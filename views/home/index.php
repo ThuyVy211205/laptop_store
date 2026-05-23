@@ -1,276 +1,244 @@
-<?php include ROOT_PATH . '/views/layouts/header.php'; ?>
+<?php
+/* ─── Fallback slides dùng ảnh local ─── */
+$localSlides = [
+    [
+        'bg'       => ASSETS_URL . '/images/slider1.jpg',
+        'badge'    => 'HOT DEAL',
+        'title'    => "Laptop Gaming<br>Chính Hãng 2025",
+        'subtitle' => 'RTX 4060 — Màn hình 144Hz — Giảm đến 30%',
+        'link'     => SITE_URL . '/products',
+    ],
+    [
+        'bg'       => ASSETS_URL . '/images/slider_2.jpg',
+        'badge'    => 'MỚI VỀ',
+        'title'    => "MacBook Air M3<br>Siêu Mỏng Nhẹ",
+        'subtitle' => 'Chip Apple M3 — Pin 18 giờ — Nhập khẩu chính hãng',
+        'link'     => SITE_URL . '/products',
+    ],
+    [
+        'bg'       => ASSETS_URL . '/images/slider_3.jpg',
+        'badge'    => 'GIÁ TỐT',
+        'title'    => "Laptop Văn Phòng<br>Từ 9.9 Triệu",
+        'subtitle' => 'Intel Core i5 — RAM 16GB — SSD 512GB NVMe',
+        'link'     => SITE_URL . '/products',
+    ],
+];
 
-<!-- ===================== HERO SLIDER ===================== -->
+/* Dùng banners từ DB nếu có, không thì dùng local */
+$slides = !empty($banners) ? array_map(fn($b) => [
+    'bg'       => imgUrl($b['image']),
+    'badge'    => 'HOT DEAL',
+    'title'    => $b['title'],
+    'subtitle' => $b['subtitle'] ?? '',
+    'link'     => SITE_URL . ($b['link'] ?? '/products'),
+], $banners) : $localSlides;
+
+/* ─── Danh mục — dùng ảnh thật từ assets/images ─── */
+$homeCategories = [
+    ['name' => 'Laptop Gaming',    'slug' => 'laptop-gaming',   'img' => 'dell-16-1.webp'],
+    ['name' => 'Laptop Văn phòng', 'slug' => 'laptop-van-phong', 'img' => 'lenovo-thinkbook-1.webp'],
+    ['name' => 'MacBook',          'slug' => 'macbook',          'img' => 'macbook_air_m2.webp'],
+    ['name' => 'Chuột',            'slug' => 'chuot-gaming',     'img' => 'chuot_gm.webp'],
+    ['name' => 'Tai nghe',         'slug' => 'tai-nghe',         'img' => 'banner4.jpg'],
+    ['name' => 'Bàn phím',         'slug' => 'ban-phim-co',      'img' => 'banner5.jpg'],
+];
+
+$extraCss = ['home.css'];
+include ROOT_PATH . '/views/layouts/header.php';
+?>
+
+<!-- =========================================================
+     HERO SECTION — Slider 65% + Sub-banners 35%
+     ========================================================= -->
 <section class="hero-section">
-    <div class="container-fluid p-0">
-        <div class="hero-slider" id="heroSlider">
-            <?php if (!empty($banners)): foreach ($banners as $i => $banner): ?>
-            <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>"
-                 style="background-image: linear-gradient(135deg, rgba(10,14,26,.8), rgba(15,23,42,.6)), url('<?= imgUrl($banner['image']) ?>')">
-                <div class="container">
-                    <div class="hero-content">
-                        <span class="hero-badge">
-                            <i class="fas fa-bolt"></i> HOT DEAL
-                        </span>
-                        <h1 class="hero-title"><?= htmlspecialchars($banner['title']) ?></h1>
-                        <p class="hero-subtitle"><?= htmlspecialchars($banner['subtitle']) ?></p>
-                        <a href="<?= SITE_URL . htmlspecialchars($banner['link'] ?? '/products') ?>" class="btn btn-tech btn-lg hero-cta">
-                            <i class="fas fa-rocket me-2"></i>Khám phá ngay
-                        </a>
+    <div class="container">
+        <div class="hero-grid">
+
+            <!-- ── Main Slider (65%) — chỉ dùng dots ── -->
+            <div class="hero-main">
+                <div class="hero-slides-wrap" id="heroSlider">
+                    <?php foreach ($slides as $i => $s): ?>
+                    <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>"
+                         style="background-image:url('<?= $s['bg'] ?>')">
+                        <div class="hero-slide-overlay">
+                            <div class="hero-content">
+                                <span class="hero-badge">
+                                    <i class="fas fa-bolt"></i> <?= htmlspecialchars($s['badge']) ?>
+                                </span>
+                                <h1 class="hero-title"><?= $s['title'] ?></h1>
+                                <p class="hero-subtitle"><?= htmlspecialchars($s['subtitle']) ?></p>
+                                <div class="hero-btns">
+                                    <a href="<?= $s['link'] ?>" class="btn btn-primary">
+                                        <i class="fas fa-shopping-bag"></i> Mua ngay
+                                    </a>
+                                    <a href="<?= SITE_URL ?>/products" class="btn btn-white">
+                                        <i class="fas fa-search"></i> Tìm hiểu thêm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Dots điều hướng — không dùng arrows -->
+                <div class="hero-dots" id="heroDots">
+                    <?php foreach ($slides as $i => $_): ?>
+                    <button class="hero-dot <?= $i === 0 ? 'active' : '' ?>"
+                            data-idx="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
-            <?php endforeach; else: ?>
-            <!-- Fallback hero -->
-            <div class="hero-slide active hero-fallback">
-                <div class="container">
-                    <div class="hero-content">
-                        <span class="hero-badge"><i class="fas fa-bolt"></i> WELCOME</span>
-                        <h1 class="hero-title">CÔNG NGHỆ ĐỈNH CAO<br>GIÁ TỐT NHẤT</h1>
-                        <p class="hero-subtitle">Laptop Gaming, MacBook, Phụ kiện chính hãng — Giảm giá đến 50%</p>
-                        <a href="<?= SITE_URL ?>/products" class="btn btn-tech btn-lg hero-cta">
-                            <i class="fas fa-rocket me-2"></i>Mua sắm ngay
-                        </a>
+            <!-- /hero-main -->
+
+            <!-- ── Sub-banners phải (35%) — 2 card ảnh thật ── -->
+            <div class="hero-sub">
+
+                <!-- Card 1: MacBook Air M4 -->
+                <div class="hero-sub-card" style="
+                    background: linear-gradient(135deg, rgba(5,12,40,.62) 0%, rgba(15,40,110,.45) 100%),
+                                url('<?= ASSETS_URL ?>/images/macbook_air_m4.webp');
+                    background-size: cover;
+                    background-position: center;">
+                    <div class="sub-card-overlay">
+                        <div>
+                            <span class="sub-card-label">Mới về 2025</span>
+                            <h3 class="sub-card-title">MacBook Air M4<br>Siêu mỏng nhẹ</h3>
+                            <p class="sub-card-desc">Chip M4 — Pin 20 giờ — Retina</p>
+                            <a href="<?= SITE_URL ?>/products" class="sub-card-btn">
+                                Xem ngay <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
+                    <div class="sub-card-decor"><i class="fab fa-apple"></i></div>
                 </div>
+
+                <!-- Card 2: Laptop Gaming -->
+                <div class="hero-sub-card" style="
+                    background: linear-gradient(135deg, rgba(20,5,50,.65) 0%, rgba(80,10,10,.48) 100%),
+                                url('<?= ASSETS_URL ?>/images/banner-new.jpg');
+                    background-size: cover;
+                    background-position: center;">
+                    <div class="sub-card-overlay">
+                        <div>
+                            <span class="sub-card-label">HOT DEAL</span>
+                            <h3 class="sub-card-title">Laptop Gaming<br>Giảm đến 30%</h3>
+                            <p class="sub-card-desc">RTX 4060 — 144Hz — 16GB RAM</p>
+                            <a href="<?= SITE_URL ?>/products" class="sub-card-btn">
+                                Mua ngay <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sub-card-decor"><i class="fas fa-gamepad"></i></div>
+                </div>
+
             </div>
-            <?php endif; ?>
-        </div>
+            <!-- /hero-sub -->
 
-        <!-- Slider nav -->
-        <button class="hero-nav hero-prev" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
-        <button class="hero-nav hero-next" id="heroNext"><i class="fas fa-chevron-right"></i></button>
-
-        <!-- Dots -->
-        <?php if (!empty($banners) && count($banners) > 1): ?>
-        <div class="hero-dots">
-            <?php foreach ($banners as $i => $b): ?>
-            <span class="hero-dot <?= $i === 0 ? 'active' : '' ?>" data-index="<?= $i ?>"></span>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
+        </div><!-- /hero-grid -->
     </div>
 </section>
 
-<!-- ===================== BRAND STRIP ===================== -->
-<section class="brand-strip">
+<!-- =========================================================
+     DANH MỤC SẢN PHẨM — Hình ảnh thật, không dùng icon
+     ========================================================= -->
+<section class="section">
     <div class="container">
-        <div class="brand-marquee">
-            <div class="brand-track">
-                <span class="brand-item"><i class="fab fa-apple"></i> Apple</span>
-                <span class="brand-item">ASUS ROG</span>
-                <span class="brand-item">MSI Gaming</span>
-                <span class="brand-item">Acer</span>
-                <span class="brand-item">Dell</span>
-                <span class="brand-item">HP</span>
-                <span class="brand-item">Lenovo</span>
-                <span class="brand-item">Razer</span>
-                <span class="brand-item">Logitech</span>
-                <span class="brand-item">SteelSeries</span>
-                <!-- Duplicate for infinite scroll -->
-                <span class="brand-item"><i class="fab fa-apple"></i> Apple</span>
-                <span class="brand-item">ASUS ROG</span>
-                <span class="brand-item">MSI Gaming</span>
-                <span class="brand-item">Acer</span>
-                <span class="brand-item">Dell</span>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===================== CATEGORIES GRID ===================== -->
-<section class="section section-categories">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-th-large"></i> Danh mục nổi bật
-            </h2>
-            <a href="<?= SITE_URL ?>/products" class="section-link">
-                Xem tất cả <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="row g-3">
-            <?php foreach ($categories as $cat): ?>
-            <div class="col-md-4 col-lg-2 col-6">
-                <a href="<?= SITE_URL ?>/category/<?= htmlspecialchars($cat['slug']) ?>" class="category-card">
-                    <div class="category-icon">
-                        <i class="fas fa-<?= htmlspecialchars($cat['icon'] ?? 'folder') ?>"></i>
-                    </div>
-                    <h6 class="category-name"><?= htmlspecialchars($cat['name']) ?></h6>
-                    <span class="category-count"><?= $cat['product_count'] ?? 0 ?> sản phẩm</span>
+        <div class="section-card">
+            <div class="section-head">
+                <h2 class="section-title">Danh mục sản phẩm</h2>
+                <a href="<?= SITE_URL ?>/products" class="section-more">
+                    Xem tất cả <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
-<!-- ===================== FLASH SALE ===================== -->
-<?php if (!empty($flashSale)): ?>
-<section class="section section-flash-sale">
-    <div class="container">
-        <div class="flash-sale-header">
-            <div class="flash-sale-title">
-                <i class="fas fa-bolt"></i>
-                <h2>FLASH SALE</h2>
-                <span class="flash-sale-tag">GIẢM SỐC</span>
-            </div>
-            <div class="flash-sale-countdown" id="flashCountdown" data-end="<?= $flashSale[0]['flash_sale_end'] ?? '' ?>">
-                <span class="countdown-label">Kết thúc sau:</span>
-                <div class="countdown-boxes">
-                    <span class="countdown-box"><span id="cd-hours">00</span><small>Giờ</small></span>
-                    <span class="countdown-sep">:</span>
-                    <span class="countdown-box"><span id="cd-minutes">00</span><small>Phút</small></span>
-                    <span class="countdown-sep">:</span>
-                    <span class="countdown-box"><span id="cd-seconds">00</span><small>Giây</small></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-3">
-            <?php foreach ($flashSale as $product): ?>
-            <div class="col-lg-3 col-md-4 col-6">
-                <?php include __DIR__ . '/../products/_product-card.php'; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
-
-<!-- ===================== FEATURED PRODUCTS WITH TABS ===================== -->
-<section class="section section-featured">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-star"></i> Sản phẩm nổi bật
-            </h2>
-            <div class="section-tabs" id="featuredTabs">
-                <button class="tab-btn active" data-tab="all">Tất cả</button>
-                <?php foreach (array_slice($categories, 0, 4) as $cat): ?>
-                <button class="tab-btn" data-tab="cat-<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></button>
+            <div class="cat-img-grid">
+                <?php foreach ($homeCategories as $cat): ?>
+                <a href="<?= SITE_URL ?>/category/<?= htmlspecialchars($cat['slug']) ?>"
+                   class="cat-img-card">
+                    <div class="cat-img-thumb">
+                        <img src="<?= ASSETS_URL ?>/images/<?= htmlspecialchars($cat['img']) ?>"
+                             alt="<?= htmlspecialchars($cat['name']) ?>" loading="lazy"
+                             onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    </div>
+                    <div class="cat-img-name"><?= htmlspecialchars($cat['name']) ?></div>
+                </a>
                 <?php endforeach; ?>
             </div>
         </div>
-
-        <div class="row g-3" id="featuredGrid">
-            <?php foreach ($featured as $product): ?>
-            <div class="col-lg-3 col-md-4 col-6 featured-item" data-cat="cat-<?= $product['category_id'] ?>">
-                <?php include __DIR__ . '/../products/_product-card.php'; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="text-center mt-4">
-            <a href="<?= SITE_URL ?>/products" class="btn btn-outline-tech">
-                Xem tất cả sản phẩm <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
     </div>
 </section>
 
-<!-- ===================== GAMING BANNER ===================== -->
-<section class="section">
+<!-- =========================================================
+     SẢN PHẨM NỔI BẬT — 4 sản phẩm hàng ngang (dynamic)
+     ========================================================= -->
+<?php if (!empty($featured)): ?>
+<section class="section section-products">
     <div class="container">
-        <div class="gaming-banner">
-            <div class="gaming-banner-content">
-                <span class="banner-tag"><i class="fas fa-gamepad"></i> GAMING ZONE</span>
-                <h2 class="banner-title">PHỤ KIỆN GAMING CHẤT LƯỢNG</h2>
-                <p class="banner-desc">Bàn phím cơ, chuột gaming, tai nghe — Trang bị "vũ khí" để thống trị mọi trận đấu</p>
-                <a href="<?= SITE_URL ?>/category/chuot-gaming" class="btn btn-tech">
-                    <i class="fas fa-arrow-right me-2"></i>Khám phá ngay
+        <div class="section-card">
+            <div class="section-head">
+                <h2 class="section-title">Sản phẩm nổi bật</h2>
+                <a href="<?= SITE_URL ?>/products" class="section-more">
+                    Xem tất cả <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="gaming-banner-decor">
-                <i class="fas fa-gamepad floating-icon"></i>
-                <i class="fas fa-headphones floating-icon"></i>
-                <i class="fas fa-keyboard floating-icon"></i>
-                <i class="fas fa-mouse floating-icon"></i>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===================== NEW ARRIVALS ===================== -->
-<?php if (!empty($newArrivals)): ?>
-<section class="section section-new">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-sparkles"></i> Hàng mới về
-            </h2>
-            <a href="<?= SITE_URL ?>/products?sort=newest" class="section-link">
-                Xem tất cả <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="row g-3">
-            <?php foreach ($newArrivals as $product): ?>
-            <div class="col-lg-3 col-md-4 col-6">
+            <div class="pg-grid">
+                <?php foreach (array_slice($featured, 0, 4) as $product): ?>
                 <?php include __DIR__ . '/../products/_product-card.php'; ?>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
         </div>
     </div>
 </section>
 <?php endif; ?>
 
-<!-- ===================== BEST SELLERS ===================== -->
+<!-- =========================================================
+     SẢN PHẨM BÁN CHẠY — 4 sản phẩm hàng ngang (dynamic)
+     ========================================================= -->
 <?php if (!empty($bestSellers)): ?>
-<section class="section section-bestsellers">
+<section class="section section-products">
     <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-fire"></i> Bán chạy nhất
-            </h2>
-            <a href="<?= SITE_URL ?>/products?sort=best_seller" class="section-link">
-                Xem tất cả <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="row g-3">
-            <?php foreach ($bestSellers as $product): ?>
-            <div class="col-lg-3 col-md-4 col-6">
-                <?php include __DIR__ . '/../products/_product-card.php'; ?>
+        <div class="section-card">
+            <div class="section-head">
+                <h2 class="section-title">Sản phẩm bán chạy</h2>
+                <a href="<?= SITE_URL ?>/products?sort=best_seller" class="section-more">
+                    Xem tất cả <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
-            <?php endforeach; ?>
+            <div class="pg-grid">
+                <?php foreach (array_slice($bestSellers, 0, 4) as $product): ?>
+                <?php include __DIR__ . '/../products/_product-card.php'; ?>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 </section>
 <?php endif; ?>
 
-<!-- ===================== WHY US ===================== -->
-<section class="section section-why-us">
+<!-- =========================================================
+     CHÍNH SÁCH (giữ nguyên)
+     ========================================================= -->
+<section class="section" style="padding-top:0;padding-bottom:40px">
     <div class="container">
-        <div class="row g-4">
-            <div class="col-md-3 col-6">
-                <div class="why-us-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h6>Chính hãng 100%</h6>
-                    <small>Cam kết nguồn gốc</small>
-                </div>
+        <div class="why-us-grid">
+            <div class="why-item">
+                <i class="fas fa-shield-alt"></i>
+                <h6>Chính hãng 100%</h6>
+                <small>Cam kết nguồn gốc rõ ràng</small>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="why-us-item">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h6>Giao hàng nhanh</h6>
-                    <small>Free ship đơn từ 500K</small>
-                </div>
+            <div class="why-item">
+                <i class="fas fa-shipping-fast"></i>
+                <h6>Giao hàng nhanh</h6>
+                <small>Free ship đơn từ 500K</small>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="why-us-item">
-                    <i class="fas fa-headset"></i>
-                    <h6>Hỗ trợ 24/7</h6>
-                    <small>Hotline: 1900 9999</small>
-                </div>
+            <div class="why-item">
+                <i class="fas fa-headset"></i>
+                <h6>Hỗ trợ 24/7</h6>
+                <small>Hotline: 1900 9999</small>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="why-us-item">
-                    <i class="fas fa-medal"></i>
-                    <h6>Bảo hành dài hạn</h6>
-                    <small>Bảo hành toàn quốc</small>
-                </div>
+            <div class="why-item">
+                <i class="fas fa-medal"></i>
+                <h6>Bảo hành dài hạn</h6>
+                <small>Bảo hành toàn quốc</small>
             </div>
         </div>
     </div>

@@ -21,7 +21,12 @@ class Product {
                 WHERE p.status = 'active'";
         $params = [];
 
-        if (!empty($filters['category_id'])) {
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if (!empty($ids)) {
+                $sql .= " AND p.category_id IN (" . implode(',', $ids) . ")";
+            }
+        } elseif (!empty($filters['category_id'])) {
             $sql .= " AND p.category_id = ?";
             $params[] = $filters['category_id'];
         }
@@ -78,7 +83,12 @@ class Product {
         $sql = "SELECT COUNT(*) AS total FROM products p WHERE p.status = 'active'";
         $params = [];
 
-        if (!empty($filters['category_id'])) {
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $filters['category_ids'])));
+            if (!empty($ids)) {
+                $sql .= " AND p.category_id IN (" . implode(',', $ids) . ")";
+            }
+        } elseif (!empty($filters['category_id'])) {
             $sql .= " AND p.category_id = ?";
             $params[] = $filters['category_id'];
         }
@@ -252,6 +262,25 @@ class Product {
      */
     public function deleteImages($productId) {
         return $this->db->execute("DELETE FROM product_images WHERE product_id = ?", [$productId]);
+    }
+
+    /**
+     * Get color/variant alternatives — same brand + category, different product IDs
+     */
+    public function getColorVariants($productId, $categoryId, $brand, $limit = 4) {
+        if (empty($brand)) return [];
+        try {
+            return $this->db->fetchAll(
+                "SELECT id, name, slug, thumbnail, color, price, sale_price
+                 FROM products
+                 WHERE status = 'active' AND category_id = ? AND brand = ? AND id != ?
+                 ORDER BY id ASC
+                 LIMIT " . (int)$limit,
+                [$categoryId, $brand, $productId]
+            );
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**

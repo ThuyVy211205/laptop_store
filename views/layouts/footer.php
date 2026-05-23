@@ -113,7 +113,7 @@
 <!-- ===================== SCRIPTS ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= ASSETS_URL ?>/js/main.js"></script>
-<script src="<?= ASSETS_URL ?>/js/cart.js"></script>
+<script src="<?= ASSETS_URL ?>/js/cart.js?v=2"></script>
 <?php if (!empty($extraJs)): foreach ($extraJs as $js): ?>
 <script src="<?= ASSETS_URL ?>/js/<?= $js ?>"></script>
 <?php endforeach; endif; ?>

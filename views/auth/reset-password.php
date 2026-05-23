@@ -1,5 +1,6 @@
 <?php
 $extraCss = ['auth.css'];
+$hideNav  = true;
 include ROOT_PATH . '/views/layouts/header.php';
 ?>
 <div class="auth-page">

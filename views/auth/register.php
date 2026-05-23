@@ -1,7 +1,19 @@
 <?php
 $extraCss = ['auth.css'];
+$hideNav  = true;
 include ROOT_PATH . '/views/layouts/header.php';
 ?>
+
+<!-- Mini topbar for auth pages -->
+<div class="auth-topbar">
+    <a href="<?= SITE_URL ?>" class="auth-topbar-brand">
+        <div class="brand-icon"><i class="fas fa-laptop-code"></i></div>
+        TECH<span class="logo-accent">STORE</span>
+    </a>
+    <a href="<?= SITE_URL ?>" class="auth-topbar-back">
+        <i class="fas fa-arrow-left"></i> Quay về trang chủ
+    </a>
+</div>
 
 <div class="auth-page">
     <div class="container">

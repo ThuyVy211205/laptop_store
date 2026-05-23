@@ -3,12 +3,13 @@
  * Product Card Component (partial)
  * Expects: $product (array)
  */
-$price     = $product['price'];
-$salePrice = $product['sale_price'] ?? null;
-$discount  = $salePrice ? calcDiscount($price, $salePrice) : 0;
+$price      = $product['price'];
+$salePrice  = $product['sale_price'] ?? null;
+$discount   = $salePrice ? calcDiscount($price, $salePrice) : 0;
 $finalPrice = $salePrice ?: $price;
 ?>
 <div class="product-card" data-product-id="<?= $product['id'] ?>">
+
     <!-- Badges -->
     <div class="product-badges">
         <?php if ($discount > 0): ?>
@@ -32,8 +33,9 @@ $finalPrice = $salePrice ?: $price;
         </button>
     </div>
 
-    <!-- Image -->
-    <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="product-image">
+    <!-- Image with decorative black bars -->
+    <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>"
+       class="product-img-wrap">
         <img src="<?= imgUrl($product['thumbnail']) ?>"
              alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy"
              onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
@@ -52,12 +54,15 @@ $finalPrice = $salePrice ?: $price;
         </h6>
 
         <!-- Rating -->
-        <?php if (!empty($product['rating_count']) && $product['rating_count'] > 0): ?>
         <div class="product-rating">
-            <?= starRating($product['rating_avg']) ?>
+            <?php if (!empty($product['rating_count']) && $product['rating_count'] > 0): ?>
+            <span class="stars"><?= starRating($product['rating_avg']) ?></span>
             <small>(<?= $product['rating_count'] ?>)</small>
+            <?php else: ?>
+            <span class="stars"><?= starRating(0) ?></span>
+            <small class="text-muted">Chưa có đánh giá</small>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
 
         <!-- Price -->
         <div class="product-price">
@@ -67,21 +72,22 @@ $finalPrice = $salePrice ?: $price;
             <?php endif; ?>
         </div>
 
-        <!-- Stock progress for flash sale -->
+        <!-- Flash sale stock bar -->
         <?php if (!empty($product['is_flash_sale']) && !empty($product['sold_quantity'])): ?>
         <?php
-            $sold  = $product['sold_quantity'];
-            $stock = $sold + $product['stock'];
+            $sold    = $product['sold_quantity'];
+            $stock   = $sold + $product['stock'];
             $percent = $stock > 0 ? min(100, ($sold / $stock) * 100) : 0;
         ?>
         <div class="product-stock-bar">
             <div class="stock-bar-fill" style="width: <?= $percent ?>%"></div>
-            <span class="stock-text"><i class="fas fa-fire"></i> Đã bán <?= $sold ?></span>
         </div>
+        <span class="stock-text"><i class="fas fa-fire"></i> Đã bán <?= $sold ?></span>
         <?php endif; ?>
 
         <!-- Add to cart -->
-        <button class="btn btn-tech btn-sm w-100 mt-2 btn-add-cart" data-id="<?= $product['id'] ?>">
+        <button class="btn btn-tech btn-sm w-100 mt-2 btn-add-cart"
+                data-id="<?= $product['id'] ?>">
             <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
         </button>
     </div>

@@ -34,8 +34,12 @@ try {
         case 'products':
             require_once 'controllers/ProductController.php';
             $ctrl = new ProductController();
-            if ($action === 'index' || $action === '') {
+            if ($action === '' || $action === 'index') {
                 $ctrl->index();
+            } elseif ($action === 'search-suggest') {
+                $ctrl->searchSuggest();
+            } elseif ($action === 'quickview' && $param) {
+                $ctrl->quickview($param);
             } else {
                 // /products/{slug}
                 $ctrl->detail($action);
@@ -83,9 +87,25 @@ try {
             (new AuthController())->$action();
             break;
 
+        case 'admin':
+            require_once 'controllers/AdminController.php';
+            $ctrl   = new AdminController();
+            $method = ($action === '' || $action === 'index') ? 'dashboard' : $action;
+            if (method_exists($ctrl, $method)) {
+                $ctrl->$method($param);
+            } else {
+                $ctrl->dashboard();
+            }
+            break;
+
         case 'wishlist':
             require_once 'controllers/WishlistController.php';
             (new WishlistController())->$action($param);
+            break;
+
+        case 'contact':
+            require_once 'controllers/ContactController.php';
+            (new ContactController())->index();
             break;
 
         case 'api':

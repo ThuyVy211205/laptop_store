@@ -1,0 +1,339 @@
+/* ============================================================
+   TechStore — Auth Stylesheet
+   Covers: login, register, forgot-password, reset-password
+   ============================================================ */
+
+/* ---- Page wrapper ---- */
+.auth-page {
+    min-height: 100vh;
+    background: var(--color-bg);
+    display: flex;
+    align-items: center;
+    padding: 48px 0 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-page::before {
+    content: '';
+    position: absolute;
+    top: -15%;
+    right: -8%;
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, rgba(37,99,235,.07) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+.auth-page::after {
+    content: '';
+    position: absolute;
+    bottom: -18%;
+    left: -8%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,.06) 0%, transparent 65%);
+    pointer-events: none;
+}
+
+/* ---- Card ---- */
+.auth-card-tech {
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 38px 42px 36px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+    animation: authFadeIn .38s cubic-bezier(.4,0,.2,1);
+}
+
+@media (max-width: 576px) {
+    .auth-card-tech { padding: 28px 22px; border-radius: var(--radius-lg); }
+    .auth-page      { padding: 28px 0 40px; }
+}
+
+@keyframes authFadeIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Header ---- */
+.auth-header-tech {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.auth-logo-tech {
+    display: inline-block;
+    font-family: 'Rajdhani', 'Exo 2', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    line-height: 1;
+}
+
+.auth-logo-tech .logo-tech  { color: var(--color-primary); }
+.auth-logo-tech .logo-store { color: var(--color-text); }
+
+.auth-title-tech {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 8px;
+}
+
+.auth-subtitle-tech {
+    font-size: 14px;
+    color: var(--color-text-3);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ---- Form group ---- */
+.form-group-tech {
+    margin-bottom: 18px;
+}
+
+.form-label-tech {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-text-2);
+    margin-bottom: 7px;
+}
+
+/* ---- Input with icon ---- */
+.input-wrap {
+    position: relative;
+}
+
+.input-wrap .form-tech {
+    padding-left: 42px !important;
+    padding-right: 14px !important;
+}
+
+.input-wrap .form-tech.has-toggle {
+    padding-right: 42px !important;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--color-text-3);
+    pointer-events: none;
+    z-index: 2;
+    transition: color .2s;
+}
+
+.input-wrap:focus-within .input-icon {
+    color: var(--color-primary);
+}
+
+.btn-show-pwd {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--color-text-3);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 14px;
+    line-height: 1;
+    transition: color .2s;
+    z-index: 2;
+}
+
+.btn-show-pwd:hover { color: var(--color-primary); }
+
+/* ---- Form options row (remember + forgot) ---- */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0 4px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ---- Custom checkbox ---- */
+.checkbox-tech {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--color-text-2);
+    user-select: none;
+    line-height: 1.4;
+}
+
+.checkbox-tech input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.checkbox-tech a { color: var(--color-primary); font-weight: 600; }
+
+/* ---- Forgot password link ---- */
+.forgot-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-primary);
+    white-space: nowrap;
+    transition: color .2s;
+}
+
+.forgot-link:hover { color: var(--color-primary-h); }
+
+/* ---- Google button ---- */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 20px;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+.btn-google i { color: #ea4335; font-size: 16px; }
+.btn-google:hover { background: var(--color-surface-2); border-color: rgba(234,67,53,.35); }
+
+/* ---- OR divider ---- */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--color-text-3);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+/* ---- Footer text ---- */
+.auth-footer-text {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 14px;
+    color: var(--color-text-2);
+    margin-bottom: 0;
+}
+
+/* ---- Password strength meter ---- */
+.pwd-strength {
+    margin-top: 9px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pwd-strength-bar {
+    flex: 1;
+    height: 5px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pwd-strength-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 3px;
+    transition: width .35s ease, background .35s ease;
+}
+
+.pwd-strength small {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: right;
+}
+
+/* ---- Info / back links ---- */
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13.5px;
+    color: var(--color-text-2);
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: color .2s;
+}
+
+.auth-back-link:hover { color: var(--color-primary); }
+
+/* ---- Auth page top bar (replaces navbar on auth pages) ---- */
+.auth-topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    height: 56px;
+    display: flex; align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+
+.auth-topbar-brand {
+    font-family: 'Rajdhani','Exo 2',sans-serif;
+    font-size: 22px; font-weight: 700;
+    text-decoration: none; color: var(--color-text);
+    display: flex; align-items: center; gap: 10px;
+}
+
+.auth-topbar-brand .brand-icon {
+    width: 34px; height: 34px;
+    background: var(--grad-primary); border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px;
+}
+
+.auth-topbar-back {
+    margin-left: auto;
+    font-size: 13.5px; font-weight: 500;
+    color: var(--color-text-2);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+    transition: color .2s;
+}
+
+.auth-topbar-back:hover { color: var(--color-primary); }
+
+.auth-page { padding-top: 80px; }  /* offset for fixed topbar */
+
+/* ---- Dark mode extras ---- */
+html.dark .auth-card-tech {
+    box-shadow: var(--shadow-xl);
+}
+
+html.dark .btn-google {
+    background: var(--color-surface-2);
+}

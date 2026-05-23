@@ -154,6 +154,8 @@ function imgUrl($path) {
         return ASSETS_URL . '/images/no-image.png';
     }
     if (strpos($path, 'http') === 0) return $path;
+    // paths stored as assets/images/... → served from SITE_URL
+    if (strpos($path, 'assets/') === 0) return SITE_URL . '/' . ltrim($path, '/');
     return UPLOAD_URL . '/' . ltrim($path, '/');
 }
 

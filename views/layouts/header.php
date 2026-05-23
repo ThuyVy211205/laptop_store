@@ -6,6 +6,8 @@ $flash       = getFlash();
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- Theme init — must run before any CSS to prevent flash of light mode -->
+    <script>if(localStorage.getItem('ts_theme')==='dark')document.documentElement.classList.add('dark');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="TechStore - Cửa hàng Laptop & Phụ kiện công nghệ chính hãng">
@@ -24,12 +26,12 @@ $flash       = getFlash();
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/style.css">
     <?php if (!empty($extraCss)): foreach ($extraCss as $css): ?>
-        <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/<?= $css ?>">
+        <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/<?= $css ?>?v=<?= @filemtime(ROOT_PATH . '/assets/css/' . $css) ?: 2 ?>">
     <?php endforeach; endif; ?>
 
     <!-- Pass PHP vars to JS -->
@@ -40,6 +42,7 @@ $flash       = getFlash();
 </head>
 <body>
 
+<?php if (empty($hideNav)): ?>
 <!-- ===================== TOP BAR ===================== -->
 <div class="top-bar">
     <div class="container">
@@ -55,8 +58,8 @@ $flash       = getFlash();
         </div>
     </div>
 </div>
-
 <?php include __DIR__ . '/navbar.php'; ?>
+<?php endif; ?>
 
 <!-- ===================== FLASH MESSAGE ===================== -->
 <?php if ($flash): ?>
@@ -104,9 +107,9 @@ $flash       = getFlash();
 <!-- ===================== QUICK VIEW MODAL ===================== -->
 <div class="modal fade" id="quickViewModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark-card">
+        <div class="modal-content">
             <div class="modal-header border-0">
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="quickViewBody">
                 <div class="text-center py-5">

@@ -1,0 +1,681 @@
+/* ================================================================
+   TechStore — Contact Page  (contact.css)
+   ----------------------------------------------------------------
+   All styles are scoped to .tc-section and .tc-breadcrumb so they
+   never bleed into global layout. Integrates with the project's
+   existing CSS custom properties (style.css) for dark-mode support.
+   ================================================================ */
+
+
+/* ── 1. COMPONENT TOKENS ─────────────────────────────────────────
+   Define everything in one place for easy theming.
+   These shadow the global vars where names differ.
+   ─────────────────────────────────────────────────────────────── */
+:root {
+    --tc-blue:        #2563eb;
+    --tc-blue-dark:   #1d4ed8;
+    --tc-blue-glow:   rgba(37, 99, 235, 0.16);
+    --tc-navy:        #0f172a;   /* dark-panel gradient start */
+    --tc-navy-mid:    #1e3a8a;   /* dark-panel gradient end   */
+    --tc-white:       #ffffff;
+    --tc-surface:     #f1f5f9;   /* page background           */
+    --tc-border:      #dde3ee;
+    --tc-text:        #1a1f36;
+    --tc-text-2:      #4a5568;
+    --tc-text-3:      #94a3b8;
+    --tc-success:     #059669;
+    --tc-danger:      #dc2626;
+    --tc-r-card:      16px;      /* main card radius          */
+    --tc-r-input:     10px;      /* input / small-el radius   */
+    --tc-r-xs:        7px;
+    --tc-shadow:      0 24px 64px rgba(0, 0, 0, 0.12);
+    --tc-ease:        cubic-bezier(0.4, 0, 0.2, 1);
+    --tc-dur:         0.25s;
+}
+
+
+/* ── 2. BREADCRUMB ──────────────────────────────────────────────── */
+.tc-breadcrumb {
+    background: var(--tc-white);
+    border-bottom: 1px solid var(--tc-border);
+    padding: 11px 24px;
+}
+
+.tc-breadcrumb__inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--tc-text-3);
+}
+
+.tc-breadcrumb__inner a {
+    color: var(--tc-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--tc-dur) var(--tc-ease);
+}
+.tc-breadcrumb__inner a:hover { color: var(--tc-blue-dark); }
+
+
+/* ── 3. OUTER SECTION ───────────────────────────────────────────── */
+.tc-section {
+    background: var(--tc-surface);
+    padding: 64px 24px;
+    /* Use the project's Inter / system font stack */
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--tc-text);
+}
+
+.tc-container {
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+
+/* ── 4. MAIN CARD (the two-column shell) ────────────────────────── */
+.tc-card {
+    display: grid;
+    grid-template-columns: 2fr 3fr;   /* 40 % left / 60 % right */
+    background: var(--tc-white);
+    border-radius: var(--tc-r-card);
+    box-shadow: var(--tc-shadow);
+    overflow: hidden;                  /* clips dark panel to card radius */
+    min-height: 660px;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   5. LEFT PANEL — Dark navy, contact details & map
+   ════════════════════════════════════════════════════════════════ */
+
+.tc-info {
+    background: linear-gradient(160deg, var(--tc-navy) 0%, var(--tc-navy-mid) 100%);
+    padding: 52px 40px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+}
+
+/* Decorative blurred radial glows — purely cosmetic */
+.tc-info::before,
+.tc-info::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.tc-info::before {
+    /* top-right indigo glow */
+    top:   -100px;
+    right: -100px;
+    width:  340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, transparent 65%);
+}
+.tc-info::after {
+    /* bottom-left blue glow */
+    bottom: -80px;
+    left:   -80px;
+    width:  260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.22) 0%, transparent 65%);
+}
+
+/* Inner flex column — sits above the two pseudo-element glows */
+.tc-info__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+
+/* ── Panel header ────────────────────────────────────────────────── */
+.tc-info__header { display: flex; flex-direction: column; gap: 10px; }
+
+/* "GET IN TOUCH" pill */
+.tc-info__kicker {
+    display: inline-block;
+    width: max-content;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #93c5fd;                        /* blue-300 */
+    background: rgba(147, 197, 253, 0.12);
+    border: 1px solid rgba(147, 197, 253, 0.25);
+    border-radius: 99px;
+    padding: 4px 12px;
+}
+
+.tc-info__title {
+    font-size: clamp(1.75rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: var(--tc-white);
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.tc-info__sub {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.50);
+    line-height: 1.65;
+    margin: 0;
+}
+
+
+/* ── Info list ───────────────────────────────────────────────────── */
+.tc-info__list {
+    list-style: none;
+    padding: 0 0 0 24px;          /* left padding creates the accent-line offset */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tc-info__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.tc-info__item:first-child { padding-top: 0; }
+.tc-info__item:last-child  { border-bottom: none; padding-bottom: 0; }
+
+/* Icon bubble */
+.tc-info__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    color: rgba(255, 255, 255, 0.70);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition:
+        background   var(--tc-dur) var(--tc-ease),
+        border-color var(--tc-dur) var(--tc-ease),
+        color        var(--tc-dur) var(--tc-ease);
+}
+.tc-info__item:hover .tc-info__icon {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: var(--tc-white);
+}
+
+/* Text block beside each icon */
+.tc-info__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.tc-info__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.tc-info__value {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.5;
+    word-break: break-word;
+    text-decoration: none;
+}
+
+.tc-info__link {
+    transition: color var(--tc-dur) var(--tc-ease);
+}
+.tc-info__link:hover { color: var(--tc-white); text-decoration: underline; }
+
+.tc-info__note {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.38);
+    margin-top: 1px;
+}
+
+
+/* ── Google Maps block ───────────────────────────────────────────── */
+.tc-map {
+    border-radius: var(--tc-r-input);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+}
+
+/* "Showroom Location" label bar above the iframe */
+.tc-map__label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    margin: 0;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.40);
+    background: rgba(0, 0, 0, 0.28);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.tc-map__label svg { color: #60a5fa; flex-shrink: 0; }
+
+.tc-map__frame iframe {
+    display: block;
+    width: 100%;
+    height: 190px;
+    border: none;
+    /* Subtle desaturation so the map tones match the dark panel */
+    filter: grayscale(15%);
+}
+
+
+/* ── Social icons ─────────────────────────────────────────────────
+   Monochrome white by default. Brand color emerges on hover only.
+   ─────────────────────────────────────────────────────────────── */
+.tc-social { margin-top: auto; }   /* flex: pins to the bottom of the left panel */
+
+.tc-social__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0 0 12px;
+}
+
+.tc-social__row {
+    display: flex;
+    gap: 10px;
+}
+
+/* Base state: neutral white-tint pill */
+.tc-social__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--tc-r-xs);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    color: rgba(255, 255, 255, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition:
+        background   var(--tc-dur) var(--tc-ease),
+        border-color var(--tc-dur) var(--tc-ease),
+        color        var(--tc-dur) var(--tc-ease),
+        transform    var(--tc-dur) var(--tc-ease),
+        box-shadow   var(--tc-dur) var(--tc-ease);
+}
+.tc-social__icon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* Brand color revealed on hover */
+.tc-social--fb:hover { background: #1877f2; border-color: #1877f2; color: #fff; }
+.tc-social--yt:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
+.tc-social--tt:hover { background: #131313; border-color: #3a3a3a; color: #fff; }
+.tc-social--ig:hover {
+    background:    linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    border-color:  transparent;
+    color: #fff;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   6. RIGHT PANEL — White, the contact form
+   ════════════════════════════════════════════════════════════════ */
+
+.tc-form-panel {
+    padding: 52px 52px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid var(--tc-border);
+}
+
+
+/* ── Form header ─────────────────────────────────────────────────── */
+.tc-form__header { margin-bottom: 32px; }
+
+.tc-form__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--tc-text);
+    letter-spacing: -0.4px;
+    margin: 0 0 8px;
+}
+
+/* Gradient accent underline beneath the form title */
+.tc-form__title::after {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 3px;
+    margin-top: 10px;
+    background: linear-gradient(90deg, var(--tc-blue), #6366f1);
+    border-radius: 99px;
+}
+
+.tc-form__sub {
+    font-size: 14px;
+    color: var(--tc-text-2);
+    margin: 0;
+    line-height: 1.65;
+}
+
+
+/* ── Form layout ─────────────────────────────────────────────────── */
+.tc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Two-field rows (Name + Phone, Email + Order ID) */
+.tc-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+
+/* ── Field wrapper ───────────────────────────────────────────────── */
+.tc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.tc-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tc-text);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+
+.tc-required {
+    color: var(--tc-danger);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.tc-optional {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--tc-text-3);
+}
+
+
+/* ── Core input / select / textarea ─────────────────────────────── */
+.tc-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--tc-text);
+    background: var(--tc-white);
+    border: 1.5px solid var(--tc-border);
+    border-radius: var(--tc-r-input);
+    outline: none;
+    line-height: 1.5;
+    -webkit-appearance: none;
+    appearance: none;
+    transition:
+        border-color var(--tc-dur) var(--tc-ease),
+        box-shadow   var(--tc-dur) var(--tc-ease),
+        background   var(--tc-dur) var(--tc-ease);
+}
+
+.tc-input::placeholder {
+    color: var(--tc-text-3);
+    font-size: 14px;
+}
+
+/* Hover: subtle pre-focus nudge */
+.tc-input:hover:not(:focus) {
+    border-color: #b0bbd4;
+}
+
+/* Focus: the key premium micro-interaction — blue glow */
+.tc-input:focus {
+    border-color: var(--tc-blue);
+    box-shadow: 0 0 0 4px var(--tc-blue-glow);
+    background: #fdfeff;
+}
+
+
+/* ── Custom select ───────────────────────────────────────────────── */
+.tc-select-wrap {
+    position: relative;
+}
+
+.tc-select {
+    cursor: pointer;
+    padding-right: 40px;    /* room for the custom chevron */
+}
+
+/* Custom chevron arrow (SVG injected in HTML) */
+.tc-select-wrap__arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--tc-text-3);
+    pointer-events: none;
+    transition:
+        color     var(--tc-dur) var(--tc-ease),
+        transform var(--tc-dur) var(--tc-ease);
+}
+
+/* Arrow flips upward while select is open / focused */
+.tc-select-wrap:focus-within .tc-select-wrap__arrow {
+    color: var(--tc-blue);
+    transform: translateY(-50%) rotate(180deg);
+}
+
+
+/* ── Textarea ────────────────────────────────────────────────────── */
+.tc-textarea {
+    resize: vertical;
+    min-height: 150px;
+    line-height: 1.65;
+    padding-top: 14px;
+}
+
+
+/* ── Submit button ───────────────────────────────────────────────── */
+.tc-submit {
+    position: relative;
+    width: 100%;
+    padding: 15px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    letter-spacing: 0.25px;
+    color: var(--tc-white);
+    background: linear-gradient(135deg, var(--tc-blue) 0%, var(--tc-blue-dark) 100%);
+    border: none;
+    border-radius: var(--tc-r-input);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    overflow: hidden;
+    /* Ambient blue shadow creates the "floating" feel */
+    box-shadow: 0 4px 18px rgba(37, 99, 235, 0.40);
+    transition:
+        transform  var(--tc-dur) var(--tc-ease),
+        box-shadow var(--tc-dur) var(--tc-ease);
+    margin-top: 4px;
+}
+
+/* Subtle top-left sheen that appears on hover */
+.tc-submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.00) 55%
+    );
+    opacity: 0;
+    transition: opacity var(--tc-dur) var(--tc-ease);
+}
+
+.tc-submit:hover {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 10px 34px rgba(37, 99, 235, 0.54);
+}
+.tc-submit:hover::before { opacity: 1; }
+
+.tc-submit:active {
+    transform: translateY(0) scale(0.99);
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.38);
+}
+
+/* Send icon: springs forward on hover */
+.tc-submit__icon {
+    flex-shrink: 0;
+    transition: transform 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tc-submit:hover .tc-submit__icon {
+    transform: translateX(4px) rotate(-12deg);
+}
+
+
+/* ── 7. ALERT STATES ─────────────────────────────────────────────── */
+
+.tc-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    border-radius: var(--tc-r-input);
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+/* Success */
+.tc-alert--success {
+    background: rgba(5, 150, 105, 0.06);
+    border: 1.5px solid rgba(5, 150, 105, 0.22);
+    border-left: 4px solid var(--tc-success);
+    color: var(--tc-text);
+}
+.tc-alert--success .tc-alert__icon { color: var(--tc-success); flex-shrink: 0; margin-top: 1px; }
+.tc-alert--success strong          { display: block; font-size: 15px; color: var(--tc-success); margin-bottom: 4px; }
+.tc-alert--success p               { margin: 0; color: var(--tc-text-2); font-size: 13.5px; }
+
+/* Error */
+.tc-alert--error {
+    align-items: center;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1.5px solid rgba(220, 38, 38, 0.22);
+    border-left: 4px solid var(--tc-danger);
+    color: var(--tc-danger);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+/* ── 8. DARK MODE ────────────────────────────────────────────────
+   Respects the project's existing html.dark toggle.
+   Left panel is already dark so only the right panel needs work.
+   ─────────────────────────────────────────────────────────────── */
+html.dark .tc-breadcrumb { background: #141c30; border-color: rgba(255,255,255,.08); }
+html.dark .tc-section    { background: #0c1120; }
+html.dark .tc-card       { background: #141c30; box-shadow: 0 24px 64px rgba(0,0,0,.55); }
+html.dark .tc-form-panel { border-left-color: rgba(255,255,255,.07); }
+
+html.dark .tc-form__title,
+html.dark .tc-label      { color: #e8edf8; }
+html.dark .tc-form__sub  { color: #8a96b8; }
+
+html.dark .tc-input {
+    background:   #1a2540;
+    border-color: rgba(255,255,255,.10);
+    color:        #e8edf8;
+}
+html.dark .tc-input::placeholder          { color: #4a5580; }
+html.dark .tc-input:hover:not(:focus)     { border-color: rgba(255,255,255,.18); }
+html.dark .tc-input:focus {
+    background:   #1e2d50;
+    border-color: var(--tc-blue);
+    box-shadow:   0 0 0 4px rgba(37, 99, 235, 0.22);
+}
+
+/* Dark-mode map: invert + hue-rotate turns the standard map into a dark map */
+html.dark .tc-map__frame iframe {
+    filter: invert(0.90) hue-rotate(180deg);
+}
+
+
+/* ── 9. RESPONSIVE ───────────────────────────────────────────────── */
+
+/* Tablet: tighten horizontal padding, 2 columns intact */
+@media (max-width: 1024px) {
+    .tc-info       { padding: 40px 30px; }
+    .tc-form-panel { padding: 40px 36px; }
+}
+
+/* < 900 px: stack to a single column */
+@media (max-width: 900px) {
+    .tc-card {
+        grid-template-columns: 1fr;
+    }
+
+    .tc-info {
+        padding: 36px 28px;
+        min-height: unset;
+    }
+
+    .tc-info__inner { gap: 28px; }
+    .tc-social      { margin-top: 0; }   /* remove bottom-pin in stacked layout */
+
+    .tc-form-panel {
+        border-left: none;
+        border-top: 1px solid var(--tc-border);
+        padding: 36px 28px;
+    }
+}
+
+/* < 640 px: collapse paired form rows into single column */
+@media (max-width: 640px) {
+    .tc-section   { padding: 36px 16px; }
+    .tc-form__row { grid-template-columns: 1fr; }
+    .tc-info__list { padding-left: 16px; }
+    .tc-info__title { font-size: 1.65rem; }
+}
+
+/* < 420 px: micro-adjustments for very small screens */
+@media (max-width: 420px) {
+    .tc-section,
+    .tc-info,
+    .tc-form-panel { padding: 28px 20px; }
+    .tc-info__title { font-size: 1.45rem; }
+}
