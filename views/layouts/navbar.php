@@ -59,17 +59,6 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
                 <a href="<?= SITE_URL ?>/contact"
                    class="nav-link-plain" style="display:none" id="navLH">Liên hệ</a>
 
-                <!-- Wishlist (khi đăng nhập) -->
-                <?php if (isLoggedIn()): ?>
-                <?php $wcount = getWishlistCount(); ?>
-                <a href="<?= SITE_URL ?>/wishlist" class="nav-icon-btn d-none d-md-flex" title="Yêu thích">
-                    <i class="fas fa-heart"></i>
-                    <?php if ($wcount > 0): ?>
-                    <span class="nav-badge"><?= $wcount ?></span>
-                    <?php endif; ?>
-                </a>
-                <?php endif; ?>
-
                 <!-- Cart -->
                 <button class="nav-icon-btn cart-toggle" id="cartToggleBtn" title="Giỏ hàng">
                     <i class="fas fa-shopping-bag"></i>

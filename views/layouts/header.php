@@ -10,9 +10,9 @@ $flash       = getFlash();
     <script>if(localStorage.getItem('ts_theme')==='dark')document.documentElement.classList.add('dark');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TechStore - Cửa hàng Laptop & Phụ kiện công nghệ chính hãng">
+    <meta name="description" content="VQStore - Cửa hàng Laptop & Phụ kiện công nghệ chính hãng">
     <meta name="keywords" content="laptop, gaming, macbook, bàn phím cơ, chuột gaming, tai nghe">
-    <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' — ' : '' ?>TechStore</title>
+    <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' — ' : '' ?>VQStore</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= ASSETS_URL ?>/images/favicon.png">

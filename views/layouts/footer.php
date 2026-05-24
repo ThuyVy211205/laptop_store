@@ -8,7 +8,7 @@
                 <!-- About -->
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-logo mb-3">
-                        <span class="logo-tech">TECH</span><span class="logo-store">STORE</span>
+                        <span class="logo-tech">VQ</span><span class="logo-store">STORE</span>
                     </div>
                     <p class="footer-desc">
                         Cửa hàng phân phối Laptop, Phụ kiện công nghệ chính hãng hàng đầu Việt Nam.
@@ -95,7 +95,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    <small>&copy; <?= date('Y') ?> TechStore.vn — All Rights Reserved.</small>
+                    <small>&copy; <?= date('Y') ?> VQSTORE.vn — All Rights Reserved.</small>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <small>Made with <i class="fas fa-heart text-danger"></i> in Vietnam</small>

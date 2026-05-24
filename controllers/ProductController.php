@@ -84,7 +84,7 @@ class ProductController {
             $totalCount = $this->productModel->countAll($filters);
             $totalPages = ceil($totalCount / $perPage);
             $pageTitle    = 'Phụ kiện';
-            $pageSubtitle = 'Khám phá tất cả phụ kiện công nghệ tại TechStore';
+            $pageSubtitle = 'Khám phá tất cả phụ kiện công nghệ tại VQSTORE';
             $pageType     = 'phu-kien';
 
             require_once ROOT_PATH . '/views/products/accessories.php';
@@ -105,7 +105,7 @@ class ProductController {
         $totalCount = $this->productModel->countAll($filters);
         $totalPages = ceil($totalCount / $perPage);
         $pageTitle    = 'Laptop';
-        $pageSubtitle = 'Khám phá tất cả các sản phẩm Laptop hiện có tại TechStore';
+        $pageSubtitle = 'Khám phá tất cả các sản phẩm Laptop hiện có tại VQSTORE';
         $pageType     = 'laptop';
 
         require_once ROOT_PATH . '/views/products/list.php';
