@@ -15,10 +15,119 @@
 }
 
 /* ──────────────────────────────────────────────────────────
-   2. HERO — khoảng cách bên dưới hero section
+   2. BANNER — Slider bo góc, cùng khoảng cách với các section
    ────────────────────────────────────────────────────────── */
-.hero-section {
-    padding-bottom: 0;
+.banner-section {
+    padding: 20px 0 0;
+}
+
+/* ── Desktop: fixed height, absolute slides, fade animation ── */
+.banner-fullwidth {
+    position: relative;
+    width: 100%;
+    height: 460px;
+    overflow: hidden;
+    background: #0a0f23;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+@keyframes bannerFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.banner-slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    z-index: 0;
+}
+.banner-slide.active {
+    opacity: 1;
+    z-index: 1;
+    animation: bannerFadeIn 0.9s ease-in-out;
+}
+
+.banner-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* ── Arrows (desktop) ── */
+.banner-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 44px; height: 44px;
+    background: rgba(0,0,0,.35);
+    border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .2s, background .2s;
+    padding: 0;
+}
+.banner-fullwidth:hover .banner-arrow { opacity: 1; }
+.banner-arrow:hover { background: var(--color-primary); border-color: var(--color-primary); }
+.banner-arrow--prev { left: 16px; }
+.banner-arrow--next { right: 16px; }
+
+/* ── Tablet (≤991px): height auto, display-based switching, no cropping ── */
+@media (max-width: 991px) {
+    .banner-fullwidth {
+        height: auto !important;
+        min-height: unset;
+        overflow: visible;
+    }
+    .banner-slide {
+        position: relative;
+        top: auto; left: auto;
+        width: 100%;
+        height: auto;
+        opacity: 1;
+        display: none;
+        z-index: auto;
+    }
+    .banner-slide.active {
+        display: block;
+        animation: none;
+    }
+    .banner-slide img {
+        width: 100%;
+        height: auto !important;
+        object-fit: contain;
+        display: block;
+    }
+    .banner-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 36px; height: 36px;
+        font-size: 13px;
+        opacity: 1;
+    }
+    .banner-arrow--prev { left: 10px; }
+    .banner-arrow--next { right: 10px; }
+}
+
+/* ── Mobile (≤767px): even smaller arrows ── */
+@media (max-width: 767px) {
+    .banner-arrow {
+        width: 30px; height: 30px;
+        font-size: 11px;
+    }
+    .banner-arrow--prev { left: 6px; }
+    .banner-arrow--next { right: 6px; }
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -101,10 +210,98 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
+    align-items: stretch;
 }
 
 @media (max-width: 900px) { .pg-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 400px) { .pg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+/* ── Product card uniform height ── */
+.pg-grid .product-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Image container: square, white bg, centered, no crop ── */
+.pg-grid .product-img-wrap,
+.pl-product-grid .product-img-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #ffffff;
+    position: relative;
+    text-decoration: none;
+    border: none;
+}
+.pg-grid .product-img-wrap img,
+.pl-product-grid .product-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    transform: scale(1.15);
+    transform-origin: center center;
+    transition: transform .35s ease;
+}
+.pg-grid .product-card:hover .product-img-wrap img,
+.pl-product-grid .product-card:hover .product-img-wrap img {
+    transform: scale(1.22);
+}
+
+/* ── Product body: flex column, text always aligned ── */
+.pg-grid .product-body,
+.pl-product-grid .product-body {
+    padding: 12px 14px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* ── Name: always 2 lines, same height across all cards ── */
+.pg-grid .product-name,
+.pl-product-grid .product-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0 0 8px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: calc(13.5px * 1.4 * 2);
+}
+
+/* ── Rating: consistent height ── */
+.pg-grid .product-rating,
+.pl-product-grid .product-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 20px;
+    margin-bottom: 6px;
+}
+
+/* ── Price: fixed spacing below rating ── */
+.pg-grid .product-price,
+.pl-product-grid .product-price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+.pg-grid .price-current,
+.pl-product-grid .price-current { font-size: 15px; font-weight: 700; color: var(--color-red); }
+.pg-grid .price-old,
+.pl-product-grid .price-old     { font-size: 12px; color: var(--color-text-3); text-decoration: line-through; }
 
 /* ──────────────────────────────────────────────────────────
    5. RESPONSIVE — Section card nhỏ hơn trên mobile

@@ -3,7 +3,7 @@ $price    = $product['price'];
 $sale     = $product['sale_price'] ?? null;
 $final    = $sale ?: $price;
 $discount = $sale ? calcDiscount($price, $sale) : 0;
-$thumb    = !empty($images) ? imgUrl($images[0]['image']) : imgUrl($product['thumbnail']);
+$thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product['thumbnail']);
 ?>
 <div class="row g-0">
     <div class="col-md-5">

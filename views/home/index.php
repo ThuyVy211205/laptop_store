@@ -1,46 +1,20 @@
 <?php
-/* ─── Fallback slides dùng ảnh local ─── */
-$localSlides = [
-    [
-        'bg'       => ASSETS_URL . '/images/slider1.jpg',
-        'badge'    => 'HOT DEAL',
-        'title'    => "Laptop Gaming<br>Chính Hãng 2025",
-        'subtitle' => 'RTX 4060 — Màn hình 144Hz — Giảm đến 30%',
-        'link'     => SITE_URL . '/products',
-    ],
-    [
-        'bg'       => ASSETS_URL . '/images/slider_2.jpg',
-        'badge'    => 'MỚI VỀ',
-        'title'    => "MacBook Air M3<br>Siêu Mỏng Nhẹ",
-        'subtitle' => 'Chip Apple M3 — Pin 18 giờ — Nhập khẩu chính hãng',
-        'link'     => SITE_URL . '/products',
-    ],
-    [
-        'bg'       => ASSETS_URL . '/images/slider_3.jpg',
-        'badge'    => 'GIÁ TỐT',
-        'title'    => "Laptop Văn Phòng<br>Từ 9.9 Triệu",
-        'subtitle' => 'Intel Core i5 — RAM 16GB — SSD 512GB NVMe',
-        'link'     => SITE_URL . '/products',
-    ],
+/* ─── Banner slides — 4 ảnh full-width ─── */
+$bannerSlides = [
+    ['img' => 'banner-macbook.webp',   'alt' => 'MacBook'],
+    ['img' => 'banner-laptop-vp.webp', 'alt' => 'Laptop Văn phòng'],
+    ['img' => 'banner-laptop-gm.webp', 'alt' => 'Laptop Gaming'],
+    ['img' => 'banner-phukien.webp',   'alt' => 'Phụ kiện'],
 ];
-
-/* Dùng banners từ DB nếu có, không thì dùng local */
-$slides = !empty($banners) ? array_map(fn($b) => [
-    'bg'       => imgUrl($b['image']),
-    'badge'    => 'HOT DEAL',
-    'title'    => $b['title'],
-    'subtitle' => $b['subtitle'] ?? '',
-    'link'     => SITE_URL . ($b['link'] ?? '/products'),
-], $banners) : $localSlides;
 
 /* ─── Danh mục — dùng ảnh thật từ assets/images ─── */
 $homeCategories = [
-    ['name' => 'Laptop Gaming',    'slug' => 'laptop-gaming',   'img' => 'dell-16-1.webp'],
-    ['name' => 'Laptop Văn phòng', 'slug' => 'laptop-van-phong', 'img' => 'lenovo-thinkbook-1.webp'],
-    ['name' => 'MacBook',          'slug' => 'macbook',          'img' => 'macbook_air_m2.webp'],
-    ['name' => 'Chuột',            'slug' => 'chuot-gaming',     'img' => 'chuot_gm.webp'],
-    ['name' => 'Tai nghe',         'slug' => 'tai-nghe',         'img' => 'banner4.jpg'],
-    ['name' => 'Bàn phím',         'slug' => 'ban-phim-co',      'img' => 'banner5.jpg'],
+    ['name' => 'Laptop Gaming',    'slug' => 'laptop-gaming',   'img' => 'lenovo-legion-pro7.webp'],
+    ['name' => 'Laptop Văn phòng', 'slug' => 'laptop-van-phong', 'img' => 'lenovo-IdeaPad-slim5.webp'],
+    ['name' => 'MacBook',          'slug' => 'macbook',          'img' => 'macbook-air-m2.webp'],
+    ['name' => 'Chuột',            'slug' => 'chuot-gaming',     'img' => 'chuot-khong-day-bluetooth-logitech.webp'],
+    ['name' => 'Tai nghe',         'slug' => 'tai-nghe',         'img' => 'tai-nghe-JBL.webp'],
+    ['name' => 'Bàn phím',         'slug' => 'ban-phim-co',      'img' => 'ban-phim-keychron.webp'],
 ];
 
 $extraCss = ['home.css'];
@@ -48,94 +22,26 @@ include ROOT_PATH . '/views/layouts/header.php';
 ?>
 
 <!-- =========================================================
-     HERO SECTION — Slider 65% + Sub-banners 35%
+     BANNER — Slider bo góc, cùng layout với các section
      ========================================================= -->
-<section class="hero-section">
+<section class="banner-section">
     <div class="container">
-        <div class="hero-grid">
-
-            <!-- ── Main Slider (65%) — chỉ dùng dots ── -->
-            <div class="hero-main">
-                <div class="hero-slides-wrap" id="heroSlider">
-                    <?php foreach ($slides as $i => $s): ?>
-                    <div class="hero-slide <?= $i === 0 ? 'active' : '' ?>"
-                         style="background-image:url('<?= $s['bg'] ?>')">
-                        <div class="hero-slide-overlay">
-                            <div class="hero-content">
-                                <span class="hero-badge">
-                                    <i class="fas fa-bolt"></i> <?= htmlspecialchars($s['badge']) ?>
-                                </span>
-                                <h1 class="hero-title"><?= $s['title'] ?></h1>
-                                <p class="hero-subtitle"><?= htmlspecialchars($s['subtitle']) ?></p>
-                                <div class="hero-btns">
-                                    <a href="<?= $s['link'] ?>" class="btn btn-primary">
-                                        <i class="fas fa-shopping-bag"></i> Mua ngay
-                                    </a>
-                                    <a href="<?= SITE_URL ?>/products" class="btn btn-white">
-                                        <i class="fas fa-search"></i> Tìm hiểu thêm
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <!-- Dots điều hướng — không dùng arrows -->
-                <div class="hero-dots" id="heroDots">
-                    <?php foreach ($slides as $i => $_): ?>
-                    <button class="hero-dot <?= $i === 0 ? 'active' : '' ?>"
-                            data-idx="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"></button>
-                    <?php endforeach; ?>
-                </div>
+        <div class="banner-fullwidth" id="bannerSlider">
+            <?php foreach ($bannerSlides as $i => $slide): ?>
+            <div class="banner-slide <?= $i === 0 ? 'active' : '' ?>">
+                <img src="<?= ASSETS_URL ?>/images/<?= htmlspecialchars($slide['img']) ?>"
+                     alt="<?= htmlspecialchars($slide['alt']) ?>"
+                     <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
             </div>
-            <!-- /hero-main -->
+            <?php endforeach; ?>
 
-            <!-- ── Sub-banners phải (35%) — 2 card ảnh thật ── -->
-            <div class="hero-sub">
-
-                <!-- Card 1: MacBook Air M4 -->
-                <div class="hero-sub-card" style="
-                    background: linear-gradient(135deg, rgba(5,12,40,.62) 0%, rgba(15,40,110,.45) 100%),
-                                url('<?= ASSETS_URL ?>/images/macbook_air_m4.webp');
-                    background-size: cover;
-                    background-position: center;">
-                    <div class="sub-card-overlay">
-                        <div>
-                            <span class="sub-card-label">Mới về 2025</span>
-                            <h3 class="sub-card-title">MacBook Air M4<br>Siêu mỏng nhẹ</h3>
-                            <p class="sub-card-desc">Chip M4 — Pin 20 giờ — Retina</p>
-                            <a href="<?= SITE_URL ?>/products" class="sub-card-btn">
-                                Xem ngay <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sub-card-decor"><i class="fab fa-apple"></i></div>
-                </div>
-
-                <!-- Card 2: Laptop Gaming -->
-                <div class="hero-sub-card" style="
-                    background: linear-gradient(135deg, rgba(20,5,50,.65) 0%, rgba(80,10,10,.48) 100%),
-                                url('<?= ASSETS_URL ?>/images/banner-new.jpg');
-                    background-size: cover;
-                    background-position: center;">
-                    <div class="sub-card-overlay">
-                        <div>
-                            <span class="sub-card-label">HOT DEAL</span>
-                            <h3 class="sub-card-title">Laptop Gaming<br>Giảm đến 30%</h3>
-                            <p class="sub-card-desc">RTX 4060 — 144Hz — 16GB RAM</p>
-                            <a href="<?= SITE_URL ?>/products" class="sub-card-btn">
-                                Mua ngay <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sub-card-decor"><i class="fas fa-gamepad"></i></div>
-                </div>
-
-            </div>
-            <!-- /hero-sub -->
-
-        </div><!-- /hero-grid -->
+            <button class="banner-arrow banner-arrow--prev" id="bannerPrev" type="button" aria-label="Slide trước">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="banner-arrow banner-arrow--next" id="bannerNext" type="button" aria-label="Slide tiếp">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
     </div>
 </section>
 
@@ -147,9 +53,6 @@ include ROOT_PATH . '/views/layouts/header.php';
         <div class="section-card">
             <div class="section-head">
                 <h2 class="section-title">Danh mục sản phẩm</h2>
-                <a href="<?= SITE_URL ?>/products" class="section-more">
-                    Xem tất cả <i class="fas fa-arrow-right"></i>
-                </a>
             </div>
             <div class="cat-img-grid">
                 <?php foreach ($homeCategories as $cat): ?>
@@ -177,9 +80,6 @@ include ROOT_PATH . '/views/layouts/header.php';
         <div class="section-card">
             <div class="section-head">
                 <h2 class="section-title">Sản phẩm nổi bật</h2>
-                <a href="<?= SITE_URL ?>/products" class="section-more">
-                    Xem tất cả <i class="fas fa-arrow-right"></i>
-                </a>
             </div>
             <div class="pg-grid">
                 <?php foreach (array_slice($featured, 0, 4) as $product): ?>
@@ -200,9 +100,6 @@ include ROOT_PATH . '/views/layouts/header.php';
         <div class="section-card">
             <div class="section-head">
                 <h2 class="section-title">Sản phẩm bán chạy</h2>
-                <a href="<?= SITE_URL ?>/products?sort=best_seller" class="section-more">
-                    Xem tất cả <i class="fas fa-arrow-right"></i>
-                </a>
             </div>
             <div class="pg-grid">
                 <?php foreach (array_slice($bestSellers, 0, 4) as $product): ?>
@@ -243,6 +140,33 @@ include ROOT_PATH . '/views/layouts/header.php';
         </div>
     </div>
 </section>
+
+<script>
+(function(){
+    var el = document.getElementById('bannerSlider');
+    if(!el) return;
+    var items = el.querySelectorAll('.banner-slide');
+    if(items.length < 2) return;
+    var cur = 0, timer;
+
+    var goTo = function(n){
+        items[cur].classList.remove('active');
+        cur = (n + items.length) % items.length;
+        items[cur].classList.add('active');
+    };
+    var startTimer = function(){
+        clearInterval(timer);
+        timer = setInterval(function(){ goTo(cur + 1); }, 5000);
+    };
+
+    var prev = document.getElementById('bannerPrev');
+    var next = document.getElementById('bannerNext');
+    if(prev) prev.addEventListener('click', function(){ goTo(cur - 1); startTimer(); });
+    if(next) next.addEventListener('click', function(){ goTo(cur + 1); startTimer(); });
+
+    startTimer();
+}());
+</script>
 
 <?php
 $extraJs = ['slider.js'];

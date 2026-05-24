@@ -65,6 +65,12 @@ if (!empty($specs)) {
                     id="mainImage"
                     onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'"
                 >
+                <button class="pd-gallery__arrow pd-gallery__arrow--prev" id="galleryPrev" type="button" aria-label="Ảnh trước">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="pd-gallery__arrow pd-gallery__arrow--next" id="galleryNext" type="button" aria-label="Ảnh sau">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
 
             <!-- Thumbnail strip — 4 square tiles -->
@@ -542,23 +548,37 @@ document.querySelectorAll('.pd-cv__card').forEach(function(card) {
     });
 });
 
-/* ─── GALLERY THUMBNAILS ─── */
-document.querySelectorAll('.pd-gallery__thumb').forEach(function(thumb) {
-    thumb.addEventListener('click', function() {
-        document.querySelectorAll('.pd-gallery__thumb').forEach(function(t) { t.classList.remove('active'); });
-        this.classList.add('active');
-        var img = document.getElementById('mainImage');
-        if (!img) return;
-        img.style.opacity = '0';
-        img.style.transform = 'scale(0.97)';
-        var src = this.dataset.src;
-        setTimeout(function() {
-            img.src = src;
-            img.style.opacity = '1';
-            img.style.transform = 'scale(1)';
+/* ─── GALLERY ─── */
+(function () {
+    var thumbs  = Array.from(document.querySelectorAll('.pd-gallery__thumb'));
+    var mainImg = document.getElementById('mainImage');
+    var prevBtn = document.getElementById('galleryPrev');
+    var nextBtn = document.getElementById('galleryNext');
+    var current = 0;
+
+    function goTo(index) {
+        if (!thumbs.length) return;
+        current = (index + thumbs.length) % thumbs.length;
+        thumbs.forEach(function (t) { t.classList.remove('active'); });
+        thumbs[current].classList.add('active');
+        if (!mainImg) return;
+        var src = thumbs[current].dataset.src;
+        mainImg.style.opacity = '0';
+        mainImg.style.transform = 'scale(0.97)';
+        setTimeout(function () {
+            mainImg.src = src;
+            mainImg.style.opacity = '1';
+            mainImg.style.transform = 'scale(1)';
         }, 140);
+    }
+
+    thumbs.forEach(function (thumb, i) {
+        thumb.addEventListener('click', function () { goTo(i); });
     });
-});
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
+}());
 
 /* ─── QUANTITY ─── */
 var qtyInput = document.getElementById('qtyInput');

@@ -17,7 +17,7 @@ define('UPLOAD_PATH', ROOT_PATH . '/uploads');
 define('ADMIN_PATH', ROOT_PATH . '/admin');
 
 // ===== Database Configuration =====
-define('DB_HOST', 'localhost');
+define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'laptop_store');
 define('DB_USER', 'root');
 define('DB_PASS', '');

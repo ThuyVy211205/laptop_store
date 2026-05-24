@@ -4,62 +4,6 @@
 (function(){
 'use strict';
 
-/* ── Hero Main Slider ── */
-var heroSlider = document.getElementById('heroSlider');
-if(heroSlider){
-    var slides   = heroSlider.querySelectorAll('.hero-slide');
-    var dots     = document.querySelectorAll('.hero-dot');
-    var prevBtn  = document.getElementById('heroPrev');
-    var nextBtn  = document.getElementById('heroNext');
-    var cur = 0, timer;
-
-    function goTo(n){
-        slides[cur].classList.remove('active');
-        if(dots[cur]) dots[cur].classList.remove('active');
-        cur = (n + slides.length) % slides.length;
-        slides[cur].classList.add('active');
-        if(dots[cur]) dots[cur].classList.add('active');
-        resetTimer();
-    }
-    function resetTimer(){
-        clearInterval(timer);
-        if(slides.length > 1) timer = setInterval(function(){ goTo(cur+1); }, 5000);
-    }
-
-    dots.forEach(function(d,i){ d.addEventListener('click', function(){ goTo(i); }); });
-    if(prevBtn) prevBtn.addEventListener('click', function(){ goTo(cur-1); });
-    if(nextBtn) nextBtn.addEventListener('click', function(){ goTo(cur+1); });
-
-    /* Touch swipe */
-    var tx=0;
-    heroSlider.addEventListener('touchstart', function(e){ tx=e.changedTouches[0].clientX; },{passive:true});
-    heroSlider.addEventListener('touchend',   function(e){
-        var diff = tx - e.changedTouches[0].clientX;
-        if(Math.abs(diff)>50) goTo(diff>0 ? cur+1 : cur-1);
-    });
-
-    resetTimer();
-}
-
-/* ── Sub Banner Slider ── */
-var subSlider = document.getElementById('subSlider');
-if(subSlider){
-    var subs = subSlider.querySelectorAll('.sub-slide');
-    var sc = 0, st;
-
-    function subGoTo(n){
-        subs[sc].classList.remove('active');
-        sc = (n + subs.length) % subs.length;
-        subs[sc].classList.add('active');
-        clearInterval(st);
-        st = setInterval(function(){ subGoTo(sc+1); }, 4200);
-    }
-    var sp = document.getElementById('subPrev');
-    var sn = document.getElementById('subNext');
-    if(sp) sp.addEventListener('click', function(){ subGoTo(sc-1); });
-    if(sn) sn.addEventListener('click', function(){ subGoTo(sc+1); });
-    st = setInterval(function(){ subGoTo(sc+1); }, 4200);
-}
 
 /* ── Featured Tabs ── */
 var tabsEl  = document.getElementById('featuredTabs');
