@@ -40,7 +40,7 @@ if (!empty($specs)) {
     </div>
 </nav>
 
-<div class="pd-page">
+<div class="pd-page" data-product-id="<?= $product['id'] ?>">
 <div class="container">
 
     <!-- =====================================================================

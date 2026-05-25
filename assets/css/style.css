@@ -448,8 +448,8 @@ html.dark .nav-theme-btn:hover  { color: #fbbf24; opacity: .85; }
    BUTTONS
    ============================================================ */
 .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 22px; border-radius: var(--radius-sm);
+    display: inline-flex; justify-content: center; gap: 8px;
+    padding: 10px 8px; border-radius: var(--radius-sm);
     font-size: 14px; font-weight: 600;
     border: none; cursor: pointer; transition: all .25s;
     line-height: 1; text-decoration: none;
@@ -833,19 +833,21 @@ html.dark .nav-theme-btn:hover  { color: #fbbf24; opacity: .85; }
 }
 .product-card:hover .product-image img { transform: scale(1.07); }
 
-/* ── Product image wrapper — square container, white bg, no crop ── */
+/* ── Product image wrapper — fixed 220px height, white bg, centered, no crop ── */
 .product-img-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 220px;
     flex-shrink: 0;
     overflow: hidden;
     background: #ffffff;
     text-decoration: none;
     position: relative;
     border: none;
+    padding: 12px;
+    box-sizing: border-box;
 }
 .product-img-wrap img {
     width: 100%;
@@ -853,11 +855,66 @@ html.dark .nav-theme-btn:hover  { color: #fbbf24; opacity: .85; }
     object-fit: contain;
     object-position: center;
     display: block;
-    transform: scale(1.15);
-    transform-origin: center center;
     transition: transform .35s ease;
 }
-.product-card:hover .product-img-wrap img { transform: scale(1.22); }
+.product-card:hover .product-img-wrap img { transform: scale(1.06); }
+
+/* Responsive image height */
+@media (max-width: 768px) { .product-img-wrap { height: 180px; padding: 10px; } }
+@media (max-width: 480px) { .product-img-wrap { height: 160px; padding: 8px; } }
+
+/* ── Per-product image scale corrections ── */
+/* Thu nhỏ 20%: Acer Nitro 5 (3), Lenovo Legion 5 Pro (4), MacBook Pro M3 (9) */
+.product-card[data-product-id="3"] .product-img-wrap img,
+.product-card[data-product-id="4"] .product-img-wrap img,
+.product-card[data-product-id="9"] .product-img-wrap img {
+    transform: scale(0.8);
+}
+.product-card[data-product-id="3"]:hover .product-img-wrap img,
+.product-card[data-product-id="4"]:hover .product-img-wrap img,
+.product-card[data-product-id="9"]:hover .product-img-wrap img {
+    transform: scale(0.85);
+}
+
+/* Phóng to 20%: MSI Katana GF66 (2), HP Pavilion 15 (6) */
+.product-card[data-product-id="2"] .product-img-wrap img,
+.product-card[data-product-id="6"] .product-img-wrap img {
+    transform: scale(1.2);
+}
+.product-card[data-product-id="2"]:hover .product-img-wrap img,
+.product-card[data-product-id="6"]:hover .product-img-wrap img {
+    transform: scale(1.27);
+}
+
+/* Phóng to 20%: SteelSeries Arctis Nova 7 Wireless (14) */
+.product-card[data-product-id="14"] .product-img-wrap img {
+    transform: scale(1.2);
+}
+.product-card[data-product-id="14"]:hover .product-img-wrap img {
+    transform: scale(1.27);
+}
+
+/* Thu nhỏ 10%: Bose QuietComfort 45 (24) — list.php */
+.product-card[data-product-id="24"] .product-img-wrap img {
+    transform: scale(0.9);
+}
+.product-card[data-product-id="24"]:hover .product-img-wrap img {
+    transform: scale(0.95);
+}
+
+/* Thu nhỏ 5% + làm trắng nền xám: Logitech Pebble M350S (20)
+   brightness(1.12): gray nhạt ≤ #e8e8e8 → trắng, màu chuột thay đổi tối thiểu */
+.product-card[data-product-id="20"] .product-img-wrap {
+    background: #ffffff;
+}
+.product-card[data-product-id="20"] .product-img-wrap img {
+    transform: scale(0.95);
+    filter: brightness(1.12);
+}
+.product-card[data-product-id="20"]:hover .product-img-wrap img {
+    transform: scale(1.0);
+    filter: brightness(1.12);
+}
 
 /* ── Product body — flex column, consistent alignment ── */
 .product-body {

@@ -33,10 +33,10 @@ $thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product
         </p>
         <?php endif; ?>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-tech btn-add-cart" data-id="<?= $product['id'] ?>" style="flex:1;min-width:140px">
+            <button class="btn btn-tech btn-add-cart" data-id="<?= $product['id'] ?>" style="flex:1;min-width:130px;padding:10px 22px;display:flex;align-items:center;justify-content:center;gap:8px">
                 <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
             </button>
-            <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline" style="flex:1;min-width:120px">
+            <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline" style="flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:8px">
                 Xem chi tiết <i class="fas fa-arrow-right"></i>
             </a>
         </div>

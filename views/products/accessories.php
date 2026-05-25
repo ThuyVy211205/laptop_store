@@ -4,7 +4,7 @@ include ROOT_PATH . '/views/layouts/header.php';
 
 // ── normalise variables ──
 $pageTitle           = $pageTitle           ?? 'Phụ kiện';
-$pageSubtitle        = $pageSubtitle        ?? 'Khám phá tất cả phụ kiện công nghệ tại TechStore';
+$pageSubtitle        = $pageSubtitle        ?? 'Khám phá tất cả phụ kiện công nghệ tại VQSTORE';
 $pageType            = 'phu-kien';
 $currentSort         = $currentSort         ?? ($_GET['sort'] ?? 'newest');
 $sidebarCategories   = $sidebarCategories   ?? [];
@@ -109,8 +109,7 @@ $qParams = $_GET;
 
                     <!-- Clear button -->
                     <button type="button" class="pl-clear-btn"
-                            onclick="window.location.href='<?= htmlspecialchars($clearUrl) ?>'">
-                        <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                            onclick="window.location.href='<?= htmlspecialchars($clearUrl) ?>'">Xóa bộ lọc
                     </button>
                 </div>
             </form>

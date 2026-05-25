@@ -327,7 +327,15 @@
 
 .auth-topbar-back:hover { color: var(--color-primary); }
 
-.auth-page { padding-top: 80px; }  /* offset for fixed topbar */
+.auth-page { padding-top: 32px; }
+
+/* Đồng bộ chiều cao btn-tech với btn-google trong form auth */
+.auth-card-tech .btn-tech {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* ---- Dark mode extras ---- */
 html.dark .auth-card-tech {

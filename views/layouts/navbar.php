@@ -24,12 +24,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 
             <!-- Logo -->
             <a href="<?= SITE_URL ?>" class="nav-logo">
-                <div class="nav-logo-icon">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <div class="logo-brand d-none d-sm-block">
-                    VQ<span class="logo-accent">STORE</span>
-                </div>
+                <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.webp" alt="Laptop Store" style="height:65px;width:auto;display:block;">
             </a>
 
             <!-- Search -->
@@ -132,7 +127,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 <!-- Mobile Drawer -->
 <div class="mobile-drawer" id="mobileDrawer">
     <div class="drawer-header">
-        <span class="logo-brand">TECH<span class="logo-accent">STORE</span></span>
+        <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.webp" alt="Laptop Store" style="height:40px;width:auto;display:block;">
         <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
     </div>
     <nav class="drawer-nav">

@@ -12,7 +12,7 @@
 
         <h1 class="success-title">Đặt hàng thành công!</h1>
         <p class="success-subtitle">
-            Cảm ơn bạn đã mua sắm tại TechStore.<br>
+            Cảm ơn bạn đã mua sắm tại VQSTORE.<br>
             Mã đơn hàng của bạn: <strong class="text-warning"><?= htmlspecialchars($order['order_code']) ?></strong>
         </p>
 

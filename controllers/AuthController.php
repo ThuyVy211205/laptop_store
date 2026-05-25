@@ -142,7 +142,7 @@ class AuthController {
                     // Create welcome notification
                     db()->insert('notifications', [
                         'user_id' => $userId,
-                        'title'   => 'Chào mừng đến với TechStore!',
+                        'title'   => 'Chào mừng đến với VQSTORE!',
                         'content' => 'Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá ngay các sản phẩm hot!',
                         'type'    => 'info',
                     ]);

@@ -15,8 +15,8 @@
     --tc-blue:        #2563eb;
     --tc-blue-dark:   #1d4ed8;
     --tc-blue-glow:   rgba(37, 99, 235, 0.16);
-    --tc-navy:        #0f172a;   /* dark-panel gradient start */
-    --tc-navy-mid:    #1e3a8a;   /* dark-panel gradient end   */
+    --tc-navy:        #1d4ed8;   /* dark-panel gradient start */
+    --tc-navy-mid:    #3351a3;   /* dark-panel gradient end   */
     --tc-white:       #ffffff;
     --tc-surface:     #f1f5f9;   /* page background           */
     --tc-border:      #dde3ee;

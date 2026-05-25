@@ -378,9 +378,9 @@
 
 /* Add to cart button — always pinned to card bottom */
 .btn-add-cart {
-    margin-top: auto !important;
+    margin-top: 0 !important;
     font-size: 13px;
-    padding: 8px 12px;
+    padding: 10px 12px;
 }
 
 /* Badges */
@@ -594,7 +594,7 @@
 .pd-gallery__main {
     position: relative;
     background: #ffffff;
-    border: 1.5px solid #E5E7EB;
+    border: 1.5px solid #f0f0f0;
     border-radius: 0;
     overflow: hidden;
     aspect-ratio: 1 / 1;
@@ -630,7 +630,8 @@
 .pd-gallery__arrow--next { right: 10px; }
 
 .pd-gallery__main img {
-    width: 85%; height: 85%;
+    max-width: 85%; max-height: 85%;
+    width: auto; height: auto;
     object-fit: contain; display: block;
     transition: transform 200ms ease, opacity 150ms ease;
     user-select: none;
@@ -648,16 +649,18 @@
 .pd-gallery__badge--sale { left: 12px; background: #f1416c; color: #ffffff; }
 .pd-gallery__badge--new  { right: 12px; background: #10B981; color: #ffffff; }
 
-/* Thumbnail strip — 4 equal square tiles */
+/* Thumbnail strip — 4 fixed-size square tiles */
 .pd-gallery__thumbs {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
     gap: 8px;
+    justify-content: flex-start;
 }
 
 .pd-gallery__thumb {
-    aspect-ratio: 1 / 1;
-    border-radius: 0;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 8px;
     border: 1.5px solid #E5E7EB;
     background: #ffffff;
     overflow: hidden; cursor: pointer; padding: 0;
@@ -666,8 +669,9 @@
 }
 
 .pd-gallery__thumb img {
-    width: 80%; height: 80%;
+    width: 100%; height: 100%;
     object-fit: contain; display: block;
+    padding: 8px;
     transition: transform .2s;
 }
 
@@ -1839,6 +1843,39 @@
 
 .pd-promo-item strong { color: var(--color-accent); font-weight: 700; }
 
+/* ── Per-product image scale — detail page gallery ── */
+
+/* Phóng to 20%: SteelSeries Arctis Nova 7 Wireless (14) */
+.pd-page[data-product-id="14"] .pd-gallery__main img {
+    transform: scale(1.2);
+}
+.pd-page[data-product-id="14"] .pd-gallery__main:hover img {
+    transform: scale(1.25);
+}
+
+/* Thu nhỏ ~30%: chuột — Aula AM104 (12), Apple Magic Mouse (13),
+   Logitech Pebble M350S (20), Asus TUF M3 Gen 2 (21) */
+.pd-page[data-product-id="12"] .pd-gallery__main img,
+.pd-page[data-product-id="13"] .pd-gallery__main img,
+.pd-page[data-product-id="20"] .pd-gallery__main img,
+.pd-page[data-product-id="21"] .pd-gallery__main img {
+    max-width: 58%; max-height: 58%;
+}
+
+/* Thu nhỏ ~20%: Bose QuietComfort 45 (24) */
+.pd-page[data-product-id="24"] .pd-gallery__main img {
+    max-width: 66%; max-height: 66%;
+}
+
+/* Logitech Pebble M350S (20) — làm sáng nền ảnh */
+.pd-page[data-product-id="20"] .pd-gallery__main img {
+    filter: brightness(1.12);
+}
+.pd-page[data-product-id="20"] .pd-gallery__main:hover img {
+    filter: brightness(1.12);
+}
+
+
 /* ════════════════════════════════════════
    RESPONSIVE — mobile-first breakpoints
 ════════════════════════════════════════ */
@@ -1888,7 +1925,8 @@
 }
 
 @media (max-width: 400px) {
-    .pd-gallery__thumbs { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .pd-gallery__thumbs { gap: 6px; }
+    .pd-gallery__thumb  { width: 60px; height: 60px; }
     .pd-related__grid,
     .pd-related-grid { gap: 8px; }
 }

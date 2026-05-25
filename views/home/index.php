@@ -1,18 +1,18 @@
 <?php
 /* ─── Banner slides — 4 ảnh full-width ─── */
 $bannerSlides = [
-    ['img' => 'banner-macbook.webp',   'alt' => 'MacBook'],
-    ['img' => 'banner-laptop-vp.webp', 'alt' => 'Laptop Văn phòng'],
-    ['img' => 'banner-laptop-gm.webp', 'alt' => 'Laptop Gaming'],
-    ['img' => 'banner-phukien.webp',   'alt' => 'Phụ kiện'],
+    ['img' => 'banner-macbook.jpg',   'alt' => 'MacBook'],
+    ['img' => 'banner-laptop-vp.jpg', 'alt' => 'Laptop Văn phòng'],
+    ['img' => 'banner-laptop-gm.jpg', 'alt' => 'Laptop Gaming'],
+    ['img' => 'banner-phukien.jpg',   'alt' => 'Phụ kiện'],
 ];
 
 /* ─── Danh mục — dùng ảnh thật từ assets/images ─── */
 $homeCategories = [
-    ['name' => 'Laptop Gaming',    'slug' => 'laptop-gaming',   'img' => 'lenovo-legion-pro7.webp'],
+    ['name' => 'Laptop Gaming',    'slug' => 'laptop-gaming',   'img' => 'laptop_asus_gaming_rog_strix_g15.webp'],
     ['name' => 'Laptop Văn phòng', 'slug' => 'laptop-van-phong', 'img' => 'lenovo-IdeaPad-slim5.webp'],
     ['name' => 'MacBook',          'slug' => 'macbook',          'img' => 'macbook-air-m2.webp'],
-    ['name' => 'Chuột',            'slug' => 'chuot-gaming',     'img' => 'chuot-khong-day-bluetooth-logitech.webp'],
+    ['name' => 'Chuột',            'slug' => 'chuot-gaming',     'img' => 'chuot-gaming-asus-tuf.webp'],
     ['name' => 'Tai nghe',         'slug' => 'tai-nghe',         'img' => 'tai-nghe-JBL.webp'],
     ['name' => 'Bàn phím',         'slug' => 'ban-phim-co',      'img' => 'ban-phim-keychron.webp'],
 ];

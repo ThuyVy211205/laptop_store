@@ -1,6 +1,6 @@
 <?php
 /**
- * TechStore - Front Controller
+ * VQSTORE - Front Controller
  * Routes all requests to appropriate controllers
  */
 
@@ -101,6 +101,12 @@ try {
         case 'wishlist':
             require_once 'controllers/WishlistController.php';
             (new WishlistController())->$action($param);
+            break;
+
+        case 'promotions':
+        case 'khuyen-mai':
+            require_once 'controllers/PromotionsController.php';
+            (new PromotionsController())->index();
             break;
 
         case 'contact':
