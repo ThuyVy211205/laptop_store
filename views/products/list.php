@@ -21,11 +21,10 @@ $priceRangeOptions = [
     ['value' => '20000000+',          'label' => 'Trên 20 triệu'],
 ];
 
-$baseUrl    = strtok($_SERVER['REQUEST_URI'], '?');
-$qParams    = $_GET;
+$baseUrl = strtok($_SERVER['REQUEST_URI'], '?');
+$qParams = $_GET;
 ?>
 
-<<<<<<< HEAD
 <?php if ($flashSale): ?>
 <?php
 // ── Extra data for category deal tabs ──
@@ -351,8 +350,6 @@ document.querySelectorAll('.deals-tab-btn').forEach(function(btn) {
 
 <?php else: ?>
 
-=======
->>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
 <!-- ===================== BREADCRUMB ===================== -->
 <nav class="breadcrumb-wrap">
     <div class="container">

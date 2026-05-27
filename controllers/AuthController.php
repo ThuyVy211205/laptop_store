@@ -43,7 +43,6 @@ class AuthController
                         "SELECT * FROM admins WHERE email = ? AND status = 'active'",
                         [$email]
                     );
-<<<<<<< HEAD
                     if ($admin) {
                         if (password_verify($password, $admin['password'])) {
                             $_SESSION['admin'] = [
@@ -57,25 +56,11 @@ class AuthController
                         }
                         $error = 'Mật khẩu không đúng';
                     } else {
-=======
-                    if ($admin && password_verify($password, $admin['password'])) {
-                        $_SESSION['admin'] = [
-                            'id' => $admin['id'],
-                            'full_name' => $admin['full_name'],
-                            'email' => $admin['email'],
-                            'role' => $admin['role'] ?? 'super_admin',
-                        ];
-                        redirect('/admin');
-                        return;
-                    }
-
->>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
                     /* --- Check employees table --- */
                     $emp = $db->fetch(
                         "SELECT * FROM employees WHERE email = ? AND status = 'active'",
                         [$email]
                     );
-<<<<<<< HEAD
                     if ($emp) {
                         if (password_verify($password, $emp['password'])) {
                             $_SESSION['admin'] = [
@@ -91,17 +76,6 @@ class AuthController
                     } else {
                         $error = 'Email không tồn tại';
                     }
-=======
-                    if ($emp && password_verify($password, $emp['password'])) {
-                        $_SESSION['admin'] = [
-                            'id' => $emp['id'],
-                            'full_name' => $emp['full_name'],
-                            'email' => $emp['email'],
-                            'role' => $emp['role'] ?? 'Nhân viên bán hàng',
-                        ];
-                        redirect('/admin');
-                        return;
->>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
                     }
                 } elseif ($user['status'] === 'blocked') {
                     $error = 'Tài khoản đã bị khóa. Vui lòng liên hệ admin.';
