@@ -9,7 +9,7 @@ $thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product
     <div class="col-md-5">
         <img src="<?= $thumb ?>" alt="<?= htmlspecialchars($product['name']) ?>"
              style="width:100%;height:320px;object-fit:contain;padding:16px;background:var(--color-surface-2)"
-             onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+             onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
     </div>
     <div class="col-md-7" style="padding:24px">
         <small style="color:var(--color-text-3);text-transform:uppercase;letter-spacing:.5px">
@@ -33,10 +33,10 @@ $thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product
         </p>
         <?php endif; ?>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-tech btn-add-cart" data-id="<?= $product['id'] ?>" style="flex:1;min-width:140px">
+            <button class="btn btn-tech btn-add-cart" data-id="<?= $product['id'] ?>" style="flex:1;min-width:130px;padding:10px 22px;display:flex;align-items:center;justify-content:center;gap:8px">
                 <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
             </button>
-            <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline" style="flex:1;min-width:120px">
+            <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="btn btn-outline" style="flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:8px">
                 Xem chi tiết <i class="fas fa-arrow-right"></i>
             </a>
         </div>

@@ -113,7 +113,7 @@
                         ?>
                         <div class="order-item">
                             <img src="<?= imgUrl($item['thumbnail']) ?>" alt=""
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                 onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                             <div class="order-item-info">
                                 <div class="order-item-name"><?= htmlspecialchars(truncate($item['name'], 40)) ?></div>
                                 <small class="text-muted">SL: <?= $item['quantity'] ?> × <?= formatPrice($price) ?></small>

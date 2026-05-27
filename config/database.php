@@ -1,11 +1,11 @@
 <?php
 /**
  * Database Configuration & Connection
- * TechStore - Laptop & Tech Accessories Store
+ * VQSTORE - Laptop & Tech Accessories Store
  */
 
 // ===== Site Configuration =====
-define('SITE_NAME', 'TechStore');
+define('SITE_NAME', 'VQSTORE');
 define('SITE_URL', 'http://localhost/laptop_store');
 define('ADMIN_URL', SITE_URL . '/admin');
 define('UPLOAD_URL', SITE_URL . '/uploads');
@@ -46,7 +46,7 @@ if (DEBUG) {
 
 // ===== Mail Configuration (placeholder) =====
 define('MAIL_FROM', 'noreply@techstore.vn');
-define('MAIL_FROM_NAME', 'TechStore');
+define('MAIL_FROM_NAME', 'VQSTORE');
 
 // ===== Google OAuth (placeholder) =====
 define('GOOGLE_CLIENT_ID', '');

@@ -85,7 +85,7 @@
                             <img id="avatarPreview"
                                  src="<?= !empty($user['avatar']) ? imgUrl($user['avatar']) : ASSETS_URL . '/images/no-avatar.png' ?>"
                                  alt="" class="avatar-preview"
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-avatar.png'">
+                                 onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-avatar.png'">
                             <label class="btn-avatar-upload">
                                 <i class="fas fa-camera"></i>
                                 <input type="file" name="avatar" id="avatarInput" accept="image/*" hidden>

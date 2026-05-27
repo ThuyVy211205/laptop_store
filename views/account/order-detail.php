@@ -82,7 +82,7 @@
                                 <td style="width:60px">
                                     <img src="<?= imgUrl($item['thumbnail']) ?>"
                                          style="width:60px;height:60px;object-fit:cover;border-radius:8px"
-                                         onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                         onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                                 </td>
                                 <td>
                                     <?php if (!empty($item['slug'])): ?>

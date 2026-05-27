@@ -4,16 +4,6 @@ $hideNav  = true;
 include ROOT_PATH . '/views/layouts/header.php';
 ?>
 
-<!-- Mini topbar for auth pages -->
-<div class="auth-topbar">
-    <a href="<?= SITE_URL ?>" class="auth-topbar-brand">
-        <div class="brand-icon"><i class="fas fa-laptop-code"></i></div>
-        TECH<span class="logo-accent">STORE</span>
-    </a>
-    <a href="<?= SITE_URL ?>" class="auth-topbar-back">
-        <i class="fas fa-arrow-left"></i> Quay về trang chủ
-    </a>
-</div>
 
 <div class="auth-page">
     <div class="container">
@@ -22,7 +12,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                 <div class="auth-card-tech">
                     <div class="auth-header-tech">
                         <div class="auth-logo-tech">
-                            <span class="logo-tech">TECH</span><span class="logo-store">STORE</span>
+                            <span class="logo-tech">VQ</span><span class="logo-store">STORE</span>
                         </div>
                         <h3 class="auth-title-tech">Đăng ký tài khoản</h3>
                         <p class="auth-subtitle-tech">Tạo tài khoản để nhận ưu đãi độc quyền</p>
@@ -155,4 +145,3 @@ document.getElementById('pwdConfirmInput').addEventListener('input', function() 
 });
 </script>
 
-<?php include ROOT_PATH . '/views/layouts/footer.php'; ?>

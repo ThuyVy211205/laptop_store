@@ -40,7 +40,7 @@ if (!empty($specs)) {
     </div>
 </nav>
 
-<div class="pd-page">
+<div class="pd-page" data-product-id="<?= $product['id'] ?>">
 <div class="container">
 
     <!-- =====================================================================
@@ -63,7 +63,7 @@ if (!empty($specs)) {
                     src="<?= imgUrl($product['thumbnail']) ?>"
                     alt="<?= htmlspecialchars($product['name']) ?>"
                     id="mainImage"
-                    onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'"
+                    onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'"
                 >
                 <button class="pd-gallery__arrow pd-gallery__arrow--prev" id="galleryPrev" type="button" aria-label="Ảnh trước">
                     <i class="fas fa-chevron-left"></i>
@@ -77,17 +77,17 @@ if (!empty($specs)) {
             <div class="pd-gallery__thumbs" id="thumbStrip">
                 <!-- Tile 0 — thumbnail (always shown) -->
                 <button class="pd-gallery__thumb active" data-src="<?= imgUrl($product['thumbnail']) ?>" type="button" aria-label="View 1">
-                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                 </button>
                 <?php $shown = 0; foreach ($images as $img): if ($shown >= 3) break; $shown++; ?>
                 <button class="pd-gallery__thumb" data-src="<?= imgUrl($img['image_path']) ?>" type="button" aria-label="View <?= $shown + 1 ?>">
-                    <img src="<?= imgUrl($img['image_path']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($img['image_path']) ?>" alt="" onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                 </button>
                 <?php endforeach; ?>
                 <?php /* Pad to always show 4 thumbnails */
                 for ($p = 1 + $shown; $p < 4; $p++): ?>
                 <button class="pd-gallery__thumb" data-src="<?= imgUrl($product['thumbnail']) ?>" type="button">
-                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                 </button>
                 <?php endfor; ?>
             </div>
@@ -232,7 +232,7 @@ if (!empty($specs)) {
                         <div class="pd-cv__img">
                             <img src="<?= imgUrl($product['thumbnail']) ?>"
                                  alt="<?= htmlspecialchars($currentColor) ?>"
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                 onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                         </div>
                         <div class="pd-cv__info">
                             <span class="pd-cv__name" id="selectedColorName"><?= htmlspecialchars($currentColor) ?></span>
@@ -262,7 +262,7 @@ if (!empty($specs)) {
                         <div class="pd-cv__img">
                             <img src="<?= imgUrl($cv['thumbnail']) ?>"
                                  alt="<?= htmlspecialchars($cvColor) ?>"
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                 onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                         </div>
                         <div class="pd-cv__info">
                             <span class="pd-cv__name"><?= htmlspecialchars($cvColor) ?></span>

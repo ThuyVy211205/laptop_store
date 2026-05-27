@@ -151,7 +151,7 @@ function uploadImage($file, $folder = 'products') {
  */
 function imgUrl($path) {
     if (empty($path)) {
-        return ASSETS_URL . '/images/no-image.png';
+        return ASSETS_URL . '/images/no-image.webp';
     }
     if (strpos($path, 'http') === 0) return $path;
     // paths stored as assets/images/... → served from SITE_URL

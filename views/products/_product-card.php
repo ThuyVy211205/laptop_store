@@ -38,7 +38,7 @@ $finalPrice = $salePrice ?: $price;
        class="product-img-wrap">
         <img src="<?= imgUrl($product['thumbnail']) ?>"
              alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy"
-             onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+             onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
     </a>
 
     <!-- Body -->
@@ -86,7 +86,7 @@ $finalPrice = $salePrice ?: $price;
         <?php endif; ?>
 
         <!-- Add to cart -->
-        <button class="btn btn-tech btn-sm w-100 mt-2 btn-add-cart"
+        <button class="btn btn-tech btn-sm w-100 btn-add-cart"
                 data-id="<?= $product['id'] ?>">
             <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
         </button>
