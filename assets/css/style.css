@@ -953,10 +953,18 @@ html.dark .nav-theme-btn:hover  { color: #fbbf24; opacity: .85; }
 .product-rating small { color: var(--color-text-3); font-size: 12px; }
 .star-rating { color: var(--color-amber); font-size: 12px; }
 
-/* Price sits right below rating; button is pinned to the bottom */
-.product-price { margin-top: 10px; margin-bottom: 4px; }
+/* Price — vertical layout: current on top, old + discount tag below */
+.product-price {
+    display: flex; flex-direction: column; gap: 3px;
+    margin-top: 8px; margin-bottom: 0;
+}
 .price-current { color: var(--color-red); font-weight: 700; font-size: 15px; }
-.price-old { color: var(--color-text-3); text-decoration: line-through; font-size: 12px; margin-left: 6px; }
+.price-row-old { display: flex; align-items: center; gap: 6px; }
+.price-old { color: var(--color-text-3); text-decoration: line-through; font-size: 12px; }
+.price-discount-tag {
+    font-size: 11px; font-weight: 700; color: #16a34a;
+    letter-spacing: .1px;
+}
 
 .product-stock-bar {
     height: 13px; background: var(--color-surface-2);

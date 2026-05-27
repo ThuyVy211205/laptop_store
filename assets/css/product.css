@@ -750,8 +750,8 @@
 
 /* ── Pricing block ── */
 .pd-price {
-    display: flex; align-items: baseline;
-    flex-wrap: wrap; gap: 8px 12px;
+    display: flex; flex-direction: column;
+    gap: 6px;
     margin-bottom: 20px; padding: 16px 18px;
     background: #FFF1F2;
     border: 1px solid rgba(241,65,108,.15);
@@ -762,6 +762,10 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 32px; font-weight: 800;
     color: #f1416c; line-height: 1; letter-spacing: -0.5px;
+}
+
+.pd-price__original-row {
+    display: flex; align-items: center; gap: 10px;
 }
 
 .pd-price__original {

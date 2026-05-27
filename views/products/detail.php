@@ -6,6 +6,10 @@ include ROOT_PATH . '/views/layouts/header.php';
 $finalPrice = $product['sale_price'] ?: $product['price'];
 $discount   = $product['sale_price'] ? calcDiscount($product['price'], $product['sale_price']) : 0;
 
+// Products excluded from showing discount % (synced with _product-card.php)
+$_noDiscountIds  = [2, 3];
+$showDetailDiscount = $discount > 0 && !in_array((int)$product['id'], $_noDiscountIds);
+
 $ramOptions     = [];
 $storageOptions = [];
 if (!empty($specs)) {
@@ -53,7 +57,7 @@ if (!empty($specs)) {
 
             <!-- Main display image -->
             <div class="pd-gallery__main" id="galleryMain">
-                <?php if ($discount > 0): ?>
+                <?php if ($showDetailDiscount): ?>
                 <span class="pd-gallery__badge pd-gallery__badge--sale">-<?= $discount ?>%</span>
                 <?php endif; ?>
                 <?php if (!empty($product['is_new'])): ?>
@@ -163,17 +167,14 @@ if (!empty($specs)) {
                 <?php endif; ?>
             </div>
 
-            <!-- Short description snippet -->
-            <?php if (!empty($product['description'])): ?>
-            <p class="pd-info__desc"><?= nl2br(htmlspecialchars(truncate($product['description'], 220))) ?></p>
-            <?php endif; ?>
-
             <!-- ── Pricing ── -->
             <div class="pd-price">
                 <span class="pd-price__current"><?= formatPrice($finalPrice) ?></span>
-                <?php if ($discount > 0): ?>
-                <span class="pd-price__original"><?= formatPrice($product['price']) ?></span>
-                <span class="pd-price__badge">Tiết kiệm <?= formatPrice($product['price'] - $finalPrice) ?></span>
+                <?php if ($showDetailDiscount): ?>
+                <div class="pd-price__original-row">
+                    <span class="pd-price__original"><?= formatPrice($product['price']) ?></span>
+                    <span class="pd-price__badge">-<?= $discount ?>%</span>
+                </div>
                 <?php endif; ?>
             </div>
 
@@ -274,11 +275,16 @@ if (!empty($specs)) {
             </div>
 
             <!-- ── Block 3: Promotions & Vouchers ── -->
+            <?php
+            $catSlugLower = strtolower($product['category_slug'] ?? '');
+            $isLaptop = strpos($catSlugLower, 'laptop') !== false || strpos($catSlugLower, 'macbook') !== false;
+            ?>
             <div class="pd-promos">
                 <div class="pd-promos__head">
                     <i class="fas fa-tag"></i>
                     <span>Ưu đãi &amp; Khuyến mãi</span>
                 </div>
+                <?php if ($isLaptop): ?>
                 <ul class="pd-promos__list">
                     <li class="pd-promo-item">
                         <span class="pd-promo-tag">-10%</span>
@@ -293,6 +299,22 @@ if (!empty($specs)) {
                         <span>Miễn phí cài đặt Office &amp; phần mềm bản quyền</span>
                     </li>
                 </ul>
+                <?php else: ?>
+                <ul class="pd-promos__list">
+                    <li class="pd-promo-item">
+                        <span class="pd-promo-tag">-10%</span>
+                        <span>Mua 2 sản phẩm giảm thêm 10%</span>
+                    </li>
+                    <li class="pd-promo-item">
+                        <span class="pd-promo-tag pd-promo-tag--free">Free</span>
+                        <span>Freeship cho đơn hàng từ 500.000₫</span>
+                    </li>
+                    <li class="pd-promo-item">
+                        <span class="pd-promo-tag pd-promo-tag--gift">BH</span>
+                        <span>Bảo hành 1 đổi 1 trong 30 ngày đầu</span>
+                    </li>
+                </ul>
+                <?php endif; ?>
             </div>
 
             <?php if ($product['stock'] > 0): ?>

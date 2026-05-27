@@ -7,21 +7,20 @@ $price      = $product['price'];
 $salePrice  = $product['sale_price'] ?? null;
 $discount   = $salePrice ? calcDiscount($price, $salePrice) : 0;
 $finalPrice = $salePrice ?: $price;
+
+// Limit discount display per page for natural ecommerce look
+if (!isset($GLOBALS['_pc_badge_discount'])) $GLOBALS['_pc_badge_discount'] = 0;
+
+// Products explicitly excluded from showing discount
+$_noDiscountIds = [2, 3];
+
+$showDiscount = $discount > 0
+                && !in_array((int)$product['id'], $_noDiscountIds)
+                && $GLOBALS['_pc_badge_discount'] < 3;
+
+if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
 ?>
 <div class="product-card" data-product-id="<?= $product['id'] ?>">
-
-    <!-- Badges -->
-    <div class="product-badges">
-        <?php if ($discount > 0): ?>
-        <span class="badge-discount">-<?= $discount ?>%</span>
-        <?php endif; ?>
-        <?php if (!empty($product['is_flash_sale'])): ?>
-        <span class="badge-flash"><i class="fas fa-bolt"></i> FLASH</span>
-        <?php endif; ?>
-        <?php if (!empty($product['is_new'])): ?>
-        <span class="badge-new">NEW</span>
-        <?php endif; ?>
-    </div>
 
     <!-- Wishlist & Quick view -->
     <div class="product-actions">
@@ -33,7 +32,7 @@ $finalPrice = $salePrice ?: $price;
         </button>
     </div>
 
-    <!-- Image with decorative black bars -->
+    <!-- Image -->
     <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>"
        class="product-img-wrap">
         <img src="<?= imgUrl($product['thumbnail']) ?>"
@@ -64,31 +63,16 @@ $finalPrice = $salePrice ?: $price;
             <?php endif; ?>
         </div>
 
-        <!-- Price -->
+        <!-- Price — vertical layout: current on top, old + discount tag below (max 3 discounts shown) -->
         <div class="product-price">
             <span class="price-current"><?= formatPrice($finalPrice) ?></span>
-            <?php if ($salePrice && $salePrice < $price): ?>
-            <span class="price-old"><?= formatPrice($price) ?></span>
+            <?php if ($showDiscount && $salePrice && $salePrice < $price): ?>
+            <div class="price-row-old">
+                <span class="price-old"><?= formatPrice($price) ?></span>
+                <span class="price-discount-tag">-<?= $discount ?>%</span>
+            </div>
             <?php endif; ?>
         </div>
 
-        <!-- Flash sale stock bar -->
-        <?php if (!empty($product['is_flash_sale']) && !empty($product['sold_quantity'])): ?>
-        <?php
-            $sold    = $product['sold_quantity'];
-            $stock   = $sold + $product['stock'];
-            $percent = $stock > 0 ? min(100, ($sold / $stock) * 100) : 0;
-        ?>
-        <div class="product-stock-bar">
-            <div class="stock-bar-fill" style="width: <?= $percent ?>%"></div>
-        </div>
-        <span class="stock-text"><i class="fas fa-fire"></i> Đã bán <?= $sold ?></span>
-        <?php endif; ?>
-
-        <!-- Add to cart -->
-        <button class="btn btn-tech btn-sm w-100 btn-add-cart"
-                data-id="<?= $product['id'] ?>">
-            <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
-        </button>
     </div>
 </div>

@@ -3,6 +3,10 @@ $price    = $product['price'];
 $sale     = $product['sale_price'] ?? null;
 $final    = $sale ?: $price;
 $discount = $sale ? calcDiscount($price, $sale) : 0;
+
+// Sync discount exclusion with _product-card.php and detail.php
+$_noDiscountIds   = [2, 3];
+$qvShowDiscount   = $discount > 0 && !in_array((int)$product['id'], $_noDiscountIds);
 $thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product['thumbnail']);
 ?>
 <div class="row g-0">
@@ -20,11 +24,9 @@ $thumb    = !empty($images) ? imgUrl($images[0]['image_path']) : imgUrl($product
         </h4>
         <div style="margin-bottom:16px">
             <span style="font-size:22px;font-weight:700;color:var(--color-red)"><?= formatPrice($final) ?></span>
-            <?php if($sale && $sale < $price): ?>
+            <?php if($sale && $sale < $price && $qvShowDiscount): ?>
             <span style="font-size:14px;color:var(--color-text-3);text-decoration:line-through;margin-left:8px"><?= formatPrice($price) ?></span>
-            <?php if($discount > 0): ?>
             <span style="background:var(--color-red);color:#fff;padding:2px 8px;border-radius:5px;font-size:12px;font-weight:700;margin-left:6px">-<?= $discount ?>%</span>
-            <?php endif; ?>
             <?php endif; ?>
         </div>
         <?php if(!empty($product['short_description'])): ?>

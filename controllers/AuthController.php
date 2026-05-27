@@ -40,34 +40,40 @@ class AuthController {
                         "SELECT * FROM admins WHERE email = ? AND status = 'active'",
                         [$email]
                     );
-                    if ($admin && password_verify($password, $admin['password'])) {
-                        $_SESSION['admin'] = [
-                            'id'        => $admin['id'],
-                            'full_name' => $admin['full_name'],
-                            'email'     => $admin['email'],
-                            'role'      => $admin['role'] ?? 'super_admin',
-                        ];
-                        redirect('/admin');
-                        return;
-                    }
-
+                    if ($admin) {
+                        if (password_verify($password, $admin['password'])) {
+                            $_SESSION['admin'] = [
+                                'id'        => $admin['id'],
+                                'full_name' => $admin['full_name'],
+                                'email'     => $admin['email'],
+                                'role'      => $admin['role'] ?? 'super_admin',
+                            ];
+                            redirect('/admin');
+                            return;
+                        }
+                        $error = 'Mật khẩu không đúng';
+                    } else {
                     /* --- Check employees table --- */
                     $emp = $db->fetch(
                         "SELECT * FROM employees WHERE email = ? AND status = 'active'",
                         [$email]
                     );
-                    if ($emp && password_verify($password, $emp['password'])) {
-                        $_SESSION['admin'] = [
-                            'id'        => $emp['id'],
-                            'full_name' => $emp['full_name'],
-                            'email'     => $emp['email'],
-                            'role'      => $emp['role'] ?? 'Nhân viên bán hàng',
-                        ];
-                        redirect('/admin');
-                        return;
+                    if ($emp) {
+                        if (password_verify($password, $emp['password'])) {
+                            $_SESSION['admin'] = [
+                                'id'        => $emp['id'],
+                                'full_name' => $emp['full_name'],
+                                'email'     => $emp['email'],
+                                'role'      => $emp['role'] ?? 'Nhân viên bán hàng',
+                            ];
+                            redirect('/admin');
+                            return;
+                        }
+                        $error = 'Mật khẩu không đúng';
+                    } else {
+                        $error = 'Email không tồn tại';
                     }
-
-                    $error = 'Email không tồn tại';
+                    }
                 } elseif ($user['status'] === 'blocked') {
                     $error = 'Tài khoản đã bị khóa. Vui lòng liên hệ admin.';
                 } elseif (!$this->userModel->verifyPassword($password, $user['password'])) {

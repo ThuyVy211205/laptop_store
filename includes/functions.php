@@ -15,7 +15,7 @@ function formatPrice($amount) {
  */
 function calcDiscount($original, $sale) {
     if ($original <= 0 || $sale <= 0 || $sale >= $original) return 0;
-    return round((($original - $sale) / $original) * 100);
+    return floor((($original - $sale) / $original) * 100);
 }
 
 /**

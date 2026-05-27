@@ -344,88 +344,88 @@ INSERT INTO `products` (`category_id`, `name`, `slug`, `sku`, `brand`, `descript
 (1, 'ASUS ROG Strix G15 G513 R7-6800H/16GB/512GB/RTX3050', 'asus-rog-strix-g15-g513-r7', 'ASUS-ROG-G513', 'ASUS', 
 'ASUS ROG Strix G15 G513 - Laptop gaming mạnh mẽ với CPU AMD Ryzen 7 thế hệ mới, card đồ họa RTX 3050, màn hình 144Hz cho trải nghiệm gaming đỉnh cao.',
 '{"CPU":"AMD Ryzen 7 6800H","RAM":"16GB DDR5","Ổ cứng":"512GB SSD NVMe","Màn hình":"15.6\\" FHD 144Hz","Card đồ họa":"NVIDIA RTX 3050 4GB","Hệ điều hành":"Windows 11"}',
-32990000, 27990000, 15, 'products/laptop-asus-rog-g513.jpg', 1, 1, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), 45, 4.8, 32),
+32990000, 27990000, 15, 'assets/images/laptop_asus_gaming_rog_strix_g15.1.webp', 1, 1, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), 45, 4.8, 32),
 
 (1, 'MSI Katana GF66 i7-11800H/16GB/512GB/RTX3060', 'msi-katana-gf66-i7-rtx3060', 'MSI-KATANA-GF66', 'MSI',
 'MSI Katana GF66 - Thiết kế hầm hố đậm chất gaming với hiệu năng vượt trội từ Intel Core i7 và RTX 3060.',
 '{"CPU":"Intel Core i7-11800H","RAM":"16GB DDR4","Ổ cứng":"512GB SSD","Màn hình":"15.6\\" FHD 144Hz","Card đồ họa":"NVIDIA RTX 3060 6GB","Hệ điều hành":"Windows 11"}',
-35990000, 30990000, 8, 'products/laptop-msi-katana.jpg', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 5 DAY), 28, 4.7, 19),
+35990000, 30990000, 8, 'assets/images/laptop-msi-katana-gf66-i7.webp', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 5 DAY), 28, 4.7, 19),
 
 (1, 'Acer Nitro 5 i5-12500H/8GB/512GB/RTX3050', 'acer-nitro-5-i5-12500h', 'ACER-NITRO-5', 'Acer',
 'Acer Nitro 5 - Laptop gaming giá tốt với cấu hình ổn định, phù hợp cho game thủ mới bắt đầu.',
 '{"CPU":"Intel Core i5-12500H","RAM":"8GB DDR4","Ổ cứng":"512GB SSD","Màn hình":"15.6\\" FHD 144Hz","Card đồ họa":"NVIDIA RTX 3050 4GB"}',
-22990000, 19990000, 20, 'products/laptop-acer-nitro.jpg', 1, 0, 1, NULL, 67, 4.6, 41),
+22990000, 19990000, 20, 'assets/images/acer_nitro_5_tiger_1.webp', 1, 0, 1, NULL, 67, 4.6, 41),
 
 (1, 'Lenovo Legion 5 Pro R7-6800H/16GB/1TB/RTX3070', 'lenovo-legion-5-pro-r7-rtx3070', 'LENOVO-LEGION-5P', 'Lenovo',
 'Lenovo Legion 5 Pro - Flagship gaming với màn hình QHD 165Hz và card đồ họa RTX 3070 cực mạnh.',
 '{"CPU":"AMD Ryzen 7 6800H","RAM":"16GB DDR5","Ổ cứng":"1TB SSD NVMe","Màn hình":"16\\" QHD 165Hz","Card đồ họa":"NVIDIA RTX 3070 8GB"}',
-45990000, NULL, 5, 'products/laptop-lenovo-legion.jpg', 1, 0, 1, NULL, 18, 4.9, 15),
+45990000, NULL, 5, 'assets/images/lenovo-legion-pro7.webp', 1, 0, 1, NULL, 18, 4.9, 15),
 
 -- Laptop Văn Phòng
 (2, 'Dell Vostro 3520 i5-1235U/8GB/256GB SSD', 'dell-vostro-3520-i5', 'DELL-VOSTRO-3520', 'Dell',
 'Dell Vostro 3520 - Laptop văn phòng bền bỉ, hiệu năng ổn định cho công việc hàng ngày.',
 '{"CPU":"Intel Core i5-1235U","RAM":"8GB DDR4","Ổ cứng":"256GB SSD","Màn hình":"15.6\\" FHD","Card đồ họa":"Intel Iris Xe"}',
-16990000, 14990000, 25, 'products/laptop-dell-vostro.jpg', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 3 DAY), 89, 4.5, 56),
+16990000, 14990000, 25, 'assets/images/dell-vostro.webp', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 3 DAY), 89, 4.5, 56),
 
 (2, 'HP Pavilion 15 i7-1255U/16GB/512GB', 'hp-pavilion-15-i7', 'HP-PAVILION-15', 'HP',
 'HP Pavilion 15 - Thiết kế sang trọng, mỏng nhẹ, phù hợp cho doanh nhân và sinh viên.',
 '{"CPU":"Intel Core i7-1255U","RAM":"16GB DDR4","Ổ cứng":"512GB SSD","Màn hình":"15.6\\" FHD IPS","Card đồ họa":"Intel Iris Xe"}',
-21990000, 19490000, 12, 'products/laptop-hp-pavilion.jpg', 1, 0, 1, NULL, 34, 4.7, 23),
+21990000, 19490000, 12, 'assets/images/hp-pavilion.webp', 1, 0, 1, NULL, 34, 4.7, 23),
 
 (2, 'ASUS Vivobook 15 i3-1215U/8GB/256GB', 'asus-vivobook-15-i3', 'ASUS-VIVO-15', 'ASUS',
 'ASUS Vivobook 15 - Laptop học tập giá rẻ, đầy đủ tính năng cho công việc cơ bản.',
 '{"CPU":"Intel Core i3-1215U","RAM":"8GB DDR4","Ổ cứng":"256GB SSD","Màn hình":"15.6\\" FHD"}',
-12990000, 10990000, 30, 'products/laptop-asus-vivo.jpg', 0, 1, 0, DATE_ADD(NOW(), INTERVAL 7 DAY), 112, 4.4, 78),
+12990000, 10990000, 30, 'assets/images/asus-vivobook.webp', 0, 1, 0, DATE_ADD(NOW(), INTERVAL 7 DAY), 112, 4.4, 78),
 
 -- MacBook
 (3, 'MacBook Air M2 2022 8GB/256GB', 'macbook-air-m2-2022-8gb-256gb', 'MAC-AIR-M2', 'Apple',
 'MacBook Air M2 - Chip M2 mạnh mẽ, thiết kế mỏng nhẹ chỉ 1.24kg, pin lên đến 18 giờ.',
 '{"Chip":"Apple M2 8-core CPU","RAM":"8GB Unified","Ổ cứng":"256GB SSD","Màn hình":"13.6\\" Liquid Retina","Pin":"Lên đến 18 giờ"}',
-27990000, 25990000, 18, 'products/macbook-air-m2.jpg', 1, 1, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), 56, 4.9, 47),
+27990000, 25990000, 18, 'assets/images/macbook-air-m2.webp', 1, 1, 1, DATE_ADD(NOW(), INTERVAL 7 DAY), 56, 4.9, 47),
 
 (3, 'MacBook Pro M3 14 inch 2023 18GB/512GB', 'macbook-pro-m3-14-2023', 'MAC-PRO-M3-14', 'Apple',
 'MacBook Pro M3 14 inch - Hiệu năng đỉnh cao với chip M3, màn hình XDR sống động.',
 '{"Chip":"Apple M3 Pro","RAM":"18GB Unified","Ổ cứng":"512GB SSD","Màn hình":"14.2\\" Liquid Retina XDR","Pin":"Lên đến 18 giờ"}',
-54990000, NULL, 7, 'products/macbook-pro-m3.jpg', 1, 0, 1, NULL, 21, 5.0, 12),
+54990000, NULL, 7, 'assets/images/macbook-pro-2023-m3.webp', 1, 0, 1, NULL, 21, 5.0, 12),
 
 -- Bàn phím cơ
 (4, 'Keychron K2 Pro RGB Hot-swap Brown Switch', 'keychron-k2-pro-rgb', 'KEY-K2-PRO', 'Keychron',
 'Keychron K2 Pro - Bàn phím cơ không dây cao cấp, hỗ trợ hot-swap, RGB đẹp mắt.',
 '{"Layout":"75% (84 phím)","Switch":"Gateron G Pro Brown","Kết nối":"USB-C / Bluetooth 5.1","Đèn":"RGB Per-key","Pin":"4000mAh"}',
-3490000, 2890000, 22, 'products/keyboard-keychron-k2.jpg', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 5 DAY), 134, 4.8, 89),
+3490000, 2890000, 22, 'assets/images/ban-phim-keychron.webp', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 5 DAY), 134, 4.8, 89),
 
 (4, 'AKKO 3098B Multi-modes World Tour Tokyo', 'akko-3098b-tokyo', 'AKKO-3098B', 'AKKO',
 'AKKO 3098B Tokyo - Bàn phím cơ với keycap theme độc đáo, switch êm ái.',
 '{"Layout":"96% (98 phím)","Switch":"AKKO V3 Cream Yellow","Kết nối":"USB-C / Bluetooth / 2.4Ghz","Keycap":"PBT Doubleshot"}',
-2790000, 2390000, 15, 'products/keyboard-akko-tokyo.jpg', 1, 0, 1, NULL, 67, 4.7, 45),
+2790000, 2390000, 15, 'assets/images/ban-phim-co-akko.webp', 1, 0, 1, NULL, 67, 4.7, 45),
 
 -- Chuột Gaming
 (5, 'Logitech G Pro X Superlight Wireless', 'logitech-gpro-x-superlight', 'LOG-GPRO-X', 'Logitech',
 'Logitech G Pro X Superlight - Chuột gaming nhẹ nhất chỉ 63g, sensor HERO 25K.',
 '{"Sensor":"HERO 25,600 DPI","Trọng lượng":"63g","Pin":"70 giờ","Kết nối":"LIGHTSPEED Wireless","Switch":"Mechanical"}',
-3290000, 2790000, 20, 'products/mouse-logitech-superlight.jpg', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 4 DAY), 156, 4.9, 124),
+3290000, 2790000, 20, 'assets/images/chuot-khong-day-bluetooth-logitech.webp', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 4 DAY), 156, 4.9, 124),
 
 (5, 'Razer DeathAdder V3 Pro Wireless', 'razer-deathadder-v3-pro', 'RAZER-DA-V3', 'Razer',
 'Razer DeathAdder V3 Pro - Form chuột huyền thoại với công nghệ mới nhất.',
 '{"Sensor":"Focus Pro 30K","Trọng lượng":"63g","Pin":"90 giờ","Kết nối":"HyperSpeed Wireless"}',
-3890000, 3490000, 12, 'products/mouse-razer-deathadder.jpg', 1, 0, 1, NULL, 78, 4.8, 56),
+3890000, 3490000, 12, 'assets/images/chuot-gaming-asus-tuf.webp', 1, 0, 1, NULL, 78, 4.8, 56),
 
 -- Tai nghe
 (6, 'SteelSeries Arctis Nova 7 Wireless', 'steelseries-arctis-nova-7', 'SS-NOVA-7', 'SteelSeries',
 'SteelSeries Arctis Nova 7 - Tai nghe gaming wireless cao cấp với âm thanh 360° Spatial.',
 '{"Driver":"40mm Neodymium","Tần số":"20Hz - 22kHz","Kết nối":"2.4GHz Wireless + Bluetooth","Pin":"38 giờ","Microphone":"ClearCast Gen 2"}',
-4990000, 4290000, 10, 'products/headphone-steelseries.jpg', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 6 DAY), 89, 4.8, 67);
+4990000, 4290000, 10, 'assets/images/tai-nghe-bluetooth-arctis-nova.webp', 1, 1, 0, DATE_ADD(NOW(), INTERVAL 6 DAY), 89, 4.8, 67);
 
 -- Sample product images (multiple per product)
 INSERT INTO `product_images` (`product_id`, `image_path`, `sort_order`) VALUES
-(1, 'products/laptop-asus-rog-g513.jpg', 1),
-(1, 'products/laptop-asus-rog-g513-2.jpg', 2),
-(1, 'products/laptop-asus-rog-g513-3.jpg', 3),
-(2, 'products/laptop-msi-katana.jpg', 1),
-(2, 'products/laptop-msi-katana-2.jpg', 2),
-(8, 'products/macbook-air-m2.jpg', 1),
-(8, 'products/macbook-air-m2-2.jpg', 2),
-(8, 'products/macbook-air-m2-3.jpg', 3);
+(1, 'assets/images/laptop_asus_gaming_rog_strix_g15.1.webp', 1),
+(1, 'assets/images/laptop_asus_gaming_rog_strix_g15.2.webp', 2),
+(1, 'assets/images/laptop_asus_gaming_rog_strix_g15.3.webp', 3),
+(2, 'assets/images/laptop-msi-katana-gf66-i7.webp', 1),
+(2, 'assets/images/laptop-msi-katana-gf66-i7.1.webp', 2),
+(8, 'assets/images/macbook-air-m2.webp', 1),
+(8, 'assets/images/macbook-air-m2.1.webp', 2),
+(8, 'assets/images/macbook-air-m2.2.webp', 3);
 
 -- Vouchers
 INSERT INTO `vouchers` (`code`, `type`, `value`, `min_order`, `max_discount`, `quantity`, `expires_at`, `is_active`) VALUES
@@ -436,9 +436,9 @@ INSERT INTO `vouchers` (`code`, `type`, `value`, `min_order`, `max_discount`, `q
 
 -- Sample banners
 INSERT INTO `banners` (`title`, `subtitle`, `image`, `link`, `position`, `sort_order`) VALUES
-('GAMING LAPTOP', 'Giảm đến 30% - Hiệu năng đỉnh cao', 'banners/banner-1.jpg', '/category/laptop-gaming', 'hero', 1),
-('MACBOOK 2024', 'Sức mạnh chip M3 mới nhất', 'banners/banner-2.jpg', '/category/macbook', 'hero', 2),
-('GAMING GEAR', 'Phụ kiện gaming chính hãng', 'banners/banner-3.jpg', '/category/chuot-gaming', 'hero', 3);
+('GAMING LAPTOP', 'Giảm đến 30% - Hiệu năng đỉnh cao', 'assets/images/banner-laptop-gm.jpg', '/category/laptop-gaming', 'hero', 1),
+('MACBOOK 2024', 'Sức mạnh chip M3 mới nhất', 'assets/images/banner-macbook.jpg', '/category/macbook', 'hero', 2),
+('GAMING GEAR', 'Phụ kiện gaming chính hãng', 'assets/images/banner-phukien.jpg', '/category/chuot-gaming', 'hero', 3);
 
 -- Sample reviews
 INSERT INTO `reviews` (`product_id`, `user_id`, `rating`, `content`) VALUES

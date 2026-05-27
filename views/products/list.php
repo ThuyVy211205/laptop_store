@@ -194,14 +194,22 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
             <?php foreach ($products as $fp):
                 $fpSale     = !empty($fp['sale_price']) ? (float)$fp['sale_price'] : (float)$fp['price'];
                 $fpOrig     = (float)$fp['price'];
-                $fpDiscount = ($fpOrig > 0 && $fpSale < $fpOrig) ? round((1 - $fpSale / $fpOrig) * 100) : 0;
+                $fpDiscount = calcDiscount($fpOrig, $fpSale);
                 $fpStock    = max(0, (int)($fp['stock'] ?? 0));
                 $fpSold     = max(0, (int)($fp['sold_quantity'] ?? 0));
                 $fpTotal    = $fpSold + $fpStock;
                 $fpPct      = $fpTotal > 0 ? min(100, round(($fpSold / $fpTotal) * 100)) : 30;
+
+                // Sync badge counters with _product-card.php — max 3 discounts per page
+                if (!isset($GLOBALS['_pc_badge_discount'])) $GLOBALS['_pc_badge_discount'] = 0;
+                if (!isset($GLOBALS['_pc_badge_flash']))    $GLOBALS['_pc_badge_flash']    = 0;
+                $fpShowDiscount = $fpDiscount > 0                     && $GLOBALS['_pc_badge_discount'] < 3;
+                $fpShowFlash    = !empty($fp['is_flash_sale'])         && $GLOBALS['_pc_badge_flash']    < 2;
+                if ($fpShowDiscount) $GLOBALS['_pc_badge_discount']++;
+                if ($fpShowFlash)    $GLOBALS['_pc_badge_flash']++;
             ?>
             <div class="flash-card">
-                <?php if ($fpDiscount > 0): ?>
+                <?php if ($fpShowDiscount): ?>
                 <div class="fc-badge">-<?= $fpDiscount ?>%</div>
                 <?php endif; ?>
                 <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($fp['slug']) ?>" class="fc-img">
@@ -213,13 +221,9 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
                     <p class="fc-name"><?= htmlspecialchars($fp['name']) ?></p>
                     <div class="fc-prices">
                         <span class="fc-price-new"><?= formatPrice($fpSale) ?></span>
-                        <?php if ($fpDiscount > 0): ?>
+                        <?php if ($fpShowDiscount): ?>
                         <span class="fc-price-old"><?= formatPrice($fpOrig) ?></span>
                         <?php endif; ?>
-                    </div>
-                    <div class="fc-stock">
-                        <div class="fc-bar"><div class="fc-bar-fill" style="width:<?= $fpPct ?>%"></div></div>
-                        <span class="fc-stock-txt">Đã bán <?= $fpSold ?> / Còn <?= $fpStock ?></span>
                     </div>
                     <button class="fc-btn btn-add-cart" data-id="<?= (int)$fp['id'] ?>">
                         <i class="fas fa-cart-plus"></i> Thêm vào giỏ
