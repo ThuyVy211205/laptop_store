@@ -56,16 +56,18 @@ define('GOOGLE_REDIRECT_URI', SITE_URL . '/auth/google-callback');
 /**
  * Database Class - PDO Singleton
  */
-class Database {
+class Database
+{
     private static $instance = null;
     private $pdo;
 
-    private function __construct() {
+    private function __construct()
+    {
         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
         $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_EMULATE_PREPARES => false,
         ];
         try {
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
@@ -78,32 +80,38 @@ class Database {
         }
     }
 
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
 
-    public function getConnection() {
+    public function getConnection()
+    {
         return $this->pdo;
     }
 
-    public function query($sql, $params = []) {
+    public function query($sql, $params = [])
+    {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    public function fetch($sql, $params = []) {
+    public function fetch($sql, $params = [])
+    {
         return $this->query($sql, $params)->fetch();
     }
 
-    public function fetchAll($sql, $params = []) {
+    public function fetchAll($sql, $params = [])
+    {
         return $this->query($sql, $params)->fetchAll();
     }
 
-    public function insert($table, $data) {
+    public function insert($table, $data)
+    {
         $cols = implode(',', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
         $sql = "INSERT INTO $table ($cols) VALUES ($placeholders)";
@@ -111,18 +119,29 @@ class Database {
         return $this->pdo->lastInsertId();
     }
 
-    public function execute($sql, $params = []) {
+    public function execute($sql, $params = [])
+    {
         return $this->query($sql, $params)->rowCount();
     }
 
-    public function beginTransaction() { return $this->pdo->beginTransaction(); }
-    public function commit()           { return $this->pdo->commit(); }
-    public function rollback()         { return $this->pdo->rollBack(); }
+    public function beginTransaction()
+    {
+        return $this->pdo->beginTransaction();
+    }
+    public function commit()
+    {
+        return $this->pdo->commit();
+    }
+    public function rollback()
+    {
+        return $this->pdo->rollBack();
+    }
 }
 
 /**
  * Helper function to get DB instance
  */
-function db() {
+function db()
+{
     return Database::getInstance();
 }

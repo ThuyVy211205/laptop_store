@@ -6,17 +6,20 @@
 require_once ROOT_PATH . '/models/User.php';
 require_once ROOT_PATH . '/models/Cart.php';
 
-class AuthController {
+class AuthController
+{
     private $userModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->userModel = new User();
     }
 
     /**
      * Login form & POST
      */
-    public function login() {
+    public function login()
+    {
         if (isLoggedIn()) {
             redirect('/account');
             return;
@@ -25,13 +28,13 @@ class AuthController {
         $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $email    = trim($_POST['email'] ?? '');
+            $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
             if (!$email || !$password) {
                 $error = 'Vui lòng nhập đầy đủ thông tin';
             } else {
-                $db   = db();
+                $db = db();
                 $user = $this->userModel->getByEmail($email);
 
                 /* --- Check admins table --- */
@@ -40,6 +43,7 @@ class AuthController {
                         "SELECT * FROM admins WHERE email = ? AND status = 'active'",
                         [$email]
                     );
+<<<<<<< HEAD
                     if ($admin) {
                         if (password_verify($password, $admin['password'])) {
                             $_SESSION['admin'] = [
@@ -53,11 +57,25 @@ class AuthController {
                         }
                         $error = 'Mật khẩu không đúng';
                     } else {
+=======
+                    if ($admin && password_verify($password, $admin['password'])) {
+                        $_SESSION['admin'] = [
+                            'id' => $admin['id'],
+                            'full_name' => $admin['full_name'],
+                            'email' => $admin['email'],
+                            'role' => $admin['role'] ?? 'super_admin',
+                        ];
+                        redirect('/admin');
+                        return;
+                    }
+
+>>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
                     /* --- Check employees table --- */
                     $emp = $db->fetch(
                         "SELECT * FROM employees WHERE email = ? AND status = 'active'",
                         [$email]
                     );
+<<<<<<< HEAD
                     if ($emp) {
                         if (password_verify($password, $emp['password'])) {
                             $_SESSION['admin'] = [
@@ -73,6 +91,17 @@ class AuthController {
                     } else {
                         $error = 'Email không tồn tại';
                     }
+=======
+                    if ($emp && password_verify($password, $emp['password'])) {
+                        $_SESSION['admin'] = [
+                            'id' => $emp['id'],
+                            'full_name' => $emp['full_name'],
+                            'email' => $emp['email'],
+                            'role' => $emp['role'] ?? 'Nhân viên bán hàng',
+                        ];
+                        redirect('/admin');
+                        return;
+>>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
                     }
                 } elseif ($user['status'] === 'blocked') {
                     $error = 'Tài khoản đã bị khóa. Vui lòng liên hệ admin.';
@@ -80,10 +109,10 @@ class AuthController {
                     $error = 'Mật khẩu không đúng';
                 } else {
                     // Login success
-                    $_SESSION['user_id']    = $user['id'];
-                    $_SESSION['user_name']  = $user['full_name'];
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['full_name'];
                     $_SESSION['user_email'] = $user['email'];
-                    $_SESSION['user_rank']  = $user['rank'];
+                    $_SESSION['user_rank'] = $user['rank'];
 
                     // Merge guest cart
                     $cartModel = new Cart();
@@ -103,23 +132,24 @@ class AuthController {
     /**
      * Register form & POST
      */
-    public function register() {
+    public function register()
+    {
         if (isLoggedIn()) {
             redirect('/account');
             return;
         }
 
         $error = null;
-        $old   = [];
+        $old = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $old = $_POST;
-            $fullName        = trim($_POST['full_name'] ?? '');
-            $email           = trim($_POST['email']    ?? '');
-            $phone           = trim($_POST['phone']    ?? '');
-            $password        = $_POST['password']      ?? '';
+            $fullName = trim($_POST['full_name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $phone = trim($_POST['phone'] ?? '');
+            $password = $_POST['password'] ?? '';
             $confirmPassword = $_POST['confirm_password'] ?? '';
-            $agreeTerms      = isset($_POST['agree_terms']);
+            $agreeTerms = isset($_POST['agree_terms']);
 
             if (!$fullName || !$email || !$password) {
                 $error = 'Vui lòng nhập đầy đủ thông tin bắt buộc';
@@ -139,18 +169,18 @@ class AuthController {
                 // Create user
                 $userId = $this->userModel->create([
                     'full_name' => $fullName,
-                    'email'     => $email,
-                    'phone'     => $phone,
-                    'password'  => $password,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'password' => $password,
                 ]);
 
                 if ($userId) {
                     // Create welcome notification
                     db()->insert('notifications', [
                         'user_id' => $userId,
-                        'title'   => 'Chào mừng đến với VQSTORE!',
+                        'title' => 'Chào mừng đến với VQSTORE!',
                         'content' => 'Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá ngay các sản phẩm hot!',
-                        'type'    => 'info',
+                        'type' => 'info',
                     ]);
 
                     setFlash('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
@@ -168,7 +198,8 @@ class AuthController {
     /**
      * Logout
      */
-    public function logout() {
+    public function logout()
+    {
         session_destroy();
         redirect('/');
     }
@@ -176,9 +207,10 @@ class AuthController {
     /**
      * Forgot password form
      */
-    public function forgotPassword() {
+    public function forgotPassword()
+    {
         $message = null;
-        $error   = null;
+        $error = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
@@ -187,13 +219,13 @@ class AuthController {
             } else {
                 $user = $this->userModel->getByEmail($email);
                 if ($user) {
-                    $token   = bin2hex(random_bytes(32));
+                    $token = bin2hex(random_bytes(32));
                     $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
                     $this->userModel->saveResetToken($email, $token, $expires);
 
                     // In production, send via email. Here, just show the link.
                     $resetLink = SITE_URL . '/auth/resetPassword?token=' . $token;
-                    $message   = 'Liên kết đặt lại mật khẩu (demo): <a href="' . $resetLink . '" class="text-warning">Bấm vào đây</a>';
+                    $message = 'Liên kết đặt lại mật khẩu (demo): <a href="' . $resetLink . '" class="text-warning">Bấm vào đây</a>';
                 } else {
                     $message = 'Nếu email tồn tại, liên kết đặt lại đã được gửi.';
                 }
@@ -207,9 +239,13 @@ class AuthController {
     /**
      * Reset password
      */
-    public function resetPassword() {
+    public function resetPassword()
+    {
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
-        if (!$token) { redirect('/auth/login'); return; }
+        if (!$token) {
+            redirect('/auth/login');
+            return;
+        }
 
         $user = $this->userModel->getByResetToken($token);
         if (!$user) {
@@ -220,7 +256,7 @@ class AuthController {
 
         $error = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $newPassword     = $_POST['password']         ?? '';
+            $newPassword = $_POST['password'] ?? '';
             $confirmPassword = $_POST['confirm_password'] ?? '';
 
             if (strlen($newPassword) < 6) {

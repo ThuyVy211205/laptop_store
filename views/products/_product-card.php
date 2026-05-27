@@ -3,9 +3,9 @@
  * Product Card Component (partial)
  * Expects: $product (array)
  */
-$price      = $product['price'];
-$salePrice  = $product['sale_price'] ?? null;
-$discount   = $salePrice ? calcDiscount($price, $salePrice) : 0;
+$price = $product['price'];
+$salePrice = $product['sale_price'] ?? null;
+$discount = $salePrice ? calcDiscount($price, $salePrice) : 0;
 $finalPrice = $salePrice ?: $price;
 
 // Limit discount display per page for natural ecommerce look
@@ -22,6 +22,22 @@ if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
 ?>
 <div class="product-card" data-product-id="<?= $product['id'] ?>">
 
+<<<<<<< HEAD
+=======
+    <!-- Badges -->
+    <div class="product-badges">
+        <?php if ($discount > 0): ?>
+            <span class="badge-discount">-<?= $discount ?>%</span>
+        <?php endif; ?>
+        <?php if (!empty($product['is_flash_sale'])): ?>
+            <span class="badge-flash"><i class="fas fa-bolt"></i> FLASH</span>
+        <?php endif; ?>
+        <?php if (!empty($product['is_new'])): ?>
+            <span class="badge-new">NEW</span>
+        <?php endif; ?>
+    </div>
+
+>>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
     <!-- Wishlist & Quick view -->
     <div class="product-actions">
         <button class="action-btn wishlist-btn" data-id="<?= $product['id'] ?>" title="Yêu thích">
@@ -32,18 +48,25 @@ if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
         </button>
     </div>
 
+<<<<<<< HEAD
     <!-- Image -->
     <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>"
        class="product-img-wrap">
         <img src="<?= imgUrl($product['thumbnail']) ?>"
              alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy"
              onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+=======
+    <!-- Image with decorative black bars -->
+    <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['slug']) ?>" class="product-img-wrap">
+        <img src="<?= imgUrl($product['thumbnail']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy"
+            onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
+>>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
     </a>
 
     <!-- Body -->
     <div class="product-body">
         <?php if (!empty($product['category_name'])): ?>
-        <small class="product-cat"><?= htmlspecialchars($product['category_name']) ?></small>
+            <small class="product-cat"><?= htmlspecialchars($product['category_name']) ?></small>
         <?php endif; ?>
 
         <h6 class="product-name">
@@ -55,17 +78,18 @@ if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
         <!-- Rating -->
         <div class="product-rating">
             <?php if (!empty($product['rating_count']) && $product['rating_count'] > 0): ?>
-            <span class="stars"><?= starRating($product['rating_avg']) ?></span>
-            <small>(<?= $product['rating_count'] ?>)</small>
+                <span class="stars"><?= starRating($product['rating_avg']) ?></span>
+                <small>(<?= $product['rating_count'] ?>)</small>
             <?php else: ?>
-            <span class="stars"><?= starRating(0) ?></span>
-            <small class="text-muted">Chưa có đánh giá</small>
+                <span class="stars"><?= starRating(0) ?></span>
+                <small class="text-muted">Chưa có đánh giá</small>
             <?php endif; ?>
         </div>
 
         <!-- Price — vertical layout: current on top, old + discount tag below (max 3 discounts shown) -->
         <div class="product-price">
             <span class="price-current"><?= formatPrice($finalPrice) ?></span>
+<<<<<<< HEAD
             <?php if ($showDiscount && $salePrice && $salePrice < $price): ?>
             <div class="price-row-old">
                 <span class="price-old"><?= formatPrice($price) ?></span>
@@ -74,5 +98,29 @@ if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
             <?php endif; ?>
         </div>
 
+=======
+            <?php if ($salePrice && $salePrice < $price): ?>
+                <span class="price-old"><?= formatPrice($price) ?></span>
+            <?php endif; ?>
+        </div>
+
+        <!-- Flash sale stock bar -->
+        <?php if (!empty($product['is_flash_sale']) && !empty($product['sold_quantity'])): ?>
+            <?php
+            $sold = $product['sold_quantity'];
+            $stock = $sold + $product['stock'];
+            $percent = $stock > 0 ? min(100, ($sold / $stock) * 100) : 0;
+            ?>
+            <div class="product-stock-bar">
+                <div class="stock-bar-fill" style="width: <?= $percent ?>%"></div>
+            </div>
+            <span class="stock-text"><i class="fas fa-fire"></i> Đã bán <?= $sold ?></span>
+        <?php endif; ?>
+
+        <!-- Add to cart -->
+        <button class="btn btn-tech btn-sm w-100 btn-add-cart" data-id="<?= $product['id'] ?>">
+            <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
+        </button>
+>>>>>>> 1a0162bf779ee750c081ca565ec555db7b89514e
     </div>
 </div>

@@ -37,7 +37,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                 <div class="cart-item-card" data-id="<?= $itemId ?>" data-price="<?= $price ?>">
                     <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($item['slug']) ?>" class="cart-item-img">
                         <img src="<?= imgUrl($item['thumbnail']) ?>" alt="<?= htmlspecialchars($item['name']) ?>"
-                             onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                             onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
                     </a>
 
                     <div class="cart-item-info">
