@@ -5,8 +5,8 @@
         <!-- Animated Check -->
         <div class="success-icon">
             <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
             </svg>
         </div>
 
@@ -64,7 +64,7 @@
             <div class="summary-row">
                 <span>Thanh toán:</span>
                 <?php
-                $payMap = ['cod'=>'COD','bank'=>'Chuyển khoản','momo'=>'MoMo','vnpay'=>'VNPay'];
+                $payMap = ['cod' => 'COD', 'bank' => 'Chuyển khoản', 'momo' => 'MoMo', 'vnpay' => 'VNPay'];
                 ?>
                 <span><?= $payMap[$order['payment_method']] ?? $order['payment_method'] ?></span>
             </div>
@@ -74,10 +74,10 @@
                 <span><?= formatPrice($order['subtotal']) ?></span>
             </div>
             <?php if ($order['discount_amount'] > 0): ?>
-            <div class="summary-row text-success">
-                <span>Giảm giá <?= !empty($order['voucher_code']) ? '(' . $order['voucher_code'] . ')' : '' ?>:</span>
-                <span>-<?= formatPrice($order['discount_amount']) ?></span>
-            </div>
+                <div class="summary-row text-success">
+                    <span>Giảm giá <?= !empty($order['voucher_code']) ? '(' . $order['voucher_code'] . ')' : '' ?>:</span>
+                    <span>-<?= formatPrice($order['discount_amount']) ?></span>
+                </div>
             <?php endif; ?>
             <div class="summary-row summary-total">
                 <span>Tổng cộng:</span>

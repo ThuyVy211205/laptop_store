@@ -1,6 +1,6 @@
 <?php
 $extraCss = ['auth.css'];
-$hideNav  = true;
+$hideNav = true;
 include ROOT_PATH . '/views/layouts/header.php';
 ?>
 
@@ -19,9 +19,9 @@ include ROOT_PATH . '/views/layouts/header.php';
                     </div>
 
                     <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger d-flex align-items-center gap-2">
-                        <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
-                    </div>
+                        <div class="alert alert-danger d-flex align-items-center gap-2">
+                            <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+                        </div>
                     <?php endif; ?>
 
                     <form method="POST" action="<?= SITE_URL ?>/auth/login" id="loginForm">
@@ -30,8 +30,8 @@ include ROOT_PATH . '/views/layouts/header.php';
                             <div class="input-wrap">
                                 <i class="fas fa-envelope input-icon"></i>
                                 <input type="email" name="email" class="form-control form-tech"
-                                       placeholder="email@example.com" required
-                                       value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                                    placeholder="email@example.com" required
+                                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                             </div>
                         </div>
 
@@ -39,8 +39,8 @@ include ROOT_PATH . '/views/layouts/header.php';
                             <label class="form-label-tech">Mật khẩu</label>
                             <div class="input-wrap">
                                 <i class="fas fa-lock input-icon"></i>
-                                <input type="password" name="password" id="passwordInput"
-                                       class="form-control form-tech" placeholder="••••••••" required>
+                                <input type="password" name="password" id="passwordInput" class="form-control form-tech"
+                                    placeholder="••••••••" required>
                                 <button type="button" class="btn-show-pwd" id="togglePwd">
                                     <i class="fas fa-eye" id="eyeIcon"></i>
                                 </button>
@@ -60,8 +60,8 @@ include ROOT_PATH . '/views/layouts/header.php';
 
                         <div class="auth-divider"><span>HOẶC</span></div>
 
-                        <button type="button" class="btn btn-google w-100" disabled
-                                title="Tính năng đang phát triển" style="opacity:.5;cursor:not-allowed;">
+                        <button type="button" class="btn btn-google w-100" disabled title="Tính năng đang phát triển"
+                            style="opacity:.5;cursor:not-allowed;">
                             <i class="fab fa-google me-2"></i>Đăng nhập với Google
                         </button>
 
@@ -77,17 +77,16 @@ include ROOT_PATH . '/views/layouts/header.php';
 </div>
 
 <script>
-// Toggle password
-document.getElementById('togglePwd').addEventListener('click', function() {
-    const input = document.getElementById('passwordInput');
-    const icon  = document.getElementById('eyeIcon');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'fas fa-eye-slash';
-    } else {
-        input.type = 'password';
-        icon.className = 'fas fa-eye';
-    }
-});
+    // Toggle password
+    document.getElementById('togglePwd').addEventListener('click', function () {
+        const input = document.getElementById('passwordInput');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    });
 </script>
-

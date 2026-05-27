@@ -17,7 +17,7 @@ $segments = $url ? explode('/', $url) : [];
 
 $route = $segments[0] ?? 'home';
 $action = $segments[1] ?? 'index';
-$param  = $segments[2] ?? null;
+$param = $segments[2] ?? null;
 $param2 = $segments[3] ?? null;
 
 // ============================================================
@@ -89,7 +89,7 @@ try {
 
         case 'admin':
             require_once 'controllers/AdminController.php';
-            $ctrl   = new AdminController();
+            $ctrl = new AdminController();
             $method = ($action === '' || $action === 'index') ? 'dashboard' : $action;
             if (method_exists($ctrl, $method)) {
                 $ctrl->$method($param);
@@ -118,7 +118,8 @@ try {
             require_once 'controllers/ApiController.php';
             $ctrl = new ApiController();
             $method = $action;
-            if ($param) $method .= ucfirst($param);
+            if ($param)
+                $method .= ucfirst($param);
             if (method_exists($ctrl, $method)) {
                 $ctrl->$method();
             } else {
