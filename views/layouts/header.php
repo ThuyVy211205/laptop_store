@@ -49,7 +49,7 @@ $flash       = getFlash();
         <div class="d-flex justify-content-between align-items-center">
             <div class="top-bar-left d-none d-md-flex gap-3">
                 <span><i class="fas fa-phone-alt me-1"></i> Hotline: 1900 9999</span>
-                <span><i class="fas fa-envelope me-1"></i> support@techstore.vn</span>
+                <span><i class="fas fa-envelope me-1"></i> support@vqstore.vn</span>
             </div>
             <div class="top-bar-right d-flex gap-3 align-items-center">
                 <span class="d-none d-md-inline"><i class="fas fa-shipping-fast me-1"></i> Miễn phí giao hàng đơn từ 500K</span>

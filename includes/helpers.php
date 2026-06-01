@@ -14,7 +14,7 @@ function isLoggedIn() {
  * Check if admin is logged in
  */
 function isAdminLoggedIn() {
-    return isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id']);
+    return !empty($_SESSION['admin']['id']);
 }
 
 /**
@@ -36,12 +36,7 @@ function getCurrentUser() {
  */
 function getCurrentAdmin() {
     if (!isAdminLoggedIn()) return null;
-    return [
-        'id'        => $_SESSION['admin_id'],
-        'full_name' => $_SESSION['admin_name'] ?? 'Admin',
-        'email'     => $_SESSION['admin_email'] ?? '',
-        'role'      => $_SESSION['admin_role'] ?? 'admin',
-    ];
+    return $_SESSION['admin'];
 }
 
 /**
@@ -102,7 +97,7 @@ function requireLogin() {
  */
 function requireAdmin() {
     if (!isAdminLoggedIn()) {
-        redirect('/admin/auth/login');
+        redirect('/admin/login');
     }
 }
 

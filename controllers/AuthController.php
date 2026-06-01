@@ -170,7 +170,7 @@ class AuthController
     }
 
     /**
-     * Logout
+     * Logout — xóa toàn bộ session, về trang chủ
      */
     public function logout()
     {

@@ -8,24 +8,15 @@ $salePrice  = $product['sale_price'] ?? null;
 $discount   = $salePrice ? calcDiscount($price, $salePrice) : 0;
 $finalPrice = $salePrice ?: $price;
 
-// Limit discount display per page for natural ecommerce look
-if (!isset($GLOBALS['_pc_badge_discount'])) $GLOBALS['_pc_badge_discount'] = 0;
-
-// Products explicitly excluded from showing discount
-$_noDiscountIds = [2, 3];
-
-$showDiscount = $discount > 0
-                && !in_array((int)$product['id'], $_noDiscountIds)
-                && $GLOBALS['_pc_badge_discount'] < 3;
-
-if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
+$showDiscount = $discount > 0;
 ?>
-<div class="product-card" data-product-id="<?= $product['id'] ?>">
+<div class="product-card" data-product-id="<?= $product['id'] ?>" data-cat="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
 
     <!-- Wishlist & Quick view -->
     <div class="product-actions">
-        <button class="action-btn wishlist-btn" data-id="<?= $product['id'] ?>" title="Yêu thích">
-            <i class="far fa-heart"></i>
+        <button class="action-btn wishlist-btn<?= !empty($inWishlist) ? ' active' : '' ?>"
+                data-id="<?= $product['id'] ?>" title="Yêu thích">
+            <i class="<?= !empty($inWishlist) ? 'fas' : 'far' ?> fa-heart"></i>
         </button>
         <button class="action-btn quickview-btn" data-id="<?= $product['id'] ?>" title="Xem nhanh">
             <i class="fas fa-eye"></i>
@@ -37,7 +28,7 @@ if ($showDiscount) $GLOBALS['_pc_badge_discount']++;
        class="product-img-wrap">
         <img src="<?= imgUrl($product['thumbnail']) ?>"
              alt="<?= htmlspecialchars($product['name']) ?>" loading="lazy"
-             onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+             onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
     </a>
 
     <!-- Body -->

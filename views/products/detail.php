@@ -6,9 +6,7 @@ include ROOT_PATH . '/views/layouts/header.php';
 $finalPrice = $product['sale_price'] ?: $product['price'];
 $discount   = $product['sale_price'] ? calcDiscount($product['price'], $product['sale_price']) : 0;
 
-// Products excluded from showing discount % (synced with _product-card.php)
-$_noDiscountIds  = [2, 3];
-$showDetailDiscount = $discount > 0 && !in_array((int)$product['id'], $_noDiscountIds);
+$showDetailDiscount = $discount > 0;
 
 $ramOptions     = [];
 $storageOptions = [];
@@ -67,7 +65,7 @@ if (!empty($specs)) {
                     src="<?= imgUrl($product['thumbnail']) ?>"
                     alt="<?= htmlspecialchars($product['name']) ?>"
                     id="mainImage"
-                    onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'"
+                    onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'"
                 >
                 <button class="pd-gallery__arrow pd-gallery__arrow--prev" id="galleryPrev" type="button" aria-label="Ảnh trước">
                     <i class="fas fa-chevron-left"></i>
@@ -81,17 +79,17 @@ if (!empty($specs)) {
             <div class="pd-gallery__thumbs" id="thumbStrip">
                 <!-- Tile 0 — thumbnail (always shown) -->
                 <button class="pd-gallery__thumb active" data-src="<?= imgUrl($product['thumbnail']) ?>" type="button" aria-label="View 1">
-                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                 </button>
                 <?php $shown = 0; foreach ($images as $img): if ($shown >= 3) break; $shown++; ?>
                 <button class="pd-gallery__thumb" data-src="<?= imgUrl($img['image_path']) ?>" type="button" aria-label="View <?= $shown + 1 ?>">
-                    <img src="<?= imgUrl($img['image_path']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($img['image_path']) ?>" alt="" onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                 </button>
                 <?php endforeach; ?>
                 <?php /* Pad to always show 4 thumbnails */
                 for ($p = 1 + $shown; $p < 4; $p++): ?>
                 <button class="pd-gallery__thumb" data-src="<?= imgUrl($product['thumbnail']) ?>" type="button">
-                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                    <img src="<?= imgUrl($product['thumbnail']) ?>" alt="" onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                 </button>
                 <?php endfor; ?>
             </div>
@@ -233,7 +231,7 @@ if (!empty($specs)) {
                         <div class="pd-cv__img">
                             <img src="<?= imgUrl($product['thumbnail']) ?>"
                                  alt="<?= htmlspecialchars($currentColor) ?>"
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                 onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                         </div>
                         <div class="pd-cv__info">
                             <span class="pd-cv__name" id="selectedColorName"><?= htmlspecialchars($currentColor) ?></span>
@@ -263,7 +261,7 @@ if (!empty($specs)) {
                         <div class="pd-cv__img">
                             <img src="<?= imgUrl($cv['thumbnail']) ?>"
                                  alt="<?= htmlspecialchars($cvColor) ?>"
-                                 onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                                 onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                         </div>
                         <div class="pd-cv__info">
                             <span class="pd-cv__name"><?= htmlspecialchars($cvColor) ?></span>
@@ -347,7 +345,7 @@ if (!empty($specs)) {
                     <span><?= $inWishlist ? 'Đã yêu thích' : 'Yêu thích' ?></span>
                 </button>
                 <button class="pd-action" type="button"
-                    onclick="if(navigator.share){navigator.share({title:document.title,url:location.href})}else{navigator.clipboard.writeText(location.href);if(window.showToast)showToast('success','Đã copy link!');}">
+                    onclick="if(navigator.share){navigator.share({title:document.title,url:location.href})}else{navigator.clipboard.writeText(location.href);showToast('Đã copy link sản phẩm!','success');}">
                     <i class="fas fa-share-alt"></i>
                     <span>Chia sẻ</span>
                 </button>
@@ -634,9 +632,9 @@ async function addToCartDetail(productId, quantity) {
             document.querySelectorAll('#cartBadgeNav, #cartBadgeSidebar').forEach(function(el) {
                 if (el) el.textContent = data.cart_count;
             });
-            if (window.showToast) showToast('success', data.message);
+            showToast(data.message || 'Đã thêm vào giỏ hàng', 'success');
         } else {
-            if (window.showToast) showToast('error', data.message);
+            showToast(data.message || 'Có lỗi xảy ra', 'error');
         }
     } catch (e) { console.error(e); }
 }
@@ -707,7 +705,7 @@ document.querySelector('.wishlist-btn-detail')?.addEventListener('click', async 
         var text = this.querySelector('span');
         if (data.action === 'added') { icon.className = 'fas fa-heart'; text.textContent = 'Đã yêu thích'; }
         else                         { icon.className = 'far fa-heart'; text.textContent = 'Yêu thích'; }
-        if (window.showToast) showToast('success', data.message);
+        showToast(data.message || (data.action === 'added' ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích'), 'success');
     }
 });
 </script>

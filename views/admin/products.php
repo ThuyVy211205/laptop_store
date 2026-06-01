@@ -77,6 +77,14 @@ $to   = min($page * 15, $total);
             <a href="<?= SITE_URL ?>/admin/reviews" class="admin-nav-item">
                 <i class="fas fa-star"></i> Đánh giá
             </a>
+            <a href="<?= SITE_URL ?>/admin/contacts" class="admin-nav-item">
+                <i class="fas fa-envelope"></i> Tin nhắn
+                <?php
+                $newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0;
+                if ($newContactCount > 0): ?>
+                <span class="badge-count"><?= $newContactCount ?></span>
+                <?php endif; ?>
+            </a>
 
             <span class="admin-nav-label">Báo cáo</span>
             <a href="<?= SITE_URL ?>/admin/revenue" class="admin-nav-item">

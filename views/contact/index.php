@@ -96,7 +96,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                             </span>
                             <div class="tc-info__body">
                                 <span class="tc-info__label">Email</span>
-                                <a href="mailto:support@techstore.vn" class="tc-info__value tc-info__link">support@techstore.vn</a>
+                                <a href="mailto:support@vqstore.vn" class="tc-info__value tc-info__link">support@vqstore.vn</a>
                                 <span class="tc-info__note">Phản hồi trong vòng 24 giờ</span>
                             </div>
                         </li>

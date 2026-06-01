@@ -14,7 +14,7 @@ class AdminController {
     /* ---- Auth guard ---- */
     private function requireAdmin() {
         if (empty($_SESSION['admin'])) {
-            header('Location: ' . SITE_URL . '/admin/login');
+            header('Location: ' . SITE_URL . '/auth/login');
             exit;
         }
     }
@@ -213,6 +213,81 @@ class AdminController {
     }
 
     /* ================================================================
+       Contacts — Tin nhắn liên hệ
+       ================================================================ */
+    public function contacts($param = null) {
+        $this->requireAdmin();
+
+        /* Phản hồi tin nhắn (POST) */
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $param === 'reply') {
+            $id      = (int)($_POST['id'] ?? 0);
+            $reply   = trim($_POST['reply_content'] ?? '');
+            $replier = $_SESSION['admin']['full_name'] ?? 'Admin';
+
+            if ($id && $reply) {
+                $this->db->execute(
+                    "UPDATE contacts SET status = 'replied', reply_content = ?, replied_by = ?, replied_at = NOW() WHERE id = ?",
+                    [$reply, $replier, $id]
+                );
+                setFlash('success', 'Đã gửi phản hồi thành công!');
+            }
+            header('Location: ' . SITE_URL . '/admin/contacts');
+            exit;
+        }
+
+        /* Đánh dấu đã đọc */
+        if ($param === 'read') {
+            $id = (int)($_GET['id'] ?? 0);
+            if ($id) {
+                $this->db->execute(
+                    "UPDATE contacts SET status = 'read' WHERE id = ? AND status = 'new'",
+                    [$id]
+                );
+            }
+            header('Location: ' . SITE_URL . '/admin/contacts');
+            exit;
+        }
+
+        /* Xóa tin nhắn */
+        if ($param === 'delete') {
+            $id = (int)($_GET['id'] ?? 0);
+            if ($id) {
+                $this->db->execute("DELETE FROM contacts WHERE id = ?", [$id]);
+                setFlash('success', 'Đã xóa tin nhắn!');
+            }
+            header('Location: ' . SITE_URL . '/admin/contacts');
+            exit;
+        }
+
+        /* Danh sách tin nhắn */
+        $filter  = in_array($_GET['status'] ?? '', ['new','read','replied']) ? $_GET['status'] : '';
+        $search  = trim($_GET['search'] ?? '');
+
+        $where  = [];
+        $params = [];
+        if ($filter) { $where[] = "status = ?"; $params[] = $filter; }
+        if ($search) {
+            $where[] = "(name LIKE ? OR email LIKE ? OR subject LIKE ?)";
+            $params  = array_merge($params, ["%$search%", "%$search%", "%$search%"]);
+        }
+        $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $contacts = $this->db->fetchAll(
+            "SELECT * FROM contacts $whereClause ORDER BY created_at DESC",
+            $params
+        );
+
+        $counts = [
+            'all'     => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts")['c'] ?? 0,
+            'new'     => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0,
+            'read'    => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='read'")['c'] ?? 0,
+            'replied' => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='replied'")['c'] ?? 0,
+        ];
+
+        include ROOT_PATH . '/views/admin/contacts.php';
+    }
+
+    /* ================================================================
        Login / Logout
        ================================================================ */
     public function login() {
@@ -250,8 +325,8 @@ class AdminController {
     }
 
     public function logout() {
-        unset($_SESSION['admin']);
-        header('Location: ' . SITE_URL . '/admin/login');
+        session_destroy();
+        header('Location: ' . SITE_URL);
         exit;
     }
 

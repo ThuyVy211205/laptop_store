@@ -2,7 +2,7 @@
 class ContactController {
     public function index() {
         $pageTitle = 'Liên hệ với chúng tôi';
-        $sent = false;
+        $sent  = false;
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,6 +18,15 @@ class ContactController {
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = 'Email không hợp lệ.';
             } else {
+                db()->insert('contacts', [
+                    'name'     => $name,
+                    'email'    => $email,
+                    'phone'    => $phone    ?: null,
+                    'order_id' => $order_id ?: null,
+                    'subject'  => $subject  ?: null,
+                    'message'  => $message,
+                    'status'   => 'new',
+                ]);
                 $sent = true;
             }
         }

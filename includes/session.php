@@ -12,11 +12,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Regenerate ID periodically to prevent fixation
+// Dùng false (không xóa session cũ ngay) để tránh race condition khi mở nhiều tab
 if (!isset($_SESSION['_init'])) {
-    session_regenerate_id(true);
+    session_regenerate_id(false);
     $_SESSION['_init'] = time();
 } elseif (time() - $_SESSION['_init'] > 1800) {
-    session_regenerate_id(true);
+    session_regenerate_id(false);
     $_SESSION['_init'] = time();
 }
 

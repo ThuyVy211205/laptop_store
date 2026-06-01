@@ -147,14 +147,22 @@ function uploadImage($file, $folder = 'products') {
 }
 
 /**
+ * Placeholder image (SVG data URI — không cần file vật lý)
+ */
+function noImageUrl() {
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E"
+         . "%3Crect fill='%23f3f4f6' width='400' height='300'/%3E"
+         . "%3Ctext fill='%23adb5bd' font-family='sans-serif' font-size='16' text-anchor='middle' x='200' y='158'%3ENo Image%3C/text%3E"
+         . "%3C/svg%3E";
+}
+
+/**
  * Get image URL (with fallback)
  */
 function imgUrl($path) {
-    if (empty($path)) {
-        return ASSETS_URL . '/images/no-image.webp';
-    }
+    if (empty($path)) return noImageUrl();
     if (strpos($path, 'http') === 0) return $path;
-    // paths stored as assets/images/... → served from SITE_URL
+    if (strpos($path, 'data:') === 0) return $path;
     if (strpos($path, 'assets/') === 0) return SITE_URL . '/' . ltrim($path, '/');
     return UPLOAD_URL . '/' . ltrim($path, '/');
 }

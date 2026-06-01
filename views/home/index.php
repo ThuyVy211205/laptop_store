@@ -1,11 +1,13 @@
 <?php
-/* ─── Banner slides — 4 ảnh full-width ─── */
-$bannerSlides = [
-    ['img' => 'banner-macbook.jpg', 'alt' => 'MacBook'],
-    ['img' => 'banner-laptop-vp.jpg', 'alt' => 'Laptop Văn phòng'],
-    ['img' => 'banner-laptop-gm.jpg', 'alt' => 'Laptop Gaming'],
-    ['img' => 'banner-phukien.jpg', 'alt' => 'Phụ kiện'],
-];
+/* ─── Banner slides — lấy từ DB (position = 'hero'), fallback tĩnh nếu rỗng ─── */
+if (empty($banners)) {
+    $banners = [
+        ['image' => 'assets/images/banner-macbook.jpg',    'title' => 'MacBook',         'link' => null],
+        ['image' => 'assets/images/banner-laptop-vp.jpg',  'title' => 'Laptop Văn phòng','link' => null],
+        ['image' => 'assets/images/banner-laptop-gm.jpg',  'title' => 'Laptop Gaming',   'link' => null],
+        ['image' => 'assets/images/banner-phukien.jpg',    'title' => 'Phụ kiện',        'link' => null],
+    ];
+}
 
 /* ─── Danh mục — dùng ảnh thật từ assets/images ─── */
 $homeCategories = [
@@ -27,10 +29,20 @@ include ROOT_PATH . '/views/layouts/header.php';
 <section class="banner-section">
     <div class="container">
         <div class="banner-fullwidth" id="bannerSlider">
-            <?php foreach ($bannerSlides as $i => $slide): ?>
+            <?php foreach ($banners as $i => $banner): ?>
                 <div class="banner-slide <?= $i === 0 ? 'active' : '' ?>">
-                    <img src="<?= ASSETS_URL ?>/images/<?= htmlspecialchars($slide['img']) ?>"
-                        alt="<?= htmlspecialchars($slide['alt']) ?>" <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
+                    <?php $imgUrl = SITE_URL . '/' . ltrim($banner['image'], '/'); ?>
+                    <?php if (!empty($banner['link'])): ?>
+                        <a href="<?= SITE_URL . htmlspecialchars($banner['link']) ?>">
+                            <img src="<?= htmlspecialchars($imgUrl) ?>"
+                                alt="<?= htmlspecialchars($banner['title'] ?? '') ?>"
+                                <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
+                        </a>
+                    <?php else: ?>
+                        <img src="<?= htmlspecialchars($imgUrl) ?>"
+                            alt="<?= htmlspecialchars($banner['title'] ?? '') ?>"
+                            <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' ?>>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
 
@@ -75,15 +87,13 @@ include ROOT_PATH . '/views/layouts/header.php';
 <?php if (!empty($featured)): ?>
     <section class="section section-products">
         <div class="container">
-            <div class="section-card">
-                <div class="section-head">
-                    <h2 class="section-title">Sản phẩm nổi bật</h2>
-                </div>
-                <div class="pg-grid">
-                    <?php foreach (array_slice($featured, 0, 4) as $product): ?>
-                        <?php include __DIR__ . '/../products/_product-card.php'; ?>
-                    <?php endforeach; ?>
-                </div>
+            <div class="section-head">
+                <h2 class="section-title">Sản phẩm nổi bật</h2>
+            </div>
+            <div class="pg-grid">
+                <?php foreach (array_slice($featured, 0, 6) as $product): ?>
+                    <?php include __DIR__ . '/../products/_product-card.php'; ?>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -95,15 +105,13 @@ include ROOT_PATH . '/views/layouts/header.php';
 <?php if (!empty($bestSellers)): ?>
     <section class="section section-products">
         <div class="container">
-            <div class="section-card">
-                <div class="section-head">
-                    <h2 class="section-title">Sản phẩm bán chạy</h2>
-                </div>
-                <div class="pg-grid">
-                    <?php foreach (array_slice($bestSellers, 0, 4) as $product): ?>
-                        <?php include __DIR__ . '/../products/_product-card.php'; ?>
-                    <?php endforeach; ?>
-                </div>
+            <div class="section-head">
+                <h2 class="section-title">Sản phẩm bán chạy</h2>
+            </div>
+            <div class="pg-grid">
+                <?php foreach (array_slice($bestSellers, 0, 6) as $product): ?>
+                    <?php include __DIR__ . '/../products/_product-card.php'; ?>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -154,7 +162,7 @@ include ROOT_PATH . '/views/layouts/header.php';
         };
         var startTimer = function () {
             clearInterval(timer);
-            timer = setInterval(function () { goTo(cur + 1); }, 5000);
+            timer = setInterval(function () { goTo(cur + 1); }, 3000);
         };
 
         var prev = document.getElementById('bannerPrev');

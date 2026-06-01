@@ -99,32 +99,10 @@ document.addEventListener('click', function(e){
         }).catch(function(){ cartBtn.disabled=false; });
     }
 
-    /* Wishlist */
-    var wBtn = e.target.closest('.wishlist-btn');
-    if(wBtn){
-        e.preventDefault();
-        if(!window.IS_LOGGED_IN){ location.href = window.SITE_URL+'/auth/login'; return; }
-        var pid = wBtn.dataset.id;
-        fetch(window.SITE_URL + '/wishlist/toggle', {
-            method:'POST',
-            headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
-            body:'product_id='+pid
-        }).then(function(r){ return r.json(); }).then(function(d){
-            if(d.success){ wBtn.classList.toggle('active',d.added); showToast(d.added?'Đã thêm vào yêu thích':'Đã xóa khỏi yêu thích','success'); }
-        });
-    }
+    /* Wishlist — handled globally in cart.js */
 });
 
-/* ── Toast helper ── */
-function showToast(msg, type){
-    var c = document.getElementById('toastContainer');
-    if(!c) return;
-    var icons = {success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle'};
-    var t = document.createElement('div');
-    t.className = 'toast-tech toast-'+(type||'success');
-    t.innerHTML = '<i class="toast-icon fas '+(icons[type]||icons.success)+'"></i><span>'+msg+'</span>';
-    c.appendChild(t);
-    setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(function(){ t.remove(); },400); }, 3000);
-}
+/* ── Toast helper — alias về window.showToast (định nghĩa trong cart.js) ── */
+function showToast(msg, type){ if(window.showToast) window.showToast(msg, type); }
 
 })();

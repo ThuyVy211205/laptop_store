@@ -1,7 +1,26 @@
 /* ============================================================
    TechStore — cart.js
-   Add to cart (product cards) + cart sidebar item removal
+   Add to cart + wishlist toggle + toast (loaded on every page)
    ============================================================ */
+
+/* ── Global toast (dùng chung cho mọi trang) ── */
+window.showToast = function(msg, type) {
+    var c = document.getElementById('toastContainer');
+    if(!c) return;
+    var icons = { success:'fa-check-circle', error:'fa-exclamation-circle',
+                  warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+    var t = document.createElement('div');
+    t.className = 'toast-tech toast-' + (type || 'success');
+    t.innerHTML = '<i class="toast-icon fas ' + (icons[type] || icons.success) + '"></i>'
+                + '<span>' + msg + '</span>';
+    c.appendChild(t);
+    setTimeout(function(){
+        t.style.opacity = '0';
+        t.style.transition = 'opacity .4s';
+        setTimeout(function(){ t.remove(); }, 400);
+    }, 3000);
+};
+
 (function(){
 'use strict';
 
@@ -42,10 +61,10 @@ document.addEventListener('click', function(e){
                 btn.innerHTML = originalHtml;
                 btn.style.background = '';
             }, 1800);
-            if(window.showToast) showToast('success', d.message || 'Đã thêm vào giỏ hàng');
+            showToast(d.message || 'Đã thêm vào giỏ hàng', 'success');
         } else {
             btn.innerHTML = originalHtml;
-            if(window.showToast) showToast('error', d.message || 'Có lỗi xảy ra');
+            showToast(d.message || 'Có lỗi xảy ra', 'error');
         }
     })
     .catch(function(){
@@ -91,6 +110,78 @@ document.addEventListener('click', function(e){
                 + '</div>';
         }
     }).catch(function(){ btn.disabled = false; });
+});
+
+/* ── Wishlist toggle (product cards — mọi trang) ── */
+document.addEventListener('click', function(e){
+    var btn = e.target.closest('.wishlist-btn');
+    /* Chặn double-fire: click vào <i> bên trong button vẫn bubble lên document
+       dù button đang disabled → phải check thủ công */
+    if(!btn || btn.disabled || btn.dataset.wlLoading === '1' || !window.SITE_URL) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if(!window.IS_LOGGED_IN){
+        window.location.href = window.SITE_URL + '/auth/login';
+        return;
+    }
+
+    var pid = btn.dataset.id;
+    if(!pid) return;
+
+    btn.disabled = true;
+    btn.dataset.wlLoading = '1';
+    fetch(window.SITE_URL + '/api/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'product_id=' + pid
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        btn.disabled = false;
+        btn.dataset.wlLoading = '0';
+        if(d.success){
+            var added = d.action === 'added';
+            var icon  = btn.querySelector('i');
+            if(icon) icon.className = added ? 'fas fa-heart' : 'far fa-heart';
+            btn.classList.toggle('active', added);
+            showToast(added ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích',
+                      added ? 'success' : 'info');
+
+            /* Nếu đang ở trang wishlist và vừa bỏ yêu thích → xóa card khỏi DOM */
+            if(!added && btn.closest('.wishlist-grid')) {
+                var card   = btn.closest('[class*="col-"]') || btn.closest('.product-card');
+                if(card) {
+                    card.style.transition = 'opacity .3s, transform .3s';
+                    card.style.opacity    = '0';
+                    card.style.transform  = 'scale(0.9)';
+                    setTimeout(function(){
+                        card.remove();
+                        /* Nếu hết sản phẩm → hiển thị trạng thái rỗng */
+                        var grid = document.getElementById('wishlistGrid');
+                        if(grid && !grid.querySelector('.product-card')) {
+                            grid.outerHTML =
+                                '<div class="empty-state text-center py-5">'
+                              + '<i class="fas fa-heart fa-3x text-muted mb-3 d-block"></i>'
+                              + '<h4>Chưa có sản phẩm yêu thích nào</h4>'
+                              + '<p class="text-muted">Lưu lại những sản phẩm bạn quan tâm để mua sau</p>'
+                              + '<a href="' + window.SITE_URL + '/products" class="btn btn-tech">'
+                              + '<i class="fas fa-shopping-bag me-2"></i>Khám phá sản phẩm</a>'
+                              + '</div>';
+                        }
+                    }, 300);
+                }
+            }
+        } else if(d.require_login){
+            window.location.href = window.SITE_URL + '/auth/login';
+        } else {
+            showToast(d.message || 'Có lỗi xảy ra', 'error');
+        }
+    })
+    .catch(function(){ btn.disabled = false; btn.dataset.wlLoading = '0'; });
 });
 
 })();

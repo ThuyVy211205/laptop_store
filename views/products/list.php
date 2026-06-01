@@ -215,7 +215,7 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
                 <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($fp['slug']) ?>" class="fc-img">
                     <img src="<?= imgUrl($fp['thumbnail']) ?>"
                          alt="<?= htmlspecialchars($fp['name']) ?>"
-                         onerror="this.src='<?= ASSETS_URL ?>/images/no-image.png'">
+                         onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'"
                 </a>
                 <div class="fc-body">
                     <p class="fc-name"><?= htmlspecialchars($fp['name']) ?></p>

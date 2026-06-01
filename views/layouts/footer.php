@@ -51,7 +51,7 @@
                     <ul class="footer-contact-list">
                         <li><i class="fas fa-map-marker-alt"></i> 123 Nguyễn Văn Cừ, Q.5, TP.HCM</li>
                         <li><i class="fas fa-phone"></i> Hotline: <strong>1900 9999</strong></li>
-                        <li><i class="fas fa-envelope"></i> support@techstore.vn</li>
+                        <li><i class="fas fa-envelope"></i> support@vqstore.vn</li>
                         <li><i class="fas fa-clock"></i> 8:00 - 22:00 (Tất cả các ngày)</li>
                     </ul>
 
@@ -113,7 +113,7 @@
 <!-- ===================== SCRIPTS ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= ASSETS_URL ?>/js/main.js"></script>
-<script src="<?= ASSETS_URL ?>/js/cart.js?v=2"></script>
+<script src="<?= ASSETS_URL ?>/js/cart.js?v=<?= filemtime(ROOT_PATH.'/assets/js/cart.js') ?>"></script>
 <?php if (!empty($extraJs)): foreach ($extraJs as $js): ?>
 <script src="<?= ASSETS_URL ?>/js/<?= $js ?>"></script>
 <?php endforeach; endif; ?>

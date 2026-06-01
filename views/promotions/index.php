@@ -1,151 +1,139 @@
 <?php
-$extraCss = ['home.css', 'promotions.css'];
+$extraCss = ['product.css', 'promotions.css'];
 include ROOT_PATH . '/views/layouts/header.php';
+
+$vcColors = ['vc--blue', 'vc--red', 'vc--amber', 'vc--green'];
 ?>
 
-<!-- ─────────────────────────────────────────────────────────────
-     HERO
-     ───────────────────────────────────────────────────────────── -->
+<!-- ── BREADCRUMB ─────────────────────────────────────────────────── -->
+<nav class="breadcrumb-wrap">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item active">Khuyến Mãi</li>
+        </ol>
+    </div>
+</nav>
+
+<!-- ── HERO BANNER ───────────────────────────────────────────────── -->
 <section class="promo-hero">
     <div class="container">
-        <div class="promo-hero__inner">
-            <span class="promo-hero__badge"><i class="fas fa-bolt me-1"></i>Ưu đãi độc quyền</span>
-            <h1 class="promo-hero__title">KHUYẾN MÃI <em>HOT</em></h1>
-            <p class="promo-hero__sub">Hàng ngàn sản phẩm giảm giá sâu — chỉ trong thời gian có hạn!</p>
+        <div class="promo-hero__img-wrap">
+            <?php
+                $promoImgUrl = !empty($promoBanner['image'])
+                    ? SITE_URL . '/' . ltrim($promoBanner['image'], '/')
+                    : ASSETS_URL . '/images/banner-sale.jpg';
+                $promoAlt = $promoBanner['title'] ?? 'Siêu Sale';
+            ?>
+            <img src="<?= htmlspecialchars($promoImgUrl) ?>"
+                 alt="<?= htmlspecialchars($promoAlt) ?>" class="promo-hero__img">
+            <div class="promo-hero__overlay">
+                <div class="promo-hero__stats">
+                    <div class="promo-hero__stat">
+                        <span class="promo-hero__stat-num"><?= count($products) ?>+</span>
+                        <span class="promo-hero__stat-lbl">Sản phẩm giảm giá</span>
+                    </div>
+                    <div class="promo-hero__stat">
+                        <span class="promo-hero__stat-num">50%</span>
+                        <span class="promo-hero__stat-lbl">Giảm tối đa</span>
+                    </div>
+                    <div class="promo-hero__stat">
+                        <span class="promo-hero__stat-num"><?= count($vouchers) ?></span>
+                        <span class="promo-hero__stat-lbl">Mã voucher</span>
+                    </div>
+                </div>
+                <div class="promo-hero__actions">
+                    <a href="#promo-products" class="promo-hero__cta">
+                        <i class="fas fa-bolt"></i> Xem ngay
+                    </a>
+                    <a href="#voucher-zone" class="promo-hero__cta-ghost">
+                        <i class="fas fa-ticket-alt"></i> Lấy voucher
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-
-<!-- ─────────────────────────────────────────────────────────────
-     FLASH SALE
-     ───────────────────────────────────────────────────────────── -->
-<?php if (!empty($flashProducts)): ?>
-<section class="section section-products">
+<!-- ── VOUCHER ZONE ───────────────────────────────────────────────── -->
+<?php if (!empty($vouchers)): ?>
+<section class="promo-section" id="voucher-zone">
     <div class="container">
-        <div class="section-card">
-            <div class="section-head">
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <span class="promo-flash-tag"><i class="fas fa-bolt"></i> FLASH SALE</span>
-                    <h2 class="section-title">Giá sốc hôm nay</h2>
+        <div class="promo-section-head">
+            <h2 class="promo-section-title"><i class="fas fa-ticket-alt"></i> Voucher Zone</h2>
+            <span class="text-muted" style="font-size:13px">Sao chép mã và áp dụng khi thanh toán</span>
+        </div>
+        <div class="voucher-grid">
+            <?php foreach ($vouchers as $i => $v):
+                $color     = $vcColors[$i % count($vcColors)];
+                $discLabel = $v['type'] === 'percent'
+                    ? $v['value'] . '%'
+                    : number_format($v['value'], 0, ',', '.') . 'đ';
+                $minLabel  = $v['min_order'] > 0
+                    ? 'Đơn từ ' . number_format($v['min_order'], 0, ',', '.') . 'đ'
+                    : 'Không giới hạn';
+                $maxLabel  = $v['max_discount']
+                    ? 'Giảm tối đa ' . number_format($v['max_discount'], 0, ',', '.') . 'đ'
+                    : '';
+                $expLabel  = $v['expires_at']
+                    ? date('d/m/Y', strtotime($v['expires_at']))
+                    : 'Không giới hạn';
+                $vcId = 'vc_' . $v['id'];
+            ?>
+            <div class="voucher-card <?= $color ?>">
+                <div class="voucher-inner">
+                    <span class="voucher-tag"><?= $v['type'] === 'percent' ? 'Giảm %' : 'Giảm tiền' ?></span>
+                    <div class="voucher-discount"><?= $discLabel ?></div>
+                    <p class="voucher-desc">
+                        <?= $minLabel ?><br>
+                        <?= $maxLabel ?>
+                    </p>
+                    <span class="voucher-expiry">
+                        <i class="far fa-clock"></i>
+                        HSD: <?= $expLabel ?>
+                    </span>
                 </div>
-                <a href="<?= SITE_URL ?>/products" class="section-more">
-                    Xem tất cả <i class="fas fa-chevron-right ms-1"></i>
-                </a>
+                <div class="voucher-footer">
+                    <span class="voucher-code" id="<?= $vcId ?>"><?= htmlspecialchars($v['code']) ?></span>
+                    <button class="voucher-copy-btn" onclick="copyVoucher('<?= $vcId ?>',this)">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
             </div>
-            <div class="pg-grid">
-                <?php foreach ($flashProducts as $product): ?>
-                <?php include ROOT_PATH . '/views/products/_product-card.php'; ?>
-                <?php endforeach; ?>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
 <?php endif; ?>
 
-
-<!-- ─────────────────────────────────────────────────────────────
-     DEAL BANNERS
-     ───────────────────────────────────────────────────────────── -->
-<section class="section section-products">
+<!-- ── SẢN PHẨM KHUYẾN MÃI ───────────────────────────────────────── -->
+<section class="promo-section" id="promo-products">
     <div class="container">
-        <div class="promo-deals">
-            <a href="<?= SITE_URL ?>/category/laptop-gaming" class="promo-deal promo-deal--gaming">
-                <div class="promo-deal__inner">
-                    <span class="promo-deal__label">Gaming</span>
-                    <h3 class="promo-deal__heading">Giảm đến <strong>30%</strong></h3>
-                    <p class="promo-deal__sub">Laptop Gaming cao cấp</p>
-                    <span class="promo-deal__btn">Mua ngay <i class="fas fa-arrow-right ms-1"></i></span>
-                </div>
-            </a>
-            <a href="<?= SITE_URL ?>/category/laptop-van-phong" class="promo-deal promo-deal--office">
-                <div class="promo-deal__inner">
-                    <span class="promo-deal__label">Văn phòng</span>
-                    <h3 class="promo-deal__heading">Giảm đến <strong>25%</strong></h3>
-                    <p class="promo-deal__sub">Laptop văn phòng mỏng nhẹ</p>
-                    <span class="promo-deal__btn">Mua ngay <i class="fas fa-arrow-right ms-1"></i></span>
-                </div>
-            </a>
-            <a href="<?= SITE_URL ?>/products/accessories" class="promo-deal promo-deal--access">
-                <div class="promo-deal__inner">
-                    <span class="promo-deal__label">Phụ kiện</span>
-                    <h3 class="promo-deal__heading">Giảm đến <strong>40%</strong></h3>
-                    <p class="promo-deal__sub">Chuột, bàn phím, tai nghe</p>
-                    <span class="promo-deal__btn">Mua ngay <i class="fas fa-arrow-right ms-1"></i></span>
-                </div>
-            </a>
+        <div class="promo-section-head">
+            <h2 class="promo-section-title">
+                <i class="fas fa-fire"></i> Sản phẩm giảm giá hôm nay
+            </h2>
+            <div class="promo-tabs">
+                <button class="promo-tab active" data-filter="all">Tất cả</button>
+                <button class="promo-tab" data-filter="laptop"><i class="fas fa-laptop me-1"></i>Laptop</button>
+                <button class="promo-tab" data-filter="phukien"><i class="fas fa-headphones me-1"></i>Phụ kiện</button>
+            </div>
         </div>
+
+        <?php if (!empty($products)): ?>
+        <div class="promo-product-grid">
+            <?php foreach ($products as $product): ?>
+            <?php include ROOT_PATH . '/views/products/_product-card.php'; ?>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
+        <p class="text-center py-5 text-muted">Hiện chưa có sản phẩm khuyến mãi.</p>
+        <?php endif; ?>
     </div>
 </section>
 
-
-<!-- ─────────────────────────────────────────────────────────────
-     TABS: Gaming / Văn phòng / Phụ kiện
-     ───────────────────────────────────────────────────────────── -->
-<section class="section section-products">
-    <div class="container">
-        <div class="section-card">
-            <div class="section-head">
-                <div class="promo-tabs" id="promoTabs">
-                    <button class="promo-tab active" data-tab="gaming">
-                        <i class="fas fa-gamepad me-1"></i>Gaming
-                    </button>
-                    <button class="promo-tab" data-tab="office">
-                        <i class="fas fa-briefcase me-1"></i>Văn phòng
-                    </button>
-                    <button class="promo-tab" data-tab="access">
-                        <i class="fas fa-headphones me-1"></i>Phụ kiện
-                    </button>
-                </div>
-                <a href="<?= SITE_URL ?>/products" class="section-more">
-                    Xem tất cả <i class="fas fa-chevron-right ms-1"></i>
-                </a>
-            </div>
-
-            <div class="promo-panel active" id="promo-gaming">
-                <?php if (!empty($gamingProducts)): ?>
-                <div class="pg-grid">
-                    <?php foreach ($gamingProducts as $product): ?>
-                    <?php include ROOT_PATH . '/views/products/_product-card.php'; ?>
-                    <?php endforeach; ?>
-                </div>
-                <?php else: ?>
-                <p class="text-center py-4 text-muted">Không có sản phẩm.</p>
-                <?php endif; ?>
-            </div>
-
-            <div class="promo-panel" id="promo-office">
-                <?php if (!empty($officeProducts)): ?>
-                <div class="pg-grid">
-                    <?php foreach ($officeProducts as $product): ?>
-                    <?php include ROOT_PATH . '/views/products/_product-card.php'; ?>
-                    <?php endforeach; ?>
-                </div>
-                <?php else: ?>
-                <p class="text-center py-4 text-muted">Không có sản phẩm.</p>
-                <?php endif; ?>
-            </div>
-
-            <div class="promo-panel" id="promo-access">
-                <?php if (!empty($accessoryProducts)): ?>
-                <div class="pg-grid">
-                    <?php foreach ($accessoryProducts as $product): ?>
-                    <?php include ROOT_PATH . '/views/products/_product-card.php'; ?>
-                    <?php endforeach; ?>
-                </div>
-                <?php else: ?>
-                <p class="text-center py-4 text-muted">Không có sản phẩm.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- ─────────────────────────────────────────────────────────────
-     CHÍNH SÁCH
-     ───────────────────────────────────────────────────────────── -->
-<section class="section" style="padding-top:0;padding-bottom:40px">
+<!-- ── CHÍNH SÁCH ─────────────────────────────────────────────────── -->
+<section class="promo-section">
     <div class="container">
         <div class="why-us-grid">
             <div class="why-item">
@@ -172,21 +160,55 @@ include ROOT_PATH . '/views/layouts/header.php';
     </div>
 </section>
 
-
 <script>
 (function () {
-    var tabs   = document.querySelectorAll('.promo-tab');
-    var panels = document.querySelectorAll('.promo-panel');
+    // Inject badge giảm giá góc trên trái chỉ trong trang khuyến mãi
+    document.querySelectorAll('.promo-product-grid .product-card').forEach(function (card) {
+        var tag = card.querySelector('.price-discount-tag');
+        if (!tag) return;
+        var pct = tag.textContent.trim().replace(/^-/, ''); // "-20%" → "20%"
+        var badge = document.createElement('span');
+        badge.className = 'discount-badge';
+        badge.textContent = 'Giảm ' + pct;
+        card.insertBefore(badge, card.firstChild);
+    });
+}());
+
+(function () {
+    var laptopSlugs = ['laptop-gaming', 'laptop-van-phong', 'macbook'];
+    var tabs  = document.querySelectorAll('.promo-tabs .promo-tab');
+    var cards = document.querySelectorAll('.promo-product-grid .product-card');
+
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
             tabs.forEach(function (t) { t.classList.remove('active'); });
-            panels.forEach(function (p) { p.classList.remove('active'); });
             tab.classList.add('active');
-            var panel = document.getElementById('promo-' + tab.dataset.tab);
-            if (panel) panel.classList.add('active');
+
+            var filter = tab.dataset.filter;
+            cards.forEach(function (card) {
+                var slug = card.dataset.cat || '';
+                var show = filter === 'all'
+                    ? true
+                    : filter === 'laptop'
+                        ? laptopSlugs.indexOf(slug) !== -1
+                        : slug !== '' && laptopSlugs.indexOf(slug) === -1;
+                card.style.display = show ? '' : 'none';
+            });
         });
     });
 }());
+
+function copyVoucher(id, btn) {
+    var code = document.getElementById(id).textContent.trim();
+    navigator.clipboard.writeText(code).then(function() {
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="fas fa-check"></i> Đã copy!';
+        setTimeout(function() {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        }, 2000);
+    });
+}
 </script>
 
 <?php include ROOT_PATH . '/views/layouts/footer.php'; ?>
