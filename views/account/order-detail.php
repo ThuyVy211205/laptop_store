@@ -66,41 +66,24 @@
         <div class="col-lg-8">
             <div class="checkout-card">
                 <h5 class="checkout-card-title"><i class="fas fa-box me-2"></i>Sản phẩm</h5>
-                <div class="table-responsive">
-                    <table class="cart-table">
-                        <thead>
-                            <tr>
-                                <th colspan="2">Sản phẩm</th>
-                                <th class="text-center">SL</th>
-                                <th class="text-end">Đơn giá</th>
-                                <th class="text-end">Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($details as $item): ?>
-                            <tr>
-                                <td style="width:60px">
-                                    <img src="<?= imgUrl($item['thumbnail']) ?>"
-                                         style="width:60px;height:60px;object-fit:cover;border-radius:8px"
-                                         onerror="this.onerror=null; this.src='<?= ASSETS_URL ?>/images/no-image.webp'">
-                                </td>
-                                <td>
-                                    <?php if (!empty($item['slug'])): ?>
-                                    <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($item['slug']) ?>" class="text-decoration-none">
-                                        <strong><?= htmlspecialchars($item['product_name']) ?></strong>
-                                    </a>
-                                    <?php else: ?>
-                                    <strong><?= htmlspecialchars($item['product_name']) ?></strong>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center">x<?= $item['quantity'] ?></td>
-                                <td class="text-end"><?= formatPrice($item['price']) ?></td>
-                                <td class="text-end text-warning fw-700"><?= formatPrice($item['subtotal']) ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                <?php foreach ($details as $item): ?>
+                <div class="order-item-row">
+                    <img src="<?= imgUrl($item['thumbnail']) ?>"
+                         onerror="this.onerror=null;this.src='<?= ASSETS_URL ?>/images/no-image.webp'"
+                         alt="<?= htmlspecialchars($item['product_name']) ?>">
+                    <div class="order-item-info">
+                        <?php if (!empty($item['slug'])): ?>
+                        <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($item['slug']) ?>" class="text-decoration-none">
+                            <strong><?= htmlspecialchars($item['product_name']) ?></strong>
+                        </a>
+                        <?php else: ?>
+                        <strong><?= htmlspecialchars($item['product_name']) ?></strong>
+                        <?php endif; ?>
+                        <small>SL: <?= $item['quantity'] ?> x <?= formatPrice($item['price']) ?></small>
+                    </div>
+                    <strong class="order-item-subtotal text-warning"><?= formatPrice($item['subtotal']) ?></strong>
                 </div>
+                <?php endforeach; ?>
             </div>
         </div>
 

@@ -270,6 +270,26 @@ class Order {
     }
 
     /**
+     * Get items for multiple orders (returns array keyed by order_id)
+     */
+    public function getItemsByOrderIds(array $ids) {
+        if (empty($ids)) return [];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $rows = $this->db->fetchAll(
+            "SELECT od.*, p.slug
+             FROM order_details od
+             LEFT JOIN products p ON od.product_id = p.id
+             WHERE od.order_id IN ($placeholders)",
+            $ids
+        );
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[$row['order_id']][] = $row;
+        }
+        return $grouped;
+    }
+
+    /**
      * Get recent orders for dashboard
      */
     public function getRecent($limit = 10) {

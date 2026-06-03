@@ -75,9 +75,10 @@ $statusClass = ['new' => 'danger', 'read' => 'secondary', 'replied' => 'success'
         <div class="admin-content">
 
             <!-- Flash message -->
-            <?php if ($flash = getFlash('success')): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($flash) ?>
+            <?php if ($flash = getFlash()): ?>
+            <div class="alert alert-<?= $flash['type'] === 'error' ? 'danger' : htmlspecialchars($flash['type']) ?> alert-dismissible fade show" role="alert">
+                <i class="fas fa-<?= $flash['type'] === 'success' ? 'check-circle' : 'exclamation-circle' ?> me-2"></i>
+                <?= htmlspecialchars($flash['message']) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             <?php endif; ?>

@@ -291,4 +291,61 @@ class ApiController {
         $commentId = $this->productModel->addComment($productId, $_SESSION['user_id'], $content, $parentId);
         $this->json(['success' => true, 'message' => 'Đã thêm bình luận', 'id' => $commentId]);
     }
+
+    /**
+     * GET /api/notifications — danh sách thông báo của user đang đăng nhập
+     */
+    public function notifications() {
+        if (!isLoggedIn()) {
+            $this->json(['success' => false, 'unread' => 0, 'items' => []]);
+        }
+        $db     = db();
+        $userId = $_SESSION['user_id'];
+
+        $items = $db->fetchAll(
+            "SELECT id, title, content, type, link, is_read, created_at
+             FROM notifications WHERE user_id = ?
+             ORDER BY created_at DESC LIMIT 20",
+            [$userId]
+        );
+
+        $unread = (int)($db->fetch(
+            "SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0",
+            [$userId]
+        )['c'] ?? 0);
+
+        $this->json(['success' => true, 'unread' => $unread, 'items' => $items]);
+    }
+
+    /**
+     * POST /api/notifications/read — đánh dấu đã đọc (id=0 → tất cả)
+     */
+    public function notificationsRead() {
+        if (!isLoggedIn()) {
+            $this->json(['success' => false], 401);
+        }
+        $db     = db();
+        $userId = $_SESSION['user_id'];
+        $data   = $this->getPostData();
+        $id     = (int)($data['id'] ?? 0);
+
+        if ($id) {
+            $db->execute(
+                "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?",
+                [$id, $userId]
+            );
+        } else {
+            $db->execute(
+                "UPDATE notifications SET is_read = 1 WHERE user_id = ?",
+                [$userId]
+            );
+        }
+
+        $unread = (int)($db->fetch(
+            "SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0",
+            [$userId]
+        )['c'] ?? 0);
+
+        $this->json(['success' => true, 'unread' => $unread]);
+    }
 }

@@ -165,52 +165,52 @@
 
             <!-- Recent Orders -->
             <?php if (!empty($recentOrders)): ?>
-            <div class="checkout-card mt-4">
-                <h5 class="checkout-card-title d-flex justify-content-between align-items-center">
+            <div class="mt-4">
+                <h5 class="checkout-card-title d-flex justify-content-between align-items-center mb-3">
                     <span><i class="fas fa-history me-2"></i>Đơn hàng gần đây</span>
                     <a href="<?= SITE_URL ?>/order" class="btn btn-sm btn-outline-tech">Xem tất cả</a>
                 </h5>
-                <div class="table-responsive">
-                    <table class="cart-table">
-                        <thead>
-                            <tr>
-                                <th>Mã đơn</th>
-                                <th>Ngày đặt</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($recentOrders as $order): ?>
-                            <tr>
-                                <td><strong class="text-primary"><?= htmlspecialchars($order['order_code']) ?></strong></td>
-                                <td><small><?= formatDate($order['created_at']) ?></small></td>
-                                <td><strong class="text-warning"><?= formatPrice($order['total_amount']) ?></strong></td>
-                                <td>
-                                    <?php
-                                    $statusMap = [
-                                        'pending'   => ['Chờ XN','warning'],
-                                        'confirmed' => ['Xác nhận','info'],
-                                        'shipping'  => ['Đang giao','primary'],
-                                        'delivered' => ['Đã giao','secondary'],
-                                        'completed' => ['Hoàn thành','success'],
-                                        'cancelled' => ['Đã hủy','danger'],
-                                    ];
-                                    $s = $statusMap[$order['status']] ?? ['?','secondary'];
-                                    ?>
-                                    <span class="badge bg-<?= $s[1] ?>"><?= $s[0] ?></span>
-                                </td>
-                                <td>
-                                    <a href="<?= SITE_URL ?>/order/detail/<?= $order['id'] ?>" class="btn btn-sm btn-outline-tech">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                <?php
+                $statusMap = [
+                    'pending'   => ['Chờ xác nhận','warning'],
+                    'confirmed' => ['Đã xác nhận','info'],
+                    'shipping'  => ['Đang giao','primary'],
+                    'delivered' => ['Đã giao','secondary'],
+                    'completed' => ['Hoàn thành','success'],
+                    'cancelled' => ['Đã hủy','danger'],
+                ];
+                foreach ($recentOrders as $order):
+                    $s = $statusMap[$order['status']] ?? ['?','secondary'];
+                ?>
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <strong class="text-primary"><i class="fas fa-receipt me-2"></i>Mã đơn: <?= htmlspecialchars($order['order_code']) ?></strong>
+                        <small class="text-muted"><?= formatDateTime($order['created_at']) ?></small>
+                    </div>
+                    <div class="order-card-body">
+                        <?php if (!empty($order['items'])): ?>
+                        <?php foreach ($order['items'] as $item): ?>
+                        <div class="order-item-row">
+                            <img src="<?= imgUrl($item['thumbnail']) ?>"
+                                 onerror="this.onerror=null;this.src='<?= ASSETS_URL ?>/images/no-image.webp'"
+                                 alt="<?= htmlspecialchars($item['product_name']) ?>">
+                            <div class="order-item-info">
+                                <strong><?= htmlspecialchars($item['product_name']) ?></strong>
+                                <small>SL: <?= $item['quantity'] ?> x <?= formatPrice($item['price']) ?></small>
+                            </div>
+                            <strong class="order-item-subtotal"><?= formatPrice($item['subtotal']) ?></strong>
+                        </div>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="order-card-footer">
+                        <span class="badge bg-<?= $s[1] ?>"><?= $s[0] ?></span>
+                        <a href="<?= SITE_URL ?>/order/detail/<?= $order['id'] ?>" class="btn btn-sm btn-outline-tech">
+                            <i class="fas fa-eye me-1"></i>Chi tiết
+                        </a>
+                    </div>
                 </div>
+                <?php endforeach; ?>
             </div>
             <?php endif; ?>
         </div>

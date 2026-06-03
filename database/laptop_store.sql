@@ -1,5 +1,5 @@
 -- ============================================================
--- VQSTORE - Laptop & Tech Accessories Store
+-- VQSTORE - Laptop & VQ Accessories Store
 -- Full Database Schema + Sample Data
 -- ============================================================
 

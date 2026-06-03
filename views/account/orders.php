@@ -49,30 +49,38 @@
         ?>
         <div class="order-card">
             <div class="order-card-header">
-                <div>
-                    <strong class="text-primary"><i class="fas fa-receipt me-2"></i><?= htmlspecialchars($order['order_code']) ?></strong>
-                    <small class="text-muted ms-3"><?= formatDateTime($order['created_at']) ?></small>
-                </div>
-                <span class="badge bg-<?= $s[1] ?>"><?= $s[0] ?></span>
+                <strong class="text-primary"><i class="fas fa-receipt me-2"></i>Mã đơn: <?= htmlspecialchars($order['order_code']) ?></strong>
+                <small class="text-muted"><?= formatDateTime($order['created_at']) ?></small>
             </div>
             <div class="order-card-body">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div>
-                        <small class="text-muted">Tổng tiền:</small>
-                        <strong class="text-warning fs-5 ms-2"><?= formatPrice($order['total_amount']) ?></strong>
+                <?php if (!empty($order['items'])): ?>
+                <?php foreach ($order['items'] as $item): ?>
+                <div class="order-item-row">
+                    <img src="<?= imgUrl($item['thumbnail']) ?>"
+                         onerror="this.onerror=null;this.src='<?= ASSETS_URL ?>/images/no-image.webp'"
+                         alt="<?= htmlspecialchars($item['product_name']) ?>">
+                    <div class="order-item-info">
+                        <strong><?= htmlspecialchars($item['product_name']) ?></strong>
+                        <small>SL: <?= $item['quantity'] ?> x <?= formatPrice($item['price']) ?></small>
                     </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= SITE_URL ?>/order/detail/<?= $order['id'] ?>" class="btn btn-sm btn-outline-tech">
-                            <i class="fas fa-eye me-1"></i>Chi tiết
-                        </a>
-                        <?php if ($order['status'] === 'pending'): ?>
-                        <form method="POST" action="<?= SITE_URL ?>/order/cancel/<?= $order['id'] ?>" style="display:inline">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng?')">
-                                <i class="fas fa-times me-1"></i>Hủy đơn
-                            </button>
-                        </form>
-                        <?php endif; ?>
-                    </div>
+                    <strong class="order-item-subtotal"><?= formatPrice($item['subtotal']) ?></strong>
+                </div>
+                <?php endforeach; ?>
+                <?php endif; ?>
+             </div>
+            <div class="order-card-footer">
+                <span class="badge bg-<?= $s[1] ?>"><?= $s[0] ?></span>
+                <div class="d-flex gap-2">
+                    <a href="<?= SITE_URL ?>/order/detail/<?= $order['id'] ?>" class="btn btn-sm btn-outline-tech">
+                        <i class="fas fa-eye me-1"></i>Chi tiết
+                    </a>
+                    <?php if ($order['status'] === 'pending'): ?>
+                    <form method="POST" action="<?= SITE_URL ?>/order/cancel/<?= $order['id'] ?>" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng?')">
+                            <i class="fas fa-times me-1"></i>Hủy đơn
+                        </button>
+                    </form>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

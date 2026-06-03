@@ -24,6 +24,12 @@ class AccountController {
         $user         = $this->userModel->getById($_SESSION['user_id']);
         $recentOrders = $this->orderModel->getByUser($_SESSION['user_id']);
         $recentOrders = array_slice($recentOrders, 0, 5);
+        $recentIds    = array_column($recentOrders, 'id');
+        $itemsByOrder = $this->orderModel->getItemsByOrderIds($recentIds);
+        foreach ($recentOrders as &$ord) {
+            $ord['items'] = $itemsByOrder[$ord['id']] ?? [];
+        }
+        unset($ord);
 
         // Stats
         $totalOrders = count($this->orderModel->getByUser($_SESSION['user_id']));

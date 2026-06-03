@@ -54,6 +54,28 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
                 <a href="<?= SITE_URL ?>/contact"
                    class="nav-link-plain" style="display:none" id="navLH">Liên hệ</a>
 
+                <!-- Notification Bell (chỉ hiện khi đăng nhập) -->
+                <?php if (isLoggedIn() && $currentUser): ?>
+                <div class="nav-notif-wrap" id="notifWrap">
+                    <button class="nav-icon-btn" id="notifToggleBtn" title="Thông báo" aria-label="Thông báo">
+                        <i class="fas fa-bell"></i>
+                        <span class="nav-badge nav-notif-badge d-none" id="notifBadge">0</span>
+                    </button>
+                    <div class="nav-notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <span class="fw-600">Thông báo</span>
+                            <button class="notif-read-all" id="notifReadAll">Đánh dấu tất cả đã đọc</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>Chưa có thông báo nào</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- Cart -->
                 <button class="nav-icon-btn cart-toggle" id="cartToggleBtn" title="Giỏ hàng">
                     <i class="fas fa-shopping-bag"></i>
@@ -254,5 +276,125 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
     if(toggleB) toggleB.addEventListener('click', openDrawer);
     if(closeB)  closeB.addEventListener('click', closeDrawer);
     if(overlay) overlay.addEventListener('click', closeDrawer);
+})();
+
+/* ── Notification Bell ── */
+(function(){
+    var btn      = document.getElementById('notifToggleBtn');
+    var dropdown = document.getElementById('notifDropdown');
+    var badge    = document.getElementById('notifBadge');
+    var list     = document.getElementById('notifList');
+    var readAll  = document.getElementById('notifReadAll');
+    if (!btn) return;
+
+    var isOpen   = false;
+    var loaded   = false;
+
+    function iconForType(type) {
+        if (type === 'reply')   return '<i class="fas fa-reply notif-icon notif-icon--reply"></i>';
+        if (type === 'voucher') return '<i class="fas fa-tag notif-icon notif-icon--voucher"></i>';
+        if (type === 'order')   return '<i class="fas fa-box notif-icon notif-icon--order"></i>';
+        return '<i class="fas fa-bell notif-icon notif-icon--info"></i>';
+    }
+
+    function timeAgo(dateStr) {
+        var diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+        if (diff < 60)   return 'Vừa xong';
+        if (diff < 3600) return Math.floor(diff/60) + ' phút trước';
+        if (diff < 86400) return Math.floor(diff/3600) + ' giờ trước';
+        return Math.floor(diff/86400) + ' ngày trước';
+    }
+
+    function renderItems(items) {
+        if (!items.length) {
+            list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>Chưa có thông báo nào</p></div>';
+            return;
+        }
+        list.innerHTML = items.map(function(n) {
+            var cls = n.is_read == 1 ? 'notif-item notif-item--read' : 'notif-item notif-item--unread';
+            var href = n.link ? ' href="' + n.link + '"' : '';
+            var tag  = n.link ? 'a' : 'div';
+            return '<' + tag + ' class="' + cls + '"' + href + ' data-id="' + n.id + '">'
+                 + iconForType(n.type)
+                 + '<div class="notif-body">'
+                 + '<div class="notif-title">' + escHtml(n.title) + '</div>'
+                 + (n.content ? '<div class="notif-content">' + escHtml(n.content) + '</div>' : '')
+                 + '<div class="notif-time">' + timeAgo(n.created_at) + '</div>'
+                 + '</div></' + tag + '>';
+        }).join('');
+
+        list.querySelectorAll('.notif-item--unread').forEach(function(el) {
+            el.addEventListener('click', function() {
+                markRead(parseInt(el.dataset.id));
+                el.classList.replace('notif-item--unread', 'notif-item--read');
+            });
+        });
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function updateBadge(count) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    }
+
+    function loadNotifications() {
+        fetch(window.SITE_URL + '/api/notifications')
+            .then(function(r){ return r.json(); })
+            .then(function(data) {
+                updateBadge(data.unread);
+                renderItems(data.items || []);
+                loaded = true;
+            })
+            .catch(function(){});
+    }
+
+    function markRead(id) {
+        fetch(window.SITE_URL + '/api/notifications/read', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
+        }).then(function(r){ return r.json(); })
+          .then(function(d){ updateBadge(d.unread); });
+    }
+
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isOpen = !isOpen;
+        dropdown.classList.toggle('open', isOpen);
+        if (isOpen && !loaded) loadNotifications();
+    });
+
+    if (readAll) {
+        readAll.addEventListener('click', function() {
+            fetch(window.SITE_URL + '/api/notifications/read', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: 0})
+            }).then(function(r){ return r.json(); })
+              .then(function(d){
+                  updateBadge(d.unread);
+                  list.querySelectorAll('.notif-item--unread').forEach(function(el){
+                      el.classList.replace('notif-item--unread', 'notif-item--read');
+                  });
+              });
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target) && e.target !== btn) {
+            isOpen = false;
+            dropdown.classList.remove('open');
+        }
+    });
+
+    // Load badge count ngay khi trang tải
+    loadNotifications();
 })();
 </script>

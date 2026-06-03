@@ -229,6 +229,25 @@ class AdminController {
                     "UPDATE contacts SET status = 'replied', reply_content = ?, replied_by = ?, replied_at = NOW() WHERE id = ?",
                     [$reply, $replier, $id]
                 );
+
+                // Tạo notification cho khách hàng nếu họ có tài khoản
+                $contact = $this->db->fetch("SELECT * FROM contacts WHERE id = ?", [$id]);
+                if ($contact) {
+                    $user = $this->db->fetch("SELECT id FROM users WHERE email = ?", [$contact['email']]);
+                    if ($user) {
+                        $subject = $contact['subject'] ?: 'Tin nhắn liên hệ';
+                        $this->db->execute(
+                            "INSERT INTO notifications (user_id, title, content, type, link) VALUES (?, ?, ?, 'reply', ?)",
+                            [
+                                $user['id'],
+                                'Phản hồi: ' . mb_substr($subject, 0, 80),
+                                mb_substr($reply, 0, 200),
+                                SITE_URL . '/contact'
+                            ]
+                        );
+                    }
+                }
+
                 setFlash('success', 'Đã gửi phản hồi thành công!');
             }
             header('Location: ' . SITE_URL . '/admin/contacts');

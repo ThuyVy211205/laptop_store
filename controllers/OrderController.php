@@ -21,6 +21,13 @@ class OrderController {
         $status = $_GET['status'] ?? null;
         $orders = $this->orderModel->getByUser($_SESSION['user_id'], $status);
 
+        $orderIds    = array_column($orders, 'id');
+        $itemsByOrder = $this->orderModel->getItemsByOrderIds($orderIds);
+        foreach ($orders as &$order) {
+            $order['items'] = $itemsByOrder[$order['id']] ?? [];
+        }
+        unset($order);
+
         $pageTitle = 'Đơn hàng của tôi';
         require_once ROOT_PATH . '/views/account/orders.php';
     }
