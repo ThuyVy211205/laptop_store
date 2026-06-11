@@ -84,6 +84,33 @@ class CartController {
     }
 
     /**
+     * Buy Now — save product to session and redirect to checkout (skip cart)
+     */
+    public function buynow($param = null) {
+        requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('/products');
+            return;
+        }
+
+        $productId = (int)($_POST['product_id'] ?? 0);
+        $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
+
+        if (!$productId) {
+            redirect('/products');
+            return;
+        }
+
+        $_SESSION['buy_now'] = [
+            'product_id' => $productId,
+            'quantity'   => $quantity,
+        ];
+
+        redirect('/checkout');
+    }
+
+    /**
      * AJAX: Get cart sidebar HTML
      */
     public function sidebar($param = null) {

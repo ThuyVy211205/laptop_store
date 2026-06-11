@@ -31,8 +31,7 @@ $statusClass = ['new' => 'danger', 'read' => 'secondary', 'replied' => 'success'
     <!-- SIDEBAR -->
     <aside class="admin-sidebar" id="adminSidebar">
         <a href="<?= SITE_URL ?>/admin" class="admin-brand">
-            <div class="admin-brand-icon"><i class="fas fa-laptop"></i></div>
-            <div class="admin-brand-text">TECH<span>STORE</span></div>
+            <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;">
         </a>
         <nav class="admin-nav">
             <span class="admin-nav-label">Tổng quan</span>

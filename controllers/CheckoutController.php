@@ -31,16 +31,40 @@ class CheckoutController {
         requireLogin();
 
         $userId = $_SESSION['user_id'];
-        $items  = $this->cartModel->getItems($userId);
 
-        if (empty($items)) {
-            setFlash('warning', 'Giỏ hàng của bạn đang trống');
-            redirect('/cart');
-            return;
+        if (!empty($_SESSION['buy_now'])) {
+            $buyNow  = $_SESSION['buy_now'];
+            $product = $this->productModel->getById($buyNow['product_id']);
+            if (!$product) {
+                unset($_SESSION['buy_now']);
+                setFlash('error', 'Sản phẩm không tồn tại');
+                redirect('/products');
+                return;
+            }
+            $qty      = $buyNow['quantity'];
+            $price    = $product['sale_price'] ?: $product['price'];
+            $items    = [[
+                'product_id' => $product['id'],
+                'id'         => $product['id'],
+                'name'       => $product['name'],
+                'thumbnail'  => $product['thumbnail'],
+                'price'      => $product['price'],
+                'sale_price' => $product['sale_price'],
+                'quantity'   => $qty,
+                'stock'      => $product['stock'],
+            ]];
+            $subtotal = $price * $qty;
+        } else {
+            $items = $this->cartModel->getItems($userId);
+            if (empty($items)) {
+                setFlash('warning', 'Giỏ hàng của bạn đang trống');
+                redirect('/cart');
+                return;
+            }
+            $subtotal = $this->cartModel->getTotal($userId);
         }
 
         $user      = $this->userModel->getById($userId);
-        $subtotal  = $this->cartModel->getTotal($userId);
         $pageTitle = 'Thanh toán';
 
         require_once ROOT_PATH . '/views/checkout/index.php';
@@ -57,13 +81,39 @@ class CheckoutController {
             return;
         }
 
-        $userId = $_SESSION['user_id'];
-        $items  = $this->cartModel->getItems($userId);
+        $userId   = $_SESSION['user_id'];
+        $isBuyNow = !empty($_SESSION['buy_now']);
 
-        if (empty($items)) {
-            setFlash('warning', 'Giỏ hàng trống');
-            redirect('/cart');
-            return;
+        if ($isBuyNow) {
+            $buyNow  = $_SESSION['buy_now'];
+            $product = $this->productModel->getById($buyNow['product_id']);
+            if (!$product) {
+                unset($_SESSION['buy_now']);
+                setFlash('error', 'Sản phẩm không tồn tại');
+                redirect('/products');
+                return;
+            }
+            $qty      = $buyNow['quantity'];
+            $price    = $product['sale_price'] ?: $product['price'];
+            $items    = [[
+                'product_id' => $product['id'],
+                'id'         => $product['id'],
+                'name'       => $product['name'],
+                'thumbnail'  => $product['thumbnail'],
+                'price'      => $product['price'],
+                'sale_price' => $product['sale_price'],
+                'quantity'   => $qty,
+                'stock'      => $product['stock'],
+            ]];
+            $subtotal = $price * $qty;
+        } else {
+            $items = $this->cartModel->getItems($userId);
+            if (empty($items)) {
+                setFlash('warning', 'Giỏ hàng trống');
+                redirect('/cart');
+                return;
+            }
+            $subtotal = $this->cartModel->getTotal($userId);
         }
 
         // Validate input
@@ -82,13 +132,18 @@ class CheckoutController {
         }
 
         if (!isValidPhone($phone)) {
-            setFlash('error', 'Số điện thoại không hợp lệ');
+            setFlash('error', 'Số điện thoại không hợp lệ (ví dụ: 0901234567)');
+            redirect('/checkout');
+            return;
+        }
+
+        if ($email && !isValidEmail($email)) {
+            setFlash('error', 'Email không hợp lệ');
             redirect('/checkout');
             return;
         }
 
         // Calculate totals
-        $subtotal = $this->cartModel->getTotal($userId);
         $discount = 0;
         $voucherId = null;
 
@@ -152,16 +207,21 @@ class CheckoutController {
             $this->userModel->updateRank($userId);
 
             // Notification
+            $orderCode = $this->orderModel->getById($orderId)['order_code'];
             $db->insert('notifications', [
                 'user_id' => $userId,
                 'title'   => 'Đặt hàng thành công',
-                'content' => 'Đơn hàng của bạn đã được tạo. Mã đơn: ' . $this->orderModel->getById($orderId)['order_code'],
+                'content' => 'Đơn hàng #' . $orderCode . ' đã được tạo thành công. Cảm ơn bạn đã mua hàng!',
                 'type'    => 'order',
-                'link'    => '/order/detail/' . $orderId,
+                'link'    => SITE_URL . '/order/detail/' . $orderId,
             ]);
 
-            // Clear cart
-            $this->cartModel->clear($userId);
+            // Clear cart or buy-now session
+            if ($isBuyNow) {
+                unset($_SESSION['buy_now']);
+            } else {
+                $this->cartModel->clear($userId);
+            }
 
             $db->commit();
 

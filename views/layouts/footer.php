@@ -8,7 +8,7 @@
                 <!-- About -->
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-logo mb-3">
-                        <span class="logo-tech">VQ</span><span class="logo-store">STORE</span>
+                        <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;">
                     </div>
                     <p class="footer-desc">
                         Cửa hàng phân phối Laptop, Phụ kiện công nghệ chính hãng hàng đầu Việt Nam.

@@ -15,10 +15,10 @@ class Wishlist {
      */
     public function getByUser($userId) {
         return $this->db->fetchAll(
-            "SELECT w.*, p.name, p.slug, p.thumbnail, p.price, p.sale_price, p.stock,
-                    p.rating_avg, p.rating_count
+            "SELECT p.id, p.name, p.slug, p.thumbnail, p.price, p.sale_price, p.stock,
+                    p.rating_avg, p.rating_count, w.created_at
              FROM wishlists w
-             LEFT JOIN products p ON w.product_id = p.id
+             INNER JOIN products p ON w.product_id = p.id AND p.status = 'active'
              WHERE w.user_id = ?
              ORDER BY w.created_at DESC",
             [$userId]

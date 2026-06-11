@@ -110,7 +110,8 @@ function sanitize($input) {
  * Validate email
  */
 function isValidEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return false;
+    return (bool) preg_match('/^[^@\s]+@gmail\.com$/i', $email);
 }
 
 /**

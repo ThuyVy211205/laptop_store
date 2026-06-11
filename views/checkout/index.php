@@ -29,13 +29,15 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                            <input type="tel" name="shipping_phone" class="form-control form-tech" required
+                            <input type="tel" name="shipping_phone" id="ckPhone" class="form-control form-tech" required
                                    placeholder="0901234567" value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+                            <small class="text-danger mt-1" id="ckPhoneErr" style="display:none;"></small>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Email</label>
-                            <input type="email" name="shipping_email" class="form-control form-tech"
+                            <input type="email" name="shipping_email" id="ckEmail" class="form-control form-tech"
                                    value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+                            <small class="text-danger mt-1" id="ckEmailErr" style="display:none;"></small>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
@@ -207,8 +209,38 @@ document.getElementById('applyVoucherBtn').addEventListener('click', async () =>
     }
 });
 
+// === Validation ===
+const PHONE_RE = /^(0|\+84)[3-9]\d{8}$/;
+const EMAIL_RE = /^[^\s@]+@gmail\.com$/i;
+
+function ckValidate(input, errId, test, msg) {
+    const val = input.value.trim();
+    const err = document.getElementById(errId);
+    if (!test(val)) {
+        err.textContent = msg;
+        err.style.display = '';
+        input.style.borderColor = '#dc2626';
+        return false;
+    }
+    err.style.display = 'none';
+    input.style.borderColor = '';
+    return true;
+}
+
+const ckPhone = document.getElementById('ckPhone');
+const ckEmail = document.getElementById('ckEmail');
+
+ckPhone.addEventListener('blur', () =>
+    ckValidate(ckPhone, 'ckPhoneErr', v => PHONE_RE.test(v), 'Số điện thoại không hợp lệ (ví dụ: 0901234567)'));
+ckEmail.addEventListener('blur', () =>
+    ckValidate(ckEmail, 'ckEmailErr', v => !v || EMAIL_RE.test(v), 'Email không hợp lệ (ví dụ: ten@gmail.com)'));
+
 // === Disable submit while processing ===
-document.getElementById('checkoutForm').addEventListener('submit', function() {
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    const okPhone = ckValidate(ckPhone, 'ckPhoneErr', v => PHONE_RE.test(v), 'Số điện thoại không hợp lệ (ví dụ: 0901234567)');
+    const okEmail = ckValidate(ckEmail, 'ckEmailErr', v => !v || EMAIL_RE.test(v), 'Email không hợp lệ (ví dụ: ten@gmail.com)');
+    if (!okPhone || !okEmail) { e.preventDefault(); return; }
+
     const btn = this.querySelector('.btn-place-order');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';

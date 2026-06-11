@@ -48,8 +48,7 @@ $to   = min($page * 15, $total);
     <!-- ===== SIDEBAR ===== -->
     <aside class="admin-sidebar" id="adminSidebar">
         <a href="<?= SITE_URL ?>/admin" class="admin-brand">
-            <div class="admin-brand-icon"><i class="fas fa-laptop"></i></div>
-            <div class="admin-brand-text">TECH<span>STORE</span></div>
+            <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;">
         </a>
 
         <nav class="admin-nav">
@@ -217,15 +216,9 @@ $to   = min($page * 15, $total);
                                 <td style="color:#8a96b8;font-size:12px;"><?= $p['id'] ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
-                                        <?php if ($p['thumbnail']): ?>
-                                        <img src="<?= UPLOAD_URL ?>/<?= htmlspecialchars($p['thumbnail']) ?>"
-                                             class="prod-thumb" alt="">
-                                        <?php else: ?>
-                                        <div class="prod-thumb d-flex align-items-center justify-content-center"
-                                             style="background:#f0f4fb;color:#c0c8d8;">
-                                            <i class="fas fa-image"></i>
-                                        </div>
-                                        <?php endif; ?>
+                                        <img src="<?= htmlspecialchars(imgUrl($p['thumbnail'] ?? '')) ?>"
+                                             class="prod-thumb" alt=""
+                                             onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
                                         <div>
                                             <div style="font-weight:600;color:#1e2a3b;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                                 <?= htmlspecialchars($p['name']) ?>
@@ -507,7 +500,10 @@ function openEditModal(p) {
 
     // Show current thumbnail
     if (p.thumbnail) {
-        document.getElementById('imgPreview').src      = '<?= UPLOAD_URL ?>/' + p.thumbnail;
+        const isAsset = p.thumbnail.startsWith('assets/');
+        document.getElementById('imgPreview').src = isAsset
+            ? '<?= SITE_URL ?>/' + p.thumbnail
+            : '<?= UPLOAD_URL ?>/' + p.thumbnail;
         document.getElementById('imgPreviewWrap').style.display = 'flex';
         document.getElementById('imgPreviewWrap').style.alignItems = 'center';
     } else {

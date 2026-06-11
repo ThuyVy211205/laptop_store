@@ -213,6 +213,314 @@ class AdminController {
     }
 
     /* ================================================================
+       Orders — Quản lý đơn hàng
+       ================================================================ */
+    public function orders($param = null) {
+        $this->requireAdmin();
+
+        /* Update status */
+        if ($param === 'status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id     = (int)($_POST['id'] ?? 0);
+            $status = $_POST['status'] ?? '';
+            $allowed = ['pending','confirmed','shipping','delivered','completed','cancelled'];
+            if ($id && in_array($status, $allowed)) {
+                $reason = trim($_POST['cancel_reason'] ?? '');
+                if ($status === 'cancelled' && $reason) {
+                    $this->db->execute(
+                        "UPDATE orders SET status='cancelled', cancel_reason=? WHERE id=?",
+                        [$reason, $id]
+                    );
+                } else {
+                    $this->db->execute("UPDATE orders SET status=? WHERE id=?", [$status, $id]);
+                }
+
+                // COD: tự động đánh dấu đã thanh toán khi hoàn thành
+                if ($status === 'completed') {
+                    $order = $this->db->fetch(
+                        "SELECT payment_method, payment_status FROM orders WHERE id=?", [$id]
+                    );
+                    if ($order && $order['payment_method'] === 'cod' && $order['payment_status'] === 'pending') {
+                        $this->db->execute(
+                            "UPDATE orders SET payment_status='paid' WHERE id=?", [$id]
+                        );
+                    }
+                }
+
+                setFlash('success', 'Đã cập nhật trạng thái đơn hàng!');
+            }
+            header('Location: ' . SITE_URL . '/admin/orders');
+            exit;
+        }
+
+        $page   = max(1, (int)($_GET['page'] ?? 1));
+        $limit  = 20;
+        $offset = ($page - 1) * $limit;
+        $search = trim($_GET['search'] ?? '');
+        $status = in_array($_GET['status'] ?? '', ['pending','confirmed','shipping','delivered','completed','cancelled'])
+                  ? $_GET['status'] : '';
+
+        $where  = []; $params = [];
+        if ($search) {
+            $where[]  = "(o.order_code LIKE ? OR o.shipping_name LIKE ? OR o.shipping_phone LIKE ?)";
+            $params   = array_merge($params, ["%$search%","%$search%","%$search%"]);
+        }
+        if ($status) { $where[] = "o.status = ?"; $params[] = $status; }
+        $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $orders = $this->db->fetchAll(
+            "SELECT o.*, u.full_name AS user_name
+             FROM orders o LEFT JOIN users u ON o.user_id = u.id
+             $whereClause ORDER BY o.created_at DESC LIMIT $limit OFFSET $offset",
+            $params
+        );
+        $total      = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders o $whereClause", $params)['c'] ?? 0);
+        $totalPages = max(1, (int)ceil($total / $limit));
+
+        $statusCounts = [];
+        foreach (['pending','confirmed','shipping','delivered','completed','cancelled'] as $s) {
+            $statusCounts[$s] = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status=?",[$s])['c'] ?? 0);
+        }
+
+        include ROOT_PATH . '/views/admin/orders.php';
+    }
+
+    /* ================================================================
+       Customers — Quản lý khách hàng
+       ================================================================ */
+    public function customers($param = null) {
+        $this->requireAdmin();
+
+        if ($param === 'toggle' && isset($_GET['id'])) {
+            $id   = (int)$_GET['id'];
+            $user = $this->db->fetch("SELECT status FROM users WHERE id=?", [$id]);
+            if ($user) {
+                $newStatus = $user['status'] === 'active' ? 'blocked' : 'active';
+                $this->db->execute("UPDATE users SET status=? WHERE id=?", [$newStatus, $id]);
+                setFlash('success', 'Đã cập nhật trạng thái tài khoản!');
+            }
+            header('Location: ' . SITE_URL . '/admin/customers');
+            exit;
+        }
+
+        $search = trim($_GET['search'] ?? '');
+        $rank   = in_array($_GET['rank'] ?? '', ['silver','gold','diamond']) ? $_GET['rank'] : '';
+
+        $where  = []; $params = [];
+        if ($search) {
+            $where[]  = "(full_name LIKE ? OR email LIKE ? OR phone LIKE ?)";
+            $params   = array_merge($params, ["%$search%","%$search%","%$search%"]);
+        }
+        if ($rank) { $where[] = "rank = ?"; $params[] = $rank; }
+        $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $customers = $this->db->fetchAll(
+            "SELECT * FROM users $whereClause ORDER BY created_at DESC", $params
+        );
+
+        include ROOT_PATH . '/views/admin/customers.php';
+    }
+
+    /* ================================================================
+       Employees — Quản lý nhân viên
+       ================================================================ */
+    public function employees($param = null) {
+        $this->requireAdmin();
+
+        if ($param === 'delete' && isset($_GET['id'])) {
+            $this->db->execute("DELETE FROM employees WHERE id=?", [(int)$_GET['id']]);
+            setFlash('success', 'Đã xóa nhân viên!');
+            header('Location: ' . SITE_URL . '/admin/employees'); exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action   = $_POST['action'] ?? 'add';
+            $id       = (int)($_POST['id'] ?? 0);
+            $fullName = trim($_POST['full_name'] ?? '');
+            $email    = trim($_POST['email'] ?? '');
+            $phone    = trim($_POST['phone'] ?? '');
+            $role     = trim($_POST['role'] ?? 'Nhân viên bán hàng');
+            $password = $_POST['password'] ?? '';
+            $status   = in_array($_POST['status'] ?? '', ['active','blocked']) ? $_POST['status'] : 'active';
+
+            if (!$fullName || !$email) {
+                setFlash('error', 'Vui lòng điền đầy đủ thông tin!');
+                header('Location: ' . SITE_URL . '/admin/employees'); exit;
+            }
+
+            if ($action === 'edit' && $id) {
+                $data = ['full_name'=>$fullName,'email'=>$email,'phone'=>$phone,'role'=>$role,'status'=>$status];
+                if ($password) $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+                $sets = implode(', ', array_map(fn($k) => "$k=:$k", array_keys($data)));
+                $data['id'] = $id;
+                $this->db->execute("UPDATE employees SET $sets WHERE id=:id", $data);
+                setFlash('success', 'Đã cập nhật nhân viên!');
+            } else {
+                if (!$password) { setFlash('error', 'Mật khẩu không được để trống!'); header('Location: ' . SITE_URL . '/admin/employees'); exit; }
+                $this->db->insert('employees', [
+                    'full_name' => $fullName, 'email' => $email, 'phone' => $phone,
+                    'role' => $role, 'status' => $status,
+                    'password' => password_hash($password, PASSWORD_DEFAULT),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                setFlash('success', 'Đã thêm nhân viên!');
+            }
+            header('Location: ' . SITE_URL . '/admin/employees'); exit;
+        }
+
+        $employees = $this->db->fetchAll("SELECT * FROM employees ORDER BY created_at DESC");
+        include ROOT_PATH . '/views/admin/employees.php';
+    }
+
+    /* ================================================================
+       Vouchers — Quản lý mã giảm giá
+       ================================================================ */
+    public function vouchers($param = null) {
+        $this->requireAdmin();
+
+        if ($param === 'delete' && isset($_GET['id'])) {
+            $this->db->execute("DELETE FROM vouchers WHERE id=?", [(int)$_GET['id']]);
+            setFlash('success', 'Đã xóa voucher!');
+            header('Location: ' . SITE_URL . '/admin/vouchers'); exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action     = $_POST['action'] ?? 'add';
+            $id         = (int)($_POST['id'] ?? 0);
+            $code       = strtoupper(trim($_POST['code'] ?? ''));
+            $type       = in_array($_POST['type'] ?? '', ['percent','fixed']) ? $_POST['type'] : 'percent';
+            $value      = (float)($_POST['value'] ?? 0);
+            $minOrder   = (float)($_POST['min_order'] ?? 0);
+            $maxDiscount= !empty($_POST['max_discount']) ? (float)$_POST['max_discount'] : null;
+            $quantity   = (int)($_POST['quantity'] ?? 0);
+            $expiresAt  = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
+            $isActive   = isset($_POST['is_active']) ? 1 : 0;
+
+            if (!$code || $value <= 0) {
+                setFlash('error', 'Mã voucher và giá trị không được để trống!');
+                header('Location: ' . SITE_URL . '/admin/vouchers'); exit;
+            }
+
+            $data = ['code'=>$code,'type'=>$type,'value'=>$value,'min_order'=>$minOrder,
+                     'max_discount'=>$maxDiscount,'quantity'=>$quantity,'expires_at'=>$expiresAt,'is_active'=>$isActive];
+
+            if ($action === 'edit' && $id) {
+                $sets = implode(', ', array_map(fn($k) => "$k=:$k", array_keys($data)));
+                $data['id'] = $id;
+                $this->db->execute("UPDATE vouchers SET $sets WHERE id=:id", $data);
+                setFlash('success', 'Đã cập nhật voucher!');
+            } else {
+                $data['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('vouchers', $data);
+                setFlash('success', 'Đã thêm voucher!');
+            }
+            header('Location: ' . SITE_URL . '/admin/vouchers'); exit;
+        }
+
+        $vouchers = $this->db->fetchAll("SELECT * FROM vouchers ORDER BY created_at DESC");
+        include ROOT_PATH . '/views/admin/vouchers.php';
+    }
+
+    /* ================================================================
+       Reviews — Quản lý đánh giá
+       ================================================================ */
+    public function reviews($param = null) {
+        $this->requireAdmin();
+
+        if ($param === 'delete' && isset($_GET['id'])) {
+            $id = (int)$_GET['id'];
+            $review = $this->db->fetch("SELECT product_id FROM reviews WHERE id=?", [$id]);
+            if ($review) {
+                $this->db->execute("DELETE FROM reviews WHERE id=?", [$id]);
+                // Recompute rating
+                $pid = $review['product_id'];
+                $agg = $this->db->fetch("SELECT COUNT(*) AS cnt, AVG(rating) AS avg FROM reviews WHERE product_id=?", [$pid]);
+                $this->db->execute(
+                    "UPDATE products SET rating_count=?, rating_avg=? WHERE id=?",
+                    [(int)$agg['cnt'], round((float)$agg['avg'], 2), $pid]
+                );
+                setFlash('success', 'Đã xóa đánh giá!');
+            }
+            header('Location: ' . SITE_URL . '/admin/reviews'); exit;
+        }
+
+        $search  = trim($_GET['search'] ?? '');
+        $rating  = (int)($_GET['rating'] ?? 0);
+        $where   = []; $params = [];
+        if ($search) {
+            $where[]  = "(u.full_name LIKE ? OR p.name LIKE ? OR r.content LIKE ?)";
+            $params   = array_merge($params, ["%$search%","%$search%","%$search%"]);
+        }
+        if ($rating >= 1 && $rating <= 5) { $where[] = "r.rating=?"; $params[] = $rating; }
+        $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $reviews = $this->db->fetchAll(
+            "SELECT r.*, u.full_name AS user_name, p.name AS product_name, p.thumbnail
+             FROM reviews r
+             JOIN users u ON r.user_id = u.id
+             JOIN products p ON r.product_id = p.id
+             $whereClause ORDER BY r.created_at DESC",
+            $params
+        );
+
+        include ROOT_PATH . '/views/admin/reviews.php';
+    }
+
+    /* ================================================================
+       Revenue — Báo cáo doanh thu
+       ================================================================ */
+    public function revenue() {
+        $this->requireAdmin();
+
+        $period = in_array($_GET['period'] ?? '', ['week','month','year']) ? $_GET['period'] : 'month';
+
+        $summary = [
+            'today'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND DATE(created_at)=CURDATE()")['t'] ?? 0),
+            'week'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEARWEEK(created_at,1)=YEARWEEK(NOW(),1)")['t'] ?? 0),
+            'month'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())")['t'] ?? 0),
+            'year'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())")['t'] ?? 0),
+            'total_orders'     => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders")['c'] ?? 0),
+            'completed_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status IN ('completed','delivered')")['c'] ?? 0),
+            'cancelled_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status='cancelled'")['c'] ?? 0),
+        ];
+
+        if ($period === 'week') {
+            $chartData = $this->db->fetchAll(
+                "SELECT DATE_FORMAT(created_at,'%d/%m') AS label, COALESCE(SUM(total_amount),0) AS total
+                 FROM orders WHERE status IN ('completed','delivered') AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC"
+            );
+        } elseif ($period === 'year') {
+            $chartData = $this->db->fetchAll(
+                "SELECT DATE_FORMAT(created_at,'%m/%Y') AS label, COALESCE(SUM(total_amount),0) AS total
+                 FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())
+                 GROUP BY MONTH(created_at) ORDER BY MONTH(created_at) ASC"
+            );
+        } else {
+            $chartData = $this->db->fetchAll(
+                "SELECT DATE_FORMAT(created_at,'%d/%m') AS label, COALESCE(SUM(total_amount),0) AS total
+                 FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())
+                 GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC"
+            );
+        }
+
+        $topProducts = $this->db->fetchAll(
+            "SELECT p.name, p.thumbnail, p.sold_quantity,
+                    COALESCE(p.sale_price, p.price) AS final_price,
+                    COALESCE(SUM(od.subtotal),0) AS revenue
+             FROM products p
+             LEFT JOIN order_details od ON od.product_id = p.id
+             LEFT JOIN orders o ON od.order_id = o.id AND o.status IN ('completed','delivered')
+             GROUP BY p.id ORDER BY revenue DESC LIMIT 10"
+        );
+
+        $ordersByStatus = $this->db->fetchAll(
+            "SELECT status, COUNT(*) AS cnt FROM orders GROUP BY status"
+        );
+
+        include ROOT_PATH . '/views/admin/revenue.php';
+    }
+
+    /* ================================================================
        Contacts — Tin nhắn liên hệ
        ================================================================ */
     public function contacts($param = null) {

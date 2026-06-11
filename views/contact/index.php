@@ -3,21 +3,15 @@ $extraCss = ['contact.css'];
 include ROOT_PATH . '/views/layouts/header.php';
 ?>
 
-<!-- ─────────────────────────────────────────────────────────────
-     BREADCRUMB
-     ───────────────────────────────────────────────────────────── -->
-<div class="tc-breadcrumb">
-    <div class="tc-breadcrumb__inner">
-        <a href="<?= SITE_URL ?>">Trang chủ</a>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-            <polyline points="9 18 15 12 9 6"/>
-        </svg>
-        <span>Liên hệ</span>
+<!-- Breadcrumb -->
+<nav class="breadcrumb-wrap">
+    <div class="container">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item active">Liên hệ</li>
+        </ol>
     </div>
-</div>
+</nav>
 
 
 <!-- ─────────────────────────────────────────────────────────────
@@ -269,15 +263,16 @@ include ROOT_PATH . '/views/layouts/header.php';
                         <div class="tc-field">
                             <label class="tc-label" for="cf-order">
                                 Mã đơn hàng
-                                <span class="tc-optional">(Tùy chọn)</span>
+                                <span class="tc-required" aria-label="bắt buộc">*</span>
                             </label>
                             <input
                                 id="cf-order"
                                 type="text"
                                 name="order_id"
                                 class="tc-input"
-                                placeholder="TS-2024-00000"
-                                value="<?= htmlspecialchars($_POST['order_id'] ?? '') ?>">
+                                placeholder="Nhập mã đơn hàng của bạn"
+                                value="<?= htmlspecialchars($_POST['order_id'] ?? '') ?>"
+                                required>
                         </div>
 
                     </div>

@@ -24,7 +24,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 
             <!-- Logo -->
             <a href="<?= SITE_URL ?>" class="nav-logo">
-                <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.webp" alt="Laptop Store" style="height:65px;width:auto;display:block;">
+                <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="Laptop Store" style="height:65px;width:auto;display:block;">
             </a>
 
             <!-- Search -->
@@ -194,7 +194,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 <!-- Mobile Drawer -->
 <div class="mobile-drawer" id="mobileDrawer">
     <div class="drawer-header">
-        <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.webp" alt="Laptop Store" style="height:40px;width:auto;display:block;">
+        <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;">
         <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
     </div>
     <nav class="drawer-nav">
@@ -305,6 +305,12 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
         return Math.floor(diff/86400) + ' ngày trước';
     }
 
+    function resolveLink(link) {
+        if (!link) return '';
+        if (link.indexOf('http') === 0) return link;
+        return window.SITE_URL + '/' + link.replace(/^\//, '');
+    }
+
     function renderItems(items) {
         if (!items.length) {
             list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i><p>Chưa có thông báo nào</p></div>';
@@ -312,8 +318,9 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
         }
         list.innerHTML = items.map(function(n) {
             var cls = n.is_read == 1 ? 'notif-item notif-item--read' : 'notif-item notif-item--unread';
-            var href = n.link ? ' href="' + n.link + '"' : '';
-            var tag  = n.link ? 'a' : 'div';
+            var resolved = resolveLink(n.link);
+            var href = resolved ? ' href="' + resolved + '"' : '';
+            var tag  = resolved ? 'a' : 'div';
             return '<' + tag + ' class="' + cls + '"' + href + ' data-id="' + n.id + '">'
                  + iconForType(n.type)
                  + '<div class="notif-body">'

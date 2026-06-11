@@ -313,6 +313,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+html.dark .product-cat { color: var(--color-text-3); }
 
 /* Name — always exactly 2 lines, same height across all cards */
 .product-name {
@@ -352,6 +353,7 @@
 }
 .price-current { font-size: 18px; font-weight: 700; color: var(--color-red); }
 .price-old     { font-size: 13px; color: #000; text-decoration: line-through; }
+html.dark .price-old { color: var(--color-text-3); }
 
 /* Flash sale stock bar */
 .product-stock-bar {
@@ -1233,7 +1235,7 @@
 .pd-empty { text-align: center; color: #9CA3AF; font-size: 14px; padding: 32px 0; margin: 0; }
 
 /* ════════════════════════════════════════
-   RELATED PRODUCTS — 4-column grid
+   RELATED PRODUCTS — 5-column grid
 ════════════════════════════════════════ */
 .pd-related,
 .pd-related-section { margin-top: 0; }
@@ -1264,8 +1266,25 @@
 .pd-related__grid,
 .pd-related-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+}
+
+.pd-related__grid .product-img-wrap,
+.pd-related-grid .product-img-wrap {
+    height: 180px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.pd-related__grid .product-body,
+.pd-related-grid .product-body {
+    padding: 10px 12px 12px;
+}
+
+.pd-related__grid .price-current,
+.pd-related-grid .price-current {
+    font-size: 15px;
 }
 
 /* ════════════════════════════════════════
@@ -1366,7 +1385,7 @@
 ════════════════════════════════════════ */
 @media (max-width: 1100px) {
     .pd-related__grid,
-    .pd-related-grid { grid-template-columns: repeat(3, 1fr); }
+    .pd-related-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 900px) {
@@ -1377,7 +1396,7 @@
     .pd-layout { grid-template-columns: 1fr; }
     .pd-col-left { position: static; }
     .pd-related__grid,
-    .pd-related-grid { grid-template-columns: repeat(2, 1fr); }
+    .pd-related-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -1484,7 +1503,7 @@ html.dark .pd-price {
     background: rgba(220,38,38,.08);
     border-color: rgba(220,38,38,.22);
 }
-html.dark .pd-price__original { color: #000; }
+html.dark .pd-price__original { color: var(--color-text-3); }
 
 html.dark .pd-price-box {
     background: var(--color-surface);

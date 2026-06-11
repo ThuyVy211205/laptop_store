@@ -24,7 +24,7 @@ $thumbFallback = imgUrl($product['thumbnail']);
         <div style="margin-bottom:16px">
             <span style="font-size:26px;font-weight:700;color:var(--color-red)"><?= formatPrice($final) ?></span>
             <?php if($sale && $sale < $price && $qvShowDiscount): ?>
-            <span style="font-size:15px;color:#000;text-decoration:line-through;margin-left:8px"><?= formatPrice($price) ?></span>
+            <span style="font-size:15px;color:#6d7fa8;text-decoration:line-through;margin-left:8px"><?= formatPrice($price) ?></span>
             <span style="background:var(--color-red);color:#fff;padding:2px 8px;border-radius:5px;font-size:12px;font-weight:700;margin-left:6px">-<?= $discount ?>%</span>
             <?php endif; ?>
         </div>

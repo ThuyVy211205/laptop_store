@@ -4,12 +4,15 @@
  */
 
 require_once ROOT_PATH . '/models/Order.php';
+require_once ROOT_PATH . '/models/User.php';
 
 class OrderController {
     private $orderModel;
+    private $userModel;
 
     public function __construct() {
         $this->orderModel = new Order();
+        $this->userModel  = new User();
     }
 
     /**
@@ -86,6 +89,18 @@ class OrderController {
 
         $reason = $_POST['reason'] ?? 'Khách hàng tự hủy';
         $this->orderModel->cancel($id, $reason);
+
+        // Hoàn lại chi tiêu và số đơn, cập nhật lại rank
+        $this->userModel->decrementStats($order['user_id'], $order['total_amount']);
+        $this->userModel->updateRank($order['user_id']);
+
+        db()->insert('notifications', [
+            'user_id' => $order['user_id'],
+            'title'   => 'Đơn hàng đã bị hủy',
+            'content' => 'Đơn hàng #' . $order['order_code'] . ' đã bị hủy. Lý do: ' . $reason,
+            'type'    => 'order',
+            'link'    => SITE_URL . '/order/detail/' . $id,
+        ]);
 
         setFlash('success', 'Đã hủy đơn hàng thành công');
         redirect('/order/detail/' . $id);

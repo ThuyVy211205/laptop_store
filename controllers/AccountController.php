@@ -21,7 +21,13 @@ class AccountController {
     public function index() {
         requireLogin();
 
-        $user         = $this->userModel->getById($_SESSION['user_id']);
+        $user = $this->userModel->getById($_SESSION['user_id']);
+        if (!$user) {
+            session_destroy();
+            redirect('/auth/login');
+            return;
+        }
+
         $recentOrders = $this->orderModel->getByUser($_SESSION['user_id']);
         $recentOrders = array_slice($recentOrders, 0, 5);
         $recentIds    = array_column($recentOrders, 'id');
@@ -64,6 +70,12 @@ class AccountController {
 
             if (!$data['full_name']) {
                 setFlash('error', 'Vui lòng nhập họ tên');
+                redirect('/account');
+                return;
+            }
+
+            if ($data['phone'] && !isValidPhone($data['phone'])) {
+                setFlash('error', 'Số điện thoại không hợp lệ (ví dụ: 0901234567)');
                 redirect('/account');
                 return;
             }

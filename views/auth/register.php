@@ -12,7 +12,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                 <div class="auth-card-tech">
                     <div class="auth-header-tech">
                         <div class="auth-logo-tech">
-                            <span class="logo-tech">VQ</span><span class="logo-store">STORE</span>
+                            <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;margin:0 auto;">
                         </div>
                         <h3 class="auth-title-tech">Đăng ký tài khoản</h3>
                         <p class="auth-subtitle-tech">Tạo tài khoản để nhận ưu đãi độc quyền</p>
@@ -41,10 +41,11 @@ include ROOT_PATH . '/views/layouts/header.php';
                                     <label class="form-label-tech">Email <span class="text-danger">*</span></label>
                                     <div class="input-wrap">
                                         <i class="fas fa-envelope input-icon"></i>
-                                        <input type="email" name="email" class="form-control form-tech"
+                                        <input type="email" name="email" id="regEmail" class="form-control form-tech"
                                             placeholder="email@example.com" required
                                             value="<?= htmlspecialchars($old['email'] ?? '') ?>">
                                     </div>
+                                    <small class="text-danger mt-1" id="regEmailErr" style="display:none;"></small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -52,10 +53,11 @@ include ROOT_PATH . '/views/layouts/header.php';
                                     <label class="form-label-tech">Số điện thoại</label>
                                     <div class="input-wrap">
                                         <i class="fas fa-phone input-icon"></i>
-                                        <input type="tel" name="phone" class="form-control form-tech"
+                                        <input type="tel" name="phone" id="regPhone" class="form-control form-tech"
                                             placeholder="0901234567"
                                             value="<?= htmlspecialchars($old['phone'] ?? '') ?>">
                                     </div>
+                                    <small class="text-danger mt-1" id="regPhoneErr" style="display:none;"></small>
                                 </div>
                             </div>
                         </div>
@@ -117,6 +119,37 @@ include ROOT_PATH . '/views/layouts/header.php';
 </div>
 
 <script>
+    const PHONE_RE = /^(0|\+84)[3-9]\d{8}$/;
+    const EMAIL_RE = /^[^\s@]+@gmail\.com$/i;
+
+    function validateField(input, errId, test, msg) {
+        const val = input.value.trim();
+        const err = document.getElementById(errId);
+        if (val && !test(val)) {
+            err.textContent = msg;
+            err.style.display = '';
+            input.style.borderColor = '#dc2626';
+            return false;
+        }
+        err.style.display = 'none';
+        input.style.borderColor = '';
+        return true;
+    }
+
+    const regEmail = document.getElementById('regEmail');
+    const regPhone = document.getElementById('regPhone');
+
+    regEmail.addEventListener('blur', () =>
+        validateField(regEmail, 'regEmailErr', v => EMAIL_RE.test(v), 'Email không hợp lệ (ví dụ: ten@gmail.com)'));
+    regPhone.addEventListener('blur', () =>
+        validateField(regPhone, 'regPhoneErr', v => PHONE_RE.test(v), 'Số điện thoại không hợp lệ (ví dụ: 0901234567)'));
+
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        const okEmail = validateField(regEmail, 'regEmailErr', v => EMAIL_RE.test(v), 'Email không hợp lệ (ví dụ: ten@gmail.com)');
+        const okPhone = validateField(regPhone, 'regPhoneErr', v => PHONE_RE.test(v), 'Số điện thoại không hợp lệ (ví dụ: 0901234567)');
+        if (!okEmail || !okPhone) { e.preventDefault(); return; }
+    });
+
     // Password strength meter
     document.getElementById('pwdInput').addEventListener('input', function () {
         const val = this.value;

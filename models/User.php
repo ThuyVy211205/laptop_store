@@ -140,6 +140,19 @@ class User {
         );
     }
 
+    /**
+     * Decrement total_spent + total_orders when order is cancelled
+     */
+    public function decrementStats($userId, $amount) {
+        return $this->db->execute(
+            "UPDATE users SET
+                total_spent = GREATEST(0, total_spent - ?),
+                total_orders = GREATEST(0, total_orders - 1)
+             WHERE id = ?",
+            [$amount, $userId]
+        );
+    }
+
     // ============================================================
     //  ADMIN
     // ============================================================

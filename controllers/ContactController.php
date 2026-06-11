@@ -13,7 +13,7 @@ class ContactController {
             $subject  = trim($_POST['subject']  ?? '');
             $message  = trim($_POST['message']  ?? '');
 
-            if (!$name || !$email || !$message) {
+            if (!$name || !$email || !$order_id || !$message) {
                 $error = 'Vui lòng điền đầy đủ các trường bắt buộc.';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = 'Email không hợp lệ.';
@@ -22,7 +22,7 @@ class ContactController {
                     'name'     => $name,
                     'email'    => $email,
                     'phone'    => $phone    ?: null,
-                    'order_id' => $order_id ?: null,
+                    'order_id' => $order_id,
                     'subject'  => $subject  ?: null,
                     'message'  => $message,
                     'status'   => 'new',

@@ -12,7 +12,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                 <div class="auth-card-tech">
                     <div class="auth-header-tech">
                         <div class="auth-logo-tech">
-                            <span class="logo-tech">VQ</span><span class="logo-store">STORE</span>
+                            <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="VQStore" style="height:65px;width:auto;display:block;margin:0 auto;">
                         </div>
                         <h3 class="auth-title-tech">Đăng nhập</h3>
                         <p class="auth-subtitle-tech">Chào mừng trở lại! Hãy đăng nhập để tiếp tục mua sắm</p>

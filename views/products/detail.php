@@ -25,11 +25,19 @@ if (!empty($specs)) {
 ?>
 
 <!-- Breadcrumb -->
+<?php
+$_catName = strtolower(($product['category_name'] ?? '') . ' ' . ($product['category_slug'] ?? ''));
+$_isAccessory = (bool) preg_match('/chu[oô]t|tai[\s-]?nghe|b[àa]n[\s-]?ph[íi]m|ph[ụu][\s-]?ki[eê]n|s[aạ]c|c[áa]p|b[uú]t[\s-]?c[aả]m[\s-]?[uứ]ng|b[aả]o[\s-]?v[eệ]/', $_catName);
+?>
 <nav class="pd-breadcrumb-bar">
     <div class="container">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="<?= SITE_URL ?>"><i class="fas fa-home"></i></a></li>
+            <?php if ($_isAccessory): ?>
+            <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/products?type=phu-kien">Phụ kiện</a></li>
+            <?php else: ?>
             <li class="breadcrumb-item"><a href="<?= SITE_URL ?>/products">Sản phẩm</a></li>
+            <?php endif; ?>
             <?php if (!empty($product['category_slug'])): ?>
             <li class="breadcrumb-item">
                 <a href="<?= SITE_URL ?>/category/<?= htmlspecialchars($product['category_slug']) ?>">
@@ -329,8 +337,12 @@ if (!empty($specs)) {
             </div>
 
             <!-- ── CTA buttons ── -->
+            <form id="form-buy-now" method="POST" action="<?= SITE_URL ?>/cart/buynow" style="display:none">
+                <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                <input type="hidden" name="quantity" id="buynow-qty" value="1">
+            </form>
             <div class="pd-cta">
-                <button class="pd-cta__buy btn-buy-now" data-id="<?= $product['id'] ?>" type="button">
+                <button class="pd-cta__buy btn-buy-now" type="button">
                     <i class="fas fa-bolt"></i> MUA NGAY
                 </button>
                 <button class="pd-cta__cart btn-add-cart-detail" data-id="<?= $product['id'] ?>" type="button">
@@ -340,9 +352,9 @@ if (!empty($specs)) {
 
             <!-- ── Wishlist + Share ── -->
             <div class="pd-actions">
-                <button class="pd-action wishlist-btn-detail" data-id="<?= $product['id'] ?>" type="button">
+                <button class="pd-action wishlist-btn-detail<?= $inWishlist ? ' active' : '' ?>" data-id="<?= $product['id'] ?>" type="button">
                     <i class="<?= $inWishlist ? 'fas' : 'far' ?> fa-heart"></i>
-                    <span><?= $inWishlist ? 'Đã yêu thích' : 'Yêu thích' ?></span>
+                    <span><?= $inWishlist ? 'Đã yêu thích' : 'Thêm vào yêu thích' ?></span>
                 </button>
                 <button class="pd-action" type="button"
                     onclick="if(navigator.share){navigator.share({title:document.title,url:location.href})}else{navigator.clipboard.writeText(location.href);showToast('Đã copy link sản phẩm!','success');}">
@@ -615,9 +627,10 @@ document.querySelector('.btn-add-cart-detail')?.addEventListener('click', functi
 });
 
 /* ─── BUY NOW ─── */
-document.querySelector('.btn-buy-now')?.addEventListener('click', async function() {
-    await addToCartDetail(this.dataset.id, qtyInput ? parseInt(qtyInput.value) : 1);
-    window.location.href = SITE_URL + '/checkout';
+document.querySelector('.btn-buy-now')?.addEventListener('click', function() {
+    var qty = qtyInput ? parseInt(qtyInput.value) : 1;
+    document.getElementById('buynow-qty').value = qty;
+    document.getElementById('form-buy-now').submit();
 });
 
 async function addToCartDetail(productId, quantity) {
@@ -689,25 +702,71 @@ document.getElementById('submitCommentBtn')?.addEventListener('click', async fun
 });
 
 /* ─── WISHLIST ─── */
-document.querySelector('.wishlist-btn-detail')?.addEventListener('click', async function() {
-    if (!window.IS_LOGGED_IN) {
-        if (confirm('Vui lòng đăng nhập để sử dụng. Bạn muốn đăng nhập?'))
-            window.location.href = SITE_URL + '/auth/login';
-        return;
+(function(){
+    var wlBtn = document.querySelector('.wishlist-btn-detail');
+    if (!wlBtn) return;
+    var wlLoading = false;
+    var pid = <?= (int)$product['id'] ?>;
+
+    function setWishlistState(added) {
+        var icon = wlBtn.querySelector('i');
+        var text = wlBtn.querySelector('span');
+        if (added) {
+            icon.className = 'fas fa-heart';
+            text.textContent = 'Đã yêu thích';
+            wlBtn.classList.add('active');
+        } else {
+            icon.className = 'far fa-heart';
+            text.textContent = 'Thêm vào yêu thích';
+            wlBtn.classList.remove('active');
+        }
     }
-    const res  = await fetch(SITE_URL + '/api/wishlist/toggle', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: <?= $product['id'] ?> }),
+
+    wlBtn.addEventListener('click', function() {
+        if (!window.IS_LOGGED_IN) {
+            if (confirm('Vui lòng đăng nhập để sử dụng. Bạn muốn đăng nhập?'))
+                window.location.href = SITE_URL + '/auth/login';
+            return;
+        }
+        if (wlLoading) return;
+        wlLoading = true;
+        wlBtn.disabled = true;
+
+        /* Optimistic update: đổi trạng thái ngay lập tức */
+        var wasActive = wlBtn.classList.contains('active');
+        setWishlistState(!wasActive);
+
+        fetch(SITE_URL + '/api/wishlist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: 'product_id=' + pid
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                var added = data.action === 'added';
+                setWishlistState(added);
+                showToast(added ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích', added ? 'success' : 'info');
+            } else if (data.require_login) {
+                window.location.href = SITE_URL + '/auth/login';
+            } else {
+                setWishlistState(wasActive);
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        })
+        .catch(function() {
+            setWishlistState(wasActive);
+            showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+        })
+        .finally(function() {
+            wlLoading = false;
+            wlBtn.disabled = false;
+        });
     });
-    const data = await res.json();
-    if (data.success) {
-        var icon = this.querySelector('i');
-        var text = this.querySelector('span');
-        if (data.action === 'added') { icon.className = 'fas fa-heart'; text.textContent = 'Đã yêu thích'; }
-        else                         { icon.className = 'far fa-heart'; text.textContent = 'Yêu thích'; }
-        showToast(data.message || (data.action === 'added' ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích'), 'success');
-    }
-});
+})();
 </script>
 
 <?php include ROOT_PATH . '/views/layouts/footer.php'; ?>

@@ -1,4 +1,7 @@
-<?php include ROOT_PATH . '/views/layouts/header.php'; ?>
+<?php
+$extraCss = ['product.css'];
+include ROOT_PATH . '/views/layouts/header.php';
+?>
 
 <nav class="breadcrumb-wrap">
     <div class="container">
@@ -13,11 +16,9 @@
     <h1 class="page-heading"><i class="fas fa-heart text-danger me-2"></i>Sản phẩm yêu thích</h1>
 
     <?php if (!empty($items)): ?>
-    <div class="row g-3 wishlist-grid" id="wishlistGrid">
+    <div class="wishlist-grid" id="wishlistGrid">
         <?php foreach ($items as $product): ?>
-        <div class="col-lg-3 col-md-4 col-6">
-            <?php $inWishlist = true; include ROOT_PATH . '/views/products/_product-card.php'; $inWishlist = false; ?>
-        </div>
+        <?php $inWishlist = true; include ROOT_PATH . '/views/products/_product-card.php'; $inWishlist = false; ?>
         <?php endforeach; ?>
     </div>
     <?php else: ?>

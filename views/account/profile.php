@@ -20,10 +20,10 @@
                         <?php if (!empty($user['avatar'])): ?>
                             <img src="<?= imgUrl($user['avatar']) ?>" alt="">
                         <?php else: ?>
-                            <span><?= mb_strtoupper(mb_substr($user['full_name'], 0, 1)) ?></span>
+                            <span><?= mb_strtoupper(mb_substr($user['full_name'] ?? '', 0, 1)) ?></span>
                         <?php endif; ?>
                     </div>
-                    <h6 class="account-name"><?= htmlspecialchars($user['full_name']) ?></h6>
+                    <h6 class="account-name"><?= htmlspecialchars($user['full_name'] ?? '') ?></h6>
                     <?php $rank = getUserRankInfo($user['rank'] ?? 'silver'); ?>
                     <span class="account-rank" style="color:<?= $rank['color'] ?>">
                         <?= $rank['icon'] ?> <?= $rank['name'] ?> Member
@@ -66,7 +66,7 @@
                     <div class="stat-card-user">
                         <i class="fas fa-coins stat-icon-user text-warning"></i>
                         <div>
-                            <h3 style="font-size:1.2rem"><?= formatPrice($user['total_spent']) ?></h3>
+                            <h3 style="font-size:1.2rem"><?= formatPrice($user['total_spent'] ?? 0) ?></h3>
                             <small>Tổng chi tiêu</small>
                         </div>
                     </div>
@@ -97,17 +97,18 @@
                         <div class="col-md-6">
                             <label class="form-label">Họ và tên</label>
                             <input type="text" name="full_name" class="form-control form-tech" required
-                                   value="<?= htmlspecialchars($user['full_name']) ?>">
+                                   value="<?= htmlspecialchars($user['full_name'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control form-tech" readonly
-                                   value="<?= htmlspecialchars($user['email']) ?>">
+                                   value="<?= htmlspecialchars($user['email'] ?? '') ?>">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số điện thoại</label>
-                            <input type="tel" name="phone" class="form-control form-tech"
+                            <input type="tel" name="phone" id="profilePhone" class="form-control form-tech"
                                    value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+                            <small class="text-danger mt-1" id="profilePhoneErr" style="display:none;"></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày sinh</label>
@@ -225,6 +226,29 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
         reader.onload = ev => document.getElementById('avatarPreview').src = ev.target.result;
         reader.readAsDataURL(e.target.files[0]);
     }
+});
+
+// Phone validation
+const PHONE_RE = /^(0|\+84)[3-9]\d{8}$/;
+const profilePhone = document.getElementById('profilePhone');
+
+function checkProfilePhone() {
+    const val = profilePhone.value.trim();
+    const err = document.getElementById('profilePhoneErr');
+    if (val && !PHONE_RE.test(val)) {
+        err.textContent = 'Số điện thoại không hợp lệ (ví dụ: 0901234567)';
+        err.style.display = '';
+        profilePhone.style.borderColor = '#dc2626';
+        return false;
+    }
+    err.style.display = 'none';
+    profilePhone.style.borderColor = '';
+    return true;
+}
+
+profilePhone.addEventListener('blur', checkProfilePhone);
+profilePhone.closest('form').addEventListener('submit', function(e) {
+    if (!checkProfilePhone()) e.preventDefault();
 });
 </script>
 
