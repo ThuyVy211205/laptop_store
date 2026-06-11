@@ -1,0 +1,13 @@
+# Thông tin nhạy cảm — KHÔNG commit
+config/secrets.php
+
+# Upload của người dùng
+uploads/avatars/*
+uploads/products/*
+!uploads/avatars/.gitkeep
+!uploads/products/.gitkeep
+
+# Hệ thống
+.DS_Store
+Thumbs.db
+*.log

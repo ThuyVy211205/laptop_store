@@ -16,12 +16,8 @@ define('ROOT_PATH', dirname(__DIR__));
 define('UPLOAD_PATH', ROOT_PATH . '/uploads');
 define('ADMIN_PATH', ROOT_PATH . '/admin');
 
-// ===== Database Configuration =====
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'laptop_store');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+// ===== Secrets (không commit lên Git) =====
+require_once __DIR__ . '/secrets.php';
 
 // ===== Other Settings =====
 define('LOW_STOCK_WARNING', 5);
@@ -49,18 +45,7 @@ define('MAIL_FROM_NAME', 'VQSTORE');
 define('SMTP_HOST',      'smtp.gmail.com');
 define('SMTP_PORT',      587);
 
-// Tài khoản gửi email marketing (admin → khách) — Yêu cầu 2
-define('SMTP_USER',      'vyphan21222005@gmail.com');
-define('SMTP_PASS',      'yfsdvgxfrgjizshb');
-
-// Tài khoản no-reply (xác nhận đơn hàng tự động) — Yêu cầu 1
-define('SMTP_NOREPLY_USER', 'vyphan21222005@gmail.com');
-define('SMTP_NOREPLY_PASS', 'yfsdvgxfrgjizshb');
-define('MAIL_FROM',          'vyphan21222005@gmail.com');
-
-// ===== Google OAuth (placeholder) =====
-define('GOOGLE_CLIENT_ID',     '80367818855-pdd5786ncki43103lstsae3gom0180r9.apps.googleusercontent.com');
-define('GOOGLE_CLIENT_SECRET', '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');
+// ===== Google OAuth =====
 define('GOOGLE_REDIRECT_URI', SITE_URL . '/auth/googleCallback');
 
 /**
