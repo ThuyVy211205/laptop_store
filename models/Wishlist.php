@@ -1,6 +1,7 @@
 <?php
 /**
- * Wishlist Model
+ * Model Yêu Thích — bảng: yeu_thich
+ * Quản lý danh sách sản phẩm yêu thích của người dùng
  */
 
 class Wishlist {
@@ -10,57 +11,46 @@ class Wishlist {
         $this->db = db();
     }
 
-    /**
-     * Get user's wishlist items
-     */
+    /** Lấy danh sách sản phẩm yêu thích của người dùng */
     public function getByUser($userId) {
         return $this->db->fetchAll(
             "SELECT p.id, p.name, p.slug, p.thumbnail, p.price, p.sale_price, p.stock,
                     p.rating_avg, p.rating_count, w.created_at
-             FROM wishlists w
-             INNER JOIN products p ON w.product_id = p.id AND p.status = 'active'
+             FROM yeu_thich w
+             INNER JOIN san_pham p ON w.product_id = p.id AND p.status = 'active'
              WHERE w.user_id = ?
              ORDER BY w.created_at DESC",
             [$userId]
         );
     }
 
-    /**
-     * Check if product is in wishlist
-     */
+    /** Kiểm tra sản phẩm có trong danh sách yêu thích không */
     public function isInWishlist($userId, $productId) {
         $row = $this->db->fetch(
-            "SELECT id FROM wishlists WHERE user_id = ? AND product_id = ?",
+            "SELECT id FROM yeu_thich WHERE user_id = ? AND product_id = ?",
             [$userId, $productId]
         );
         return (bool) $row;
     }
 
-    /**
-     * Add to wishlist
-     */
+    /** Thêm sản phẩm vào yêu thích (bỏ qua nếu đã có) */
     public function add($userId, $productId) {
         if ($this->isInWishlist($userId, $productId)) return false;
-        return $this->db->insert('wishlists', [
+        return $this->db->insert('yeu_thich', [
             'user_id'    => $userId,
             'product_id' => $productId,
         ]);
     }
 
-    /**
-     * Remove from wishlist
-     */
+    /** Xóa sản phẩm khỏi danh sách yêu thích */
     public function remove($userId, $productId) {
         return $this->db->execute(
-            "DELETE FROM wishlists WHERE user_id = ? AND product_id = ?",
+            "DELETE FROM yeu_thich WHERE user_id = ? AND product_id = ?",
             [$userId, $productId]
         );
     }
 
-    /**
-     * Toggle wishlist (add if not exists, remove if exists)
-     * Returns 'added' or 'removed'
-     */
+    /** Chuyển đổi trạng thái yêu thích — trả về 'added' hoặc 'removed' */
     public function toggle($userId, $productId) {
         if ($this->isInWishlist($userId, $productId)) {
             $this->remove($userId, $productId);
@@ -70,12 +60,10 @@ class Wishlist {
         return 'added';
     }
 
-    /**
-     * Count
-     */
+    /** Đếm số sản phẩm yêu thích của người dùng */
     public function count($userId) {
         $row = $this->db->fetch(
-            "SELECT COUNT(*) AS c FROM wishlists WHERE user_id = ?",
+            "SELECT COUNT(*) AS c FROM yeu_thich WHERE user_id = ?",
             [$userId]
         );
         return $row['c'] ?? 0;

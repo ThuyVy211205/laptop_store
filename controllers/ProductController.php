@@ -1,6 +1,7 @@
 <?php
 /**
- * Product Controller
+ * Controller Sản Phẩm
+ * Danh sách, tìm kiếm, lọc theo danh mục và trang chi tiết sản phẩm
  */
 
 require_once ROOT_PATH . '/models/Product.php';
@@ -15,15 +16,13 @@ class ProductController {
         $this->categoryModel = new Category();
     }
 
-    /**
-     * Product listing — laptop or accessories typed pages
-     */
+    /** Danh sách sản phẩm — trang laptop, phụ kiện, flash sale, tìm kiếm */
     public function index() {
         $search    = trim($_GET['q'] ?? '');
         $flashSale = !empty($_GET['flash_sale']);
         $catParam  = $_GET['category'] ?? null;
 
-        // Flat search / flash-sale mode (unchanged)
+        // Chế độ tìm kiếm nhanh / flash sale — không lọc theo danh mục
         if ($search !== '' || $flashSale || $catParam) {
             $filters = [
                 'search'      => $search,
@@ -57,7 +56,7 @@ class ProductController {
             return;
         }
 
-        // Typed listing: laptop (default) or phu-kien
+        // Trang danh mục: laptop (mặc định) hoặc phu-kien
         $type    = $_GET['type'] ?? 'laptop';
         $allCats = $this->categoryModel->getAll();
 
@@ -80,9 +79,31 @@ class ProductController {
                 $maxPrice
             );
 
-            $products   = $this->productModel->getAll($filters, $perPage, $offset);
-            $totalCount = $this->productModel->countAll($filters);
-            $totalPages = ceil($totalCount / $perPage);
+            if (count($selectedCategories) > 1) {
+                $catNameMap      = array_column($sidebarCategories, 'name', 'id');
+                $groupedProducts = [];
+                foreach ($selectedCategories as $catId) {
+                    $catFilters = array_merge($filters, ['category_ids' => [$catId]]);
+                    $catProds   = $this->productModel->getAll($catFilters, 9999, 0);
+                    if (!empty($catProds)) {
+                        $groupedProducts[] = [
+                            'id'       => $catId,
+                            'name'     => $catNameMap[$catId] ?? ($catProds[0]['category_name'] ?? ''),
+                            'products' => $catProds,
+                        ];
+                    }
+                }
+                $allProds   = !empty($groupedProducts) ? array_merge(...array_column($groupedProducts, 'products')) : [];
+                $products   = $allProds;
+                $totalCount = count($products);
+                $totalPages = 1;
+            } else {
+                $groupedProducts = null;
+                $products   = $this->productModel->getAll($filters, $perPage, $offset);
+                $totalCount = $this->productModel->countAll($filters);
+                $totalPages = ceil($totalCount / $perPage);
+            }
+
             $pageTitle    = 'Phụ kiện';
             $pageSubtitle = 'Khám phá tất cả phụ kiện công nghệ tại VQSTORE';
             $pageType     = 'phu-kien';
@@ -91,7 +112,7 @@ class ProductController {
             return;
         }
 
-        // Default: laptop
+        // Mặc định: hiển thị laptop
         $sidebarCategories = $this->_getLaptopCategories($allCats);
         $filters           = $this->_buildFilters(
             $selectedCategories,
@@ -101,9 +122,32 @@ class ProductController {
             $maxPrice
         );
 
-        $products   = $this->productModel->getAll($filters, $perPage, $offset);
-        $totalCount = $this->productModel->countAll($filters);
-        $totalPages = ceil($totalCount / $perPage);
+        if (count($selectedCategories) > 1) {
+            // Nhóm sản phẩm theo từng dòng máy khi chọn nhiều danh mục
+            $catNameMap      = array_column($sidebarCategories, 'name', 'id');
+            $groupedProducts = [];
+            foreach ($selectedCategories as $catId) {
+                $catFilters = array_merge($filters, ['category_ids' => [$catId]]);
+                $catProds   = $this->productModel->getAll($catFilters, 9999, 0);
+                if (!empty($catProds)) {
+                    $groupedProducts[] = [
+                        'id'       => $catId,
+                        'name'     => $catNameMap[$catId] ?? ($catProds[0]['category_name'] ?? ''),
+                        'products' => $catProds,
+                    ];
+                }
+            }
+            $allProds   = !empty($groupedProducts) ? array_merge(...array_column($groupedProducts, 'products')) : [];
+            $products   = $allProds;
+            $totalCount = count($products);
+            $totalPages = 1;
+        } else {
+            $groupedProducts = null;
+            $products   = $this->productModel->getAll($filters, $perPage, $offset);
+            $totalCount = $this->productModel->countAll($filters);
+            $totalPages = ceil($totalCount / $perPage);
+        }
+
         $pageTitle    = 'Laptop';
         $pageSubtitle = 'Khám phá tất cả các sản phẩm Laptop hiện có tại VQSTORE';
         $pageType     = 'laptop';
@@ -111,9 +155,7 @@ class ProductController {
         require_once ROOT_PATH . '/views/products/list.php';
     }
 
-    /**
-     * Product detail
-     */
+    /** Trang chi tiết sản phẩm theo slug */
     public function detail($slug) {
         $product = $this->productModel->getBySlug($slug);
         if (!$product) {
@@ -187,9 +229,7 @@ class ProductController {
         exit;
     }
 
-    /**
-     * Products by category slug
-     */
+    /** Lọc sản phẩm theo slug danh mục */
     public function category($slug) {
         $category = $this->categoryModel->getBySlug($slug);
         if (!$category) {
@@ -252,10 +292,7 @@ class ProductController {
         ));
     }
 
-    /**
-     * Parse price_ranges[] → [minPrice, maxPrice]
-     * e.g. ['0-10000000', '10000000-20000000', '20000000+']
-     */
+    /** Chuyển đổi mảng price_ranges[] thành [minPrice, maxPrice] */
     private function _parsePriceRanges(array $ranges): array {
         if (empty($ranges)) return [null, null];
         $mins = [];
@@ -276,10 +313,7 @@ class ProductController {
         return [$minPrice, $maxPrice];
     }
 
-    /**
-     * Build product filter array.
-     * If no categories selected, fall back to all sidebar category IDs.
-     */
+    /** Tạo mảng bộ lọc sản phẩm — fallback sang toàn bộ danh mục sidebar nếu không chọn cụ thể */
     private function _buildFilters(
         array $selectedCats,
         array $sidebarCats,

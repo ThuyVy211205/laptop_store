@@ -1,7 +1,7 @@
 <?php
 /**
- * Reusable filter sidebar for product listing & category pages
- * Variables expected: $categories (array), $currentCategoryId (int|null)
+ * Sidebar bộ lọc sản phẩm — dùng chung cho trang danh sách và danh mục
+ * Nhận: $categories (mảng danh mục), $currentCategoryId (int|null)
  */
 $currentCategoryId = $currentCategoryId ?? ($_GET['category'] ?? null);
 $minPrice          = $_GET['min_price'] ?? '';
@@ -43,7 +43,7 @@ $selectedSort      = $_GET['sort'] ?? 'newest';
         </h6>
         <form method="GET" action="" class="price-filter-form">
             <?php
-            // Preserve existing query params
+            // Giữ nguyên các param GET hiện tại (trừ phân trang và lọc giá)
             foreach ($_GET as $key => $val) {
                 if (!in_array($key, ['min_price', 'max_price', 'page'])):
             ?>
@@ -128,7 +128,7 @@ $selectedSort      = $_GET['sort'] ?? 'newest';
 </aside>
 
 <script>
-// Price range radio → set min/max inputs
+// Khi chọn khoảng giá radio — tự điền min/max vào input ẩn
 document.querySelectorAll('input[name="price_range"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const minInput = document.querySelector('input[name="min_price"]');

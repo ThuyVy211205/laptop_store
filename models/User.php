@@ -1,6 +1,7 @@
 <?php
 /**
- * User Model
+ * Model Người Dùng — bảng: nguoi_dung
+ * Xử lý đăng ký, đăng nhập, cập nhật thông tin, xếp hạng thành viên
  */
 
 class User {
@@ -10,32 +11,24 @@ class User {
         $this->db = db();
     }
 
-    /**
-     * Get user by ID
-     */
+    /** Lấy thông tin người dùng theo ID */
     public function getById($id) {
-        return $this->db->fetch("SELECT * FROM users WHERE id = ?", [$id]);
+        return $this->db->fetch("SELECT * FROM nguoi_dung WHERE id = ?", [$id]);
     }
 
-    /**
-     * Get user by email
-     */
+    /** Lấy người dùng theo địa chỉ email */
     public function getByEmail($email) {
-        return $this->db->fetch("SELECT * FROM users WHERE email = ?", [$email]);
+        return $this->db->fetch("SELECT * FROM nguoi_dung WHERE email = ?", [$email]);
     }
 
-    /**
-     * Get user by Google ID
-     */
+    /** Lấy người dùng đăng nhập bằng Google OAuth */
     public function getByGoogleId($googleId) {
-        return $this->db->fetch("SELECT * FROM users WHERE google_id = ?", [$googleId]);
+        return $this->db->fetch("SELECT * FROM nguoi_dung WHERE google_id = ?", [$googleId]);
     }
 
-    /**
-     * Check if email exists
-     */
+    /** Kiểm tra email đã tồn tại chưa (bỏ qua ID hiện tại khi cập nhật) */
     public function emailExists($email, $excludeId = null) {
-        $sql = "SELECT id FROM users WHERE email = ?";
+        $sql = "SELECT id FROM nguoi_dung WHERE email = ?";
         $params = [$email];
         if ($excludeId) {
             $sql .= " AND id != ?";
@@ -44,21 +37,17 @@ class User {
         return (bool) $this->db->fetch($sql, $params);
     }
 
-    /**
-     * Create new user
-     */
+    /** Tạo tài khoản người dùng mới, tự động hash mật khẩu */
     public function create($data) {
         if (isset($data['password']) && !empty($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
-        return $this->db->insert('users', $data);
+        return $this->db->insert('nguoi_dung', $data);
     }
 
-    /**
-     * Update user
-     */
+    /** Cập nhật thông tin người dùng, hash lại mật khẩu nếu có */
     public function update($id, $data) {
-        // If password is set, hash it
+        // Hash lại mật khẩu nếu có cập nhật
         if (isset($data['password']) && !empty($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         } elseif (isset($data['password'])) {
@@ -72,50 +61,40 @@ class User {
             $params[] = $val;
         }
         $params[] = $id;
-        $sql = "UPDATE users SET " . implode(', ', $set) . " WHERE id = ?";
+        $sql = "UPDATE nguoi_dung SET " . implode(', ', $set) . " WHERE id = ?";
         return $this->db->execute($sql, $params);
     }
 
-    /**
-     * Verify password
-     */
+    /** Xác thực mật khẩu người dùng (so sánh với hash) */
     public function verifyPassword($plainPassword, $hashedPassword) {
         return password_verify($plainPassword, $hashedPassword);
     }
 
-    /**
-     * Save reset password token
-     */
+    /** Lưu token đặt lại mật khẩu và thời hạn hết hạn */
     public function saveResetToken($email, $token, $expiresAt) {
         return $this->db->execute(
-            "UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?",
+            "UPDATE nguoi_dung SET reset_token = ?, reset_expires = ? WHERE email = ?",
             [$token, $expiresAt, $email]
         );
     }
 
-    /**
-     * Get user by reset token
-     */
+    /** Lấy người dùng theo token đặt lại mật khẩu (còn hiệu lực) */
     public function getByResetToken($token) {
         return $this->db->fetch(
-            "SELECT * FROM users WHERE reset_token = ? AND reset_expires > NOW()",
+            "SELECT * FROM nguoi_dung WHERE reset_token = ? AND reset_expires > NOW()",
             [$token]
         );
     }
 
-    /**
-     * Clear reset token
-     */
+    /** Xóa token đặt lại mật khẩu sau khi dùng xong */
     public function clearResetToken($userId) {
         return $this->db->execute(
-            "UPDATE users SET reset_token = NULL, reset_expires = NULL WHERE id = ?",
+            "UPDATE nguoi_dung SET reset_token = NULL, reset_expires = NULL WHERE id = ?",
             [$userId]
         );
     }
 
-    /**
-     * Update user rank based on total spent
-     */
+    /** Cập nhật hạng thành viên dựa vào tổng chi tiêu (silver/gold/diamond) */
     public function updateRank($userId) {
         $user = $this->getById($userId);
         if (!$user) return false;
@@ -127,25 +106,21 @@ class User {
         } elseif ($spent >= 15000000) {
             $rank = 'gold';
         }
-        return $this->db->execute("UPDATE users SET `rank` = ? WHERE id = ?", [$rank, $userId]);
+        return $this->db->execute("UPDATE nguoi_dung SET `rank` = ? WHERE id = ?", [$rank, $userId]);
     }
 
-    /**
-     * Increment total_spent + total_orders
-     */
+    /** Tăng tổng tiền đã tiêu và số đơn hàng khi đặt hàng thành công */
     public function incrementStats($userId, $amount) {
         return $this->db->execute(
-            "UPDATE users SET total_spent = total_spent + ?, total_orders = total_orders + 1 WHERE id = ?",
+            "UPDATE nguoi_dung SET total_spent = total_spent + ?, total_orders = total_orders + 1 WHERE id = ?",
             [$amount, $userId]
         );
     }
 
-    /**
-     * Decrement total_spent + total_orders when order is cancelled
-     */
+    /** Giảm tổng tiền và số đơn khi đơn hàng bị hủy */
     public function decrementStats($userId, $amount) {
         return $this->db->execute(
-            "UPDATE users SET
+            "UPDATE nguoi_dung SET
                 total_spent = GREATEST(0, total_spent - ?),
                 total_orders = GREATEST(0, total_orders - 1)
              WHERE id = ?",
@@ -154,14 +129,12 @@ class User {
     }
 
     // ============================================================
-    //  ADMIN
+    //  ADMIN: Quản lý người dùng
     // ============================================================
 
-    /**
-     * Admin: get all users
-     */
+    /** Admin: lấy tất cả người dùng, hỗ trợ tìm kiếm và lọc theo hạng */
     public function adminGetAll($search = '', $filterRank = '') {
-        $sql = "SELECT * FROM users WHERE 1=1";
+        $sql = "SELECT * FROM nguoi_dung WHERE 1=1";
         $params = [];
 
         if ($search) {
@@ -179,21 +152,17 @@ class User {
         return $this->db->fetchAll($sql, $params);
     }
 
-    /**
-     * Toggle status (active/blocked)
-     */
+    /** Chuyển đổi trạng thái active/blocked của tài khoản */
     public function toggleStatus($userId) {
         $user = $this->getById($userId);
         if (!$user) return false;
         $newStatus = $user['status'] === 'active' ? 'blocked' : 'active';
-        return $this->db->execute("UPDATE users SET status = ? WHERE id = ?", [$newStatus, $userId]);
+        return $this->db->execute("UPDATE nguoi_dung SET status = ? WHERE id = ?", [$newStatus, $userId]);
     }
 
-    /**
-     * Count total customers
-     */
+    /** Đếm tổng số khách hàng */
     public function countTotal() {
-        $row = $this->db->fetch("SELECT COUNT(*) AS total FROM users");
+        $row = $this->db->fetch("SELECT COUNT(*) AS total FROM nguoi_dung");
         return $row['total'] ?? 0;
     }
 }

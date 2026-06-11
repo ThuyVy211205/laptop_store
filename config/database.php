@@ -1,7 +1,7 @@
 <?php
 /**
- * Database Configuration & Connection
- * VQSTORE - Laptop & Tech Accessories Store
+ * Cấu hình kết nối cơ sở dữ liệu
+ * VQSTORE — Cửa hàng Laptop & Phụ kiện Công nghệ
  */
 
 // ===== Site Configuration =====
@@ -49,7 +49,8 @@ define('SMTP_PORT',      587);
 define('GOOGLE_REDIRECT_URI', SITE_URL . '/auth/googleCallback');
 
 /**
- * Database Class - PDO Singleton
+ * Lớp Kết Nối CSDL — Singleton PDO
+ * Cung cấp một kết nối duy nhất, hỗ trợ query/fetch/insert/execute
  */
 class Database
 {
@@ -133,9 +134,7 @@ class Database
     }
 }
 
-/**
- * Helper function to get DB instance
- */
+/** Hàm tiện ích lấy instance Database (dùng khắp nơi trong dự án) */
 function db()
 {
     return Database::getInstance();

@@ -11,6 +11,12 @@ $search   = $_GET['search']  ?? '';
 
 $statusLabel = ['new' => 'Mới', 'read' => 'Đã đọc', 'replied' => 'Đã phản hồi'];
 $statusClass = ['new' => 'danger', 'read' => 'secondary', 'replied' => 'success'];
+$subjectMap  = [
+    'technical-support' => 'Hỗ trợ kỹ thuật',
+    'buying-advice'     => 'Tư vấn mua hàng',
+    'warranty-check'    => 'Kiểm tra bảo hành',
+    'others'            => 'Khác',
+];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -160,8 +166,9 @@ $statusClass = ['new' => 'danger', 'read' => 'secondary', 'replied' => 'success'
                                     <?php endif; ?>
                                 </td>
                                 <td style="max-width:160px">
-                                    <span class="text-truncate d-block" style="max-width:150px" title="<?= htmlspecialchars($c['subject'] ?? '') ?>">
-                                        <?= htmlspecialchars($c['subject'] ?: '—') ?>
+                                    <?php $subjectDisplay = $subjectMap[$c['subject']] ?? $c['subject'] ?? ''; ?>
+                                    <span class="text-truncate d-block" style="max-width:150px" title="<?= htmlspecialchars($subjectDisplay) ?>">
+                                        <?= htmlspecialchars($subjectDisplay ?: '—') ?>
                                     </span>
                                 </td>
                                 <td style="max-width:220px">

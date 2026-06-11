@@ -145,7 +145,7 @@ $users = $users ?? [];
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Mobile sidebar toggle
+// Mở/đóng sidebar trên mobile
 document.getElementById('sidebarToggle').addEventListener('click', function() {
     document.getElementById('adminSidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -155,7 +155,7 @@ document.getElementById('sidebarOverlay').addEventListener('click', function() {
     this.classList.remove('show');
 });
 
-// Update send info when recipient changes
+// Cập nhật thông tin người nhận khi thay đổi lựa chọn
 var selectEl    = document.getElementById('recipientId');
 var infoText    = document.getElementById('sendInfoText');
 var totalUsers  = <?= count($users) ?>;
@@ -169,7 +169,7 @@ selectEl.addEventListener('change', function() {
     }
 });
 
-// Confirm before sending to all
+// Xác nhận trước khi gửi email hàng loạt
 document.getElementById('mailForm').addEventListener('submit', function(e) {
     var isAll = document.getElementById('recipientId').value === 'all';
     if (isAll && totalUsers > 0) {

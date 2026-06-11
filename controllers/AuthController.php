@@ -1,6 +1,7 @@
 <?php
 /**
- * Authentication Controller
+ * Controller Xác Thực
+ * Xử lý đăng nhập, đăng ký, đặt lại mật khẩu và đăng nhập Google OAuth
  */
 
 require_once ROOT_PATH . '/models/User.php';
@@ -15,9 +16,7 @@ class AuthController
         $this->userModel = new User();
     }
 
-    /**
-     * Login form & POST
-     */
+    /** Hiển thị form đăng nhập và xử lý POST đăng nhập */
     public function login()
     {
         if (isLoggedIn()) {
@@ -40,7 +39,7 @@ class AuthController
                 /* --- Check admins table --- */
                 if (!$user) {
                     $admin = $db->fetch(
-                        "SELECT * FROM admins WHERE email = ? AND status = 'active'",
+                        "SELECT * FROM quan_tri_vien WHERE email = ? AND status = 'active'",
                         [$email]
                     );
                     if ($admin) {
@@ -58,7 +57,7 @@ class AuthController
                     } else {
                     /* --- Check employees table --- */
                     $emp = $db->fetch(
-                        "SELECT * FROM employees WHERE email = ? AND status = 'active'",
+                        "SELECT * FROM nhan_vien WHERE email = ? AND status = 'active'",
                         [$email]
                     );
                     if ($emp) {
@@ -82,13 +81,13 @@ class AuthController
                 } elseif (!$this->userModel->verifyPassword($password, $user['password'])) {
                     $error = 'Mật khẩu không đúng';
                 } else {
-                    // Login success
+                    // Đăng nhập thành công — lưu thông tin vào session
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_name'] = $user['full_name'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['user_rank'] = $user['rank'];
 
-                    // Merge guest cart
+                    // Đồng bộ giỏ hàng khách (session) vào DB
                     $cartModel = new Cart();
                     $cartModel->mergeSessionToDb($user['id']);
 
@@ -103,9 +102,7 @@ class AuthController
         require_once ROOT_PATH . '/views/auth/login.php';
     }
 
-    /**
-     * Register form & POST
-     */
+    /** Hiển thị form đăng ký và xử lý POST tạo tài khoản */
     public function register()
     {
         if (isLoggedIn()) {
@@ -140,7 +137,7 @@ class AuthController
             } elseif ($this->userModel->emailExists($email)) {
                 $error = 'Email đã được sử dụng';
             } else {
-                // Create user
+                // Tạo tài khoản người dùng mới
                 $userId = $this->userModel->create([
                     'full_name' => $fullName,
                     'email' => $email,
@@ -149,8 +146,8 @@ class AuthController
                 ]);
 
                 if ($userId) {
-                    // Create welcome notification
-                    db()->insert('notifications', [
+                    // Tạo thông báo chào mừng
+                    db()->insert('thong_bao', [
                         'user_id' => $userId,
                         'title' => 'Chào mừng đến với VQSTORE!',
                         'content' => 'Cảm ơn bạn đã đăng ký tài khoản. Hãy khám phá ngay các sản phẩm hot!',
@@ -169,18 +166,14 @@ class AuthController
         require_once ROOT_PATH . '/views/auth/register.php';
     }
 
-    /**
-     * Logout — xóa toàn bộ session, về trang chủ
-     */
+    /** Đăng xuất — xóa toàn bộ session và về trang chủ */
     public function logout()
     {
         session_destroy();
         redirect('/');
     }
 
-    /**
-     * Forgot password form
-     */
+    /** Hiển thị form quên mật khẩu và gửi email đặt lại */
     public function forgotPassword()
     {
         $message = null;
@@ -197,7 +190,7 @@ class AuthController
                     $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
                     $this->userModel->saveResetToken($email, $token, $expires);
 
-                    // In production, send via email. Here, just show the link.
+                    // Demo: hiển thị link reset trực tiếp thay vì gửi email
                     $resetLink = SITE_URL . '/auth/resetPassword?token=' . $token;
                     $message = 'Liên kết đặt lại mật khẩu (demo): <a href="' . $resetLink . '" class="text-warning">Bấm vào đây</a>';
                 } else {
@@ -210,9 +203,7 @@ class AuthController
         require_once ROOT_PATH . '/views/auth/forgot-password.php';
     }
 
-    /**
-     * Google OAuth — khởi tạo đăng nhập, chuyển hướng sang Google
-     */
+    /** Google OAuth — khởi tạo đăng nhập, chuyển hướng đến trang Google */
     public function googleLogin()
     {
         if (isLoggedIn()) {
@@ -242,9 +233,7 @@ class AuthController
         exit;
     }
 
-    /**
-     * Google OAuth — nhận callback, xử lý đăng nhập / đăng ký
-     */
+    /** Google OAuth — nhận callback, xử lý đăng nhập hoặc tạo tài khoản mới */
     public function googleCallback()
     {
         // Kiểm tra lỗi từ Google
@@ -305,11 +294,11 @@ class AuthController
             }
             // Lưu google_id nếu chưa có
             if (empty($user['google_id']) && $googleId) {
-                db()->execute("UPDATE users SET google_id=? WHERE id=?", [$googleId, $user['id']]);
+                db()->execute("UPDATE nguoi_dung SET google_id=? WHERE id=?", [$googleId, $user['id']]);
             }
         } else {
             // Tạo tài khoản mới qua Google
-            $userId = db()->insert('users', [
+            $userId = db()->insert('nguoi_dung', [
                 'full_name' => $name,
                 'email'     => $email,
                 'google_id' => $googleId,
@@ -317,7 +306,7 @@ class AuthController
             ]);
             $user = $this->userModel->getById($userId);
 
-            db()->insert('notifications', [
+            db()->insert('thong_bao', [
                 'user_id' => $userId,
                 'title'   => 'Chào mừng đến với VQSTORE!',
                 'content' => 'Cảm ơn bạn đã đăng ký tài khoản bằng Google. Hãy khám phá ngay các sản phẩm hot!',
@@ -371,9 +360,7 @@ class AuthController
         return $response ? json_decode($response, true) : null;
     }
 
-    /**
-     * Reset password
-     */
+    /** Hiển thị form và xử lý đặt lại mật khẩu mới từ token email */
     public function resetPassword()
     {
         $token = $_GET['token'] ?? $_POST['token'] ?? '';

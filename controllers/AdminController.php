@@ -1,7 +1,7 @@
 <?php
 /**
- * AdminController
- * Handles all admin panel pages and actions.
+ * Controller Admin
+ * Xử lý tất cả trang và hành động trong khu vực quản trị (dashboard, đơn hàng, sản phẩm...)
  */
 class AdminController {
 
@@ -31,20 +31,20 @@ class AdminController {
 
         $stats = [
             'total_revenue'   => $this->db->fetch(
-                "SELECT COALESCE(SUM(total_amount),0) AS c FROM orders WHERE status='completed'"
+                "SELECT COALESCE(SUM(total_amount),0) AS c FROM don_hang WHERE status='completed'"
             )['c'] ?? 0,
-            'total_orders'    => $this->db->fetch("SELECT COUNT(*) AS c FROM orders")['c'] ?? 0,
-            'total_products'  => $this->db->fetch("SELECT COUNT(*) AS c FROM products")['c'] ?? 0,
-            'total_customers' => $this->db->fetch("SELECT COUNT(*) AS c FROM users")['c'] ?? 0,
+            'total_orders'    => $this->db->fetch("SELECT COUNT(*) AS c FROM don_hang")['c'] ?? 0,
+            'total_products'  => $this->db->fetch("SELECT COUNT(*) AS c FROM san_pham")['c'] ?? 0,
+            'total_customers' => $this->db->fetch("SELECT COUNT(*) AS c FROM nguoi_dung")['c'] ?? 0,
             'pending_orders'  => $this->db->fetch(
-                "SELECT COUNT(*) AS c FROM orders WHERE status='pending'"
+                "SELECT COUNT(*) AS c FROM don_hang WHERE status='pending'"
             )['c'] ?? 0,
         ];
 
         $recentOrders = $this->db->fetchAll(
             "SELECT o.*, u.full_name AS user_name
-             FROM orders o
-             LEFT JOIN users u ON o.user_id = u.id
+             FROM don_hang o
+             LEFT JOIN nguoi_dung u ON o.user_id = u.id
              ORDER BY o.created_at DESC
              LIMIT 10"
         );
@@ -52,7 +52,7 @@ class AdminController {
         $topProducts = $this->db->fetchAll(
             "SELECT name, thumbnail, sold_quantity,
                     COALESCE(sale_price, price) AS final_price
-             FROM products
+             FROM san_pham
              WHERE status = 'active'
              ORDER BY sold_quantity DESC
              LIMIT 5"
@@ -61,7 +61,7 @@ class AdminController {
         $revenueData = $this->db->fetchAll(
             "SELECT DATE_FORMAT(created_at,'%m/%Y') AS month,
                     SUM(total_amount) AS total
-             FROM orders
+             FROM don_hang
              WHERE status = 'completed'
                AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
              GROUP BY DATE_FORMAT(created_at,'%m/%Y')
@@ -81,7 +81,7 @@ class AdminController {
         if ($param === 'delete') {
             $id = (int)($_GET['id'] ?? 0);
             if ($id) {
-                $this->db->execute("DELETE FROM products WHERE id = ?", [$id]);
+                $this->db->execute("DELETE FROM san_pham WHERE id = ?", [$id]);
                 setFlash('success', 'Đã xóa sản phẩm!');
             }
             header('Location: ' . SITE_URL . '/admin/products');
@@ -124,8 +124,8 @@ class AdminController {
 
         $products = $this->db->fetchAll(
             "SELECT p.*, c.name AS category_name
-             FROM products p
-             LEFT JOIN categories c ON p.category_id = c.id
+             FROM san_pham p
+             LEFT JOIN danh_muc c ON p.category_id = c.id
              $whereClause
              ORDER BY p.created_at DESC
              LIMIT $limit OFFSET $offset",
@@ -133,12 +133,12 @@ class AdminController {
         );
 
         $total      = (int)($this->db->fetch(
-            "SELECT COUNT(*) AS c FROM products p $whereClause", $params
+            "SELECT COUNT(*) AS c FROM san_pham p $whereClause", $params
         )['c'] ?? 0);
         $totalPages = $total > 0 ? (int)ceil($total / $limit) : 1;
 
         $categories = $this->db->fetchAll(
-            "SELECT id, name FROM categories WHERE status='active' ORDER BY name"
+            "SELECT id, name FROM danh_muc WHERE status='active' ORDER BY name"
         );
 
         include ROOT_PATH . '/views/admin/products.php';
@@ -199,12 +199,12 @@ class AdminController {
         if ($action === 'edit' && $id) {
             $sets = implode(', ', array_map(fn($k) => "$k = :$k", array_keys($data)));
             $data['id'] = $id;
-            $this->db->execute("UPDATE products SET $sets WHERE id = :id", $data);
+            $this->db->execute("UPDATE san_pham SET $sets WHERE id = :id", $data);
             setFlash('success', 'Cập nhật sản phẩm thành công!');
         } else {
             $data['slug']       = createSlug($name) . '-' . time();
             $data['created_at'] = date('Y-m-d H:i:s');
-            $this->db->insert('products', $data);
+            $this->db->insert('san_pham', $data);
             setFlash('success', 'Thêm sản phẩm thành công!');
         }
 
@@ -228,26 +228,26 @@ class AdminController {
 
                 // Lấy thông tin đơn hàng trước khi cập nhật để gửi thông báo
                 $order = $this->db->fetch(
-                    "SELECT user_id, order_code FROM orders WHERE id=?", [$id]
+                    "SELECT user_id, order_code FROM don_hang WHERE id=?", [$id]
                 );
 
                 if ($status === 'cancelled' && $reason) {
                     $this->db->execute(
-                        "UPDATE orders SET status='cancelled', cancel_reason=? WHERE id=?",
+                        "UPDATE don_hang SET status='cancelled', cancel_reason=? WHERE id=?",
                         [$reason, $id]
                     );
                 } else {
-                    $this->db->execute("UPDATE orders SET status=? WHERE id=?", [$status, $id]);
+                    $this->db->execute("UPDATE don_hang SET status=? WHERE id=?", [$status, $id]);
                 }
 
                 // COD: tự động đánh dấu đã thanh toán khi hoàn thành
                 if ($status === 'completed') {
                     $orderExtra = $this->db->fetch(
-                        "SELECT payment_method, payment_status FROM orders WHERE id=?", [$id]
+                        "SELECT payment_method, payment_status FROM don_hang WHERE id=?", [$id]
                     );
                     if ($orderExtra && $orderExtra['payment_method'] === 'cod' && $orderExtra['payment_status'] === 'pending') {
                         $this->db->execute(
-                            "UPDATE orders SET payment_status='paid' WHERE id=?", [$id]
+                            "UPDATE don_hang SET payment_status='paid' WHERE id=?", [$id]
                         );
                     }
                 }
@@ -263,7 +263,7 @@ class AdminController {
                     ];
                     if (isset($statusMessages[$status])) {
                         $msg = $statusMessages[$status];
-                        $this->db->insert('notifications', [
+                        $this->db->insert('thong_bao', [
                             'user_id' => $order['user_id'],
                             'title'   => $msg['title'],
                             'content' => sprintf($msg['content'], $order['order_code']),
@@ -296,16 +296,16 @@ class AdminController {
 
         $orders = $this->db->fetchAll(
             "SELECT o.*, u.full_name AS user_name
-             FROM orders o LEFT JOIN users u ON o.user_id = u.id
+             FROM don_hang o LEFT JOIN nguoi_dung u ON o.user_id = u.id
              $whereClause ORDER BY o.created_at DESC LIMIT $limit OFFSET $offset",
             $params
         );
-        $total      = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders o $whereClause", $params)['c'] ?? 0);
+        $total      = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM don_hang o $whereClause", $params)['c'] ?? 0);
         $totalPages = max(1, (int)ceil($total / $limit));
 
         $statusCounts = [];
         foreach (['pending','confirmed','shipping','delivered','completed','cancelled'] as $s) {
-            $statusCounts[$s] = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status=?",[$s])['c'] ?? 0);
+            $statusCounts[$s] = (int)($this->db->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE status=?",[$s])['c'] ?? 0);
         }
 
         include ROOT_PATH . '/views/admin/orders.php';
@@ -319,10 +319,10 @@ class AdminController {
 
         if ($param === 'toggle' && isset($_GET['id'])) {
             $id   = (int)$_GET['id'];
-            $user = $this->db->fetch("SELECT status FROM users WHERE id=?", [$id]);
+            $user = $this->db->fetch("SELECT status FROM nguoi_dung WHERE id=?", [$id]);
             if ($user) {
                 $newStatus = $user['status'] === 'active' ? 'blocked' : 'active';
-                $this->db->execute("UPDATE users SET status=? WHERE id=?", [$newStatus, $id]);
+                $this->db->execute("UPDATE nguoi_dung SET status=? WHERE id=?", [$newStatus, $id]);
                 setFlash('success', 'Đã cập nhật trạng thái tài khoản!');
             }
             header('Location: ' . SITE_URL . '/admin/customers');
@@ -341,7 +341,7 @@ class AdminController {
         $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $customers = $this->db->fetchAll(
-            "SELECT * FROM users $whereClause ORDER BY created_at DESC", $params
+            "SELECT * FROM nguoi_dung $whereClause ORDER BY created_at DESC", $params
         );
 
         include ROOT_PATH . '/views/admin/customers.php';
@@ -354,7 +354,7 @@ class AdminController {
         $this->requireAdmin();
 
         if ($param === 'delete' && isset($_GET['id'])) {
-            $this->db->execute("DELETE FROM employees WHERE id=?", [(int)$_GET['id']]);
+            $this->db->execute("DELETE FROM nhan_vien WHERE id=?", [(int)$_GET['id']]);
             setFlash('success', 'Đã xóa nhân viên!');
             header('Location: ' . SITE_URL . '/admin/employees'); exit;
         }
@@ -379,11 +379,11 @@ class AdminController {
                 if ($password) $data['password'] = password_hash($password, PASSWORD_DEFAULT);
                 $sets = implode(', ', array_map(fn($k) => "$k=:$k", array_keys($data)));
                 $data['id'] = $id;
-                $this->db->execute("UPDATE employees SET $sets WHERE id=:id", $data);
+                $this->db->execute("UPDATE nhan_vien SET $sets WHERE id=:id", $data);
                 setFlash('success', 'Đã cập nhật nhân viên!');
             } else {
                 if (!$password) { setFlash('error', 'Mật khẩu không được để trống!'); header('Location: ' . SITE_URL . '/admin/employees'); exit; }
-                $this->db->insert('employees', [
+                $this->db->insert('nhan_vien', [
                     'full_name' => $fullName, 'email' => $email, 'phone' => $phone,
                     'role' => $role, 'status' => $status,
                     'password' => password_hash($password, PASSWORD_DEFAULT),
@@ -394,7 +394,7 @@ class AdminController {
             header('Location: ' . SITE_URL . '/admin/employees'); exit;
         }
 
-        $employees = $this->db->fetchAll("SELECT * FROM employees ORDER BY created_at DESC");
+        $employees = $this->db->fetchAll("SELECT * FROM nhan_vien ORDER BY created_at DESC");
         include ROOT_PATH . '/views/admin/employees.php';
     }
 
@@ -405,7 +405,7 @@ class AdminController {
         $this->requireAdmin();
 
         if ($param === 'delete' && isset($_GET['id'])) {
-            $this->db->execute("DELETE FROM vouchers WHERE id=?", [(int)$_GET['id']]);
+            $this->db->execute("DELETE FROM phieu_giam_gia WHERE id=?", [(int)$_GET['id']]);
             setFlash('success', 'Đã xóa voucher!');
             header('Location: ' . SITE_URL . '/admin/vouchers'); exit;
         }
@@ -433,17 +433,17 @@ class AdminController {
             if ($action === 'edit' && $id) {
                 $sets = implode(', ', array_map(fn($k) => "$k=:$k", array_keys($data)));
                 $data['id'] = $id;
-                $this->db->execute("UPDATE vouchers SET $sets WHERE id=:id", $data);
+                $this->db->execute("UPDATE phieu_giam_gia SET $sets WHERE id=:id", $data);
                 setFlash('success', 'Đã cập nhật voucher!');
             } else {
                 $data['created_at'] = date('Y-m-d H:i:s');
-                $this->db->insert('vouchers', $data);
+                $this->db->insert('phieu_giam_gia', $data);
                 setFlash('success', 'Đã thêm voucher!');
             }
             header('Location: ' . SITE_URL . '/admin/vouchers'); exit;
         }
 
-        $vouchers = $this->db->fetchAll("SELECT * FROM vouchers ORDER BY created_at DESC");
+        $vouchers = $this->db->fetchAll("SELECT * FROM phieu_giam_gia ORDER BY created_at DESC");
         include ROOT_PATH . '/views/admin/vouchers.php';
     }
 
@@ -455,14 +455,14 @@ class AdminController {
 
         if ($param === 'delete' && isset($_GET['id'])) {
             $id = (int)$_GET['id'];
-            $review = $this->db->fetch("SELECT product_id FROM reviews WHERE id=?", [$id]);
+            $review = $this->db->fetch("SELECT product_id FROM danh_gia WHERE id=?", [$id]);
             if ($review) {
-                $this->db->execute("DELETE FROM reviews WHERE id=?", [$id]);
-                // Recompute rating
+                $this->db->execute("DELETE FROM danh_gia WHERE id=?", [$id]);
+                // Tính lại điểm đánh giá trung bình của sản phẩm
                 $pid = $review['product_id'];
-                $agg = $this->db->fetch("SELECT COUNT(*) AS cnt, AVG(rating) AS avg FROM reviews WHERE product_id=?", [$pid]);
+                $agg = $this->db->fetch("SELECT COUNT(*) AS cnt, AVG(rating) AS avg FROM danh_gia WHERE product_id=?", [$pid]);
                 $this->db->execute(
-                    "UPDATE products SET rating_count=?, rating_avg=? WHERE id=?",
+                    "UPDATE san_pham SET rating_count=?, rating_avg=? WHERE id=?",
                     [(int)$agg['cnt'], round((float)$agg['avg'], 2), $pid]
                 );
                 setFlash('success', 'Đã xóa đánh giá!');
@@ -482,9 +482,9 @@ class AdminController {
 
         $reviews = $this->db->fetchAll(
             "SELECT r.*, u.full_name AS user_name, p.name AS product_name, p.thumbnail
-             FROM reviews r
-             JOIN users u ON r.user_id = u.id
-             JOIN products p ON r.product_id = p.id
+             FROM danh_gia r
+             JOIN nguoi_dung u ON r.user_id = u.id
+             JOIN san_pham p ON r.product_id = p.id
              $whereClause ORDER BY r.created_at DESC",
             $params
         );
@@ -501,31 +501,31 @@ class AdminController {
         $period = in_array($_GET['period'] ?? '', ['week','month','year']) ? $_GET['period'] : 'month';
 
         $summary = [
-            'today'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND DATE(created_at)=CURDATE()")['t'] ?? 0),
-            'week'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEARWEEK(created_at,1)=YEARWEEK(NOW(),1)")['t'] ?? 0),
-            'month'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())")['t'] ?? 0),
-            'year'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())")['t'] ?? 0),
-            'total_orders'     => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders")['c'] ?? 0),
-            'completed_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status IN ('completed','delivered')")['c'] ?? 0),
-            'cancelled_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM orders WHERE status='cancelled'")['c'] ?? 0),
+            'today'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM don_hang WHERE status IN ('completed','delivered') AND DATE(created_at)=CURDATE()")['t'] ?? 0),
+            'week'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM don_hang WHERE status IN ('completed','delivered') AND YEARWEEK(created_at,1)=YEARWEEK(NOW(),1)")['t'] ?? 0),
+            'month'  => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM don_hang WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())")['t'] ?? 0),
+            'year'   => (float)($this->db->fetch("SELECT COALESCE(SUM(total_amount),0) AS t FROM don_hang WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())")['t'] ?? 0),
+            'total_orders'     => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM don_hang")['c'] ?? 0),
+            'completed_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE status IN ('completed','delivered')")['c'] ?? 0),
+            'cancelled_orders' => (int)($this->db->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE status='cancelled'")['c'] ?? 0),
         ];
 
         if ($period === 'week') {
             $chartData = $this->db->fetchAll(
                 "SELECT DATE_FORMAT(created_at,'%d/%m') AS label, COALESCE(SUM(total_amount),0) AS total
-                 FROM orders WHERE status IN ('completed','delivered') AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 FROM don_hang WHERE status IN ('completed','delivered') AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
                  GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC"
             );
         } elseif ($period === 'year') {
             $chartData = $this->db->fetchAll(
                 "SELECT DATE_FORMAT(created_at,'%m/%Y') AS label, COALESCE(SUM(total_amount),0) AS total
-                 FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())
+                 FROM don_hang WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW())
                  GROUP BY MONTH(created_at) ORDER BY MONTH(created_at) ASC"
             );
         } else {
             $chartData = $this->db->fetchAll(
                 "SELECT DATE_FORMAT(created_at,'%d/%m') AS label, COALESCE(SUM(total_amount),0) AS total
-                 FROM orders WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())
+                 FROM don_hang WHERE status IN ('completed','delivered') AND YEAR(created_at)=YEAR(NOW()) AND MONTH(created_at)=MONTH(NOW())
                  GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC"
             );
         }
@@ -534,14 +534,14 @@ class AdminController {
             "SELECT p.name, p.thumbnail, p.sold_quantity,
                     COALESCE(p.sale_price, p.price) AS final_price,
                     COALESCE(SUM(od.subtotal),0) AS revenue
-             FROM products p
-             LEFT JOIN order_details od ON od.product_id = p.id
-             LEFT JOIN orders o ON od.order_id = o.id AND o.status IN ('completed','delivered')
+             FROM san_pham p
+             LEFT JOIN chi_tiet_don od ON od.product_id = p.id
+             LEFT JOIN don_hang o ON od.order_id = o.id AND o.status IN ('completed','delivered')
              GROUP BY p.id ORDER BY revenue DESC LIMIT 10"
         );
 
         $ordersByStatus = $this->db->fetchAll(
-            "SELECT status, COUNT(*) AS cnt FROM orders GROUP BY status"
+            "SELECT status, COUNT(*) AS cnt FROM don_hang GROUP BY status"
         );
 
         include ROOT_PATH . '/views/admin/revenue.php';
@@ -561,18 +561,18 @@ class AdminController {
 
             if ($id && $reply) {
                 $this->db->execute(
-                    "UPDATE contacts SET status = 'replied', reply_content = ?, replied_by = ?, replied_at = NOW() WHERE id = ?",
+                    "UPDATE lien_he SET status = 'replied', reply_content = ?, replied_by = ?, replied_at = NOW() WHERE id = ?",
                     [$reply, $replier, $id]
                 );
 
                 // Tạo notification cho khách hàng nếu họ có tài khoản
-                $contact = $this->db->fetch("SELECT * FROM contacts WHERE id = ?", [$id]);
+                $contact = $this->db->fetch("SELECT * FROM lien_he WHERE id = ?", [$id]);
                 if ($contact) {
-                    $user = $this->db->fetch("SELECT id FROM users WHERE email = ?", [$contact['email']]);
+                    $user = $this->db->fetch("SELECT id FROM nguoi_dung WHERE LOWER(email) = LOWER(?)", [$contact['email']]);
                     if ($user) {
                         $subject = $contact['subject'] ?: 'Tin nhắn liên hệ';
                         $this->db->execute(
-                            "INSERT INTO notifications (user_id, title, content, type, link) VALUES (?, ?, ?, 'reply', ?)",
+                            "INSERT INTO thong_bao (user_id, title, content, type, link) VALUES (?, ?, ?, 'reply', ?)",
                             [
                                 $user['id'],
                                 'Phản hồi: ' . mb_substr($subject, 0, 80),
@@ -594,7 +594,7 @@ class AdminController {
             $id = (int)($_GET['id'] ?? 0);
             if ($id) {
                 $this->db->execute(
-                    "UPDATE contacts SET status = 'read' WHERE id = ? AND status = 'new'",
+                    "UPDATE lien_he SET status = 'read' WHERE id = ? AND status = 'new'",
                     [$id]
                 );
             }
@@ -606,7 +606,7 @@ class AdminController {
         if ($param === 'delete') {
             $id = (int)($_GET['id'] ?? 0);
             if ($id) {
-                $this->db->execute("DELETE FROM contacts WHERE id = ?", [$id]);
+                $this->db->execute("DELETE FROM lien_he WHERE id = ?", [$id]);
                 setFlash('success', 'Đã xóa tin nhắn!');
             }
             header('Location: ' . SITE_URL . '/admin/contacts');
@@ -627,15 +627,15 @@ class AdminController {
         $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $contacts = $this->db->fetchAll(
-            "SELECT * FROM contacts $whereClause ORDER BY created_at DESC",
+            "SELECT * FROM lien_he $whereClause ORDER BY created_at DESC",
             $params
         );
 
         $counts = [
-            'all'     => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts")['c'] ?? 0,
-            'new'     => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0,
-            'read'    => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='read'")['c'] ?? 0,
-            'replied' => $this->db->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='replied'")['c'] ?? 0,
+            'all'     => $this->db->fetch("SELECT COUNT(*) AS c FROM lien_he")['c'] ?? 0,
+            'new'     => $this->db->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='new'")['c'] ?? 0,
+            'read'    => $this->db->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='read'")['c'] ?? 0,
+            'replied' => $this->db->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='replied'")['c'] ?? 0,
         ];
 
         include ROOT_PATH . '/views/admin/contacts.php';
@@ -662,10 +662,10 @@ class AdminController {
 
             // Lấy danh sách người nhận
             if ($recipientId === 'all') {
-                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM users WHERE status='active' AND email != ''");
+                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM nguoi_dung WHERE status='active' AND email != ''");
                 $recipientType = 'all';
             } else {
-                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM users WHERE id=? AND status='active'", [(int)$recipientId]);
+                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM nguoi_dung WHERE id=? AND status='active'", [(int)$recipientId]);
                 $recipientType = 'single';
             }
 
@@ -680,7 +680,7 @@ class AdminController {
 
             foreach ($recipients as $user) {
                 // 1. Lưu vào notifications để khách xem trong tài khoản
-                $this->db->insert('notifications', [
+                $this->db->insert('thong_bao', [
                     'user_id' => $user['id'],
                     'title'   => $subject,
                     'content' => $content,
@@ -712,7 +712,7 @@ class AdminController {
 
         // GET — form soạn email
         $users = $this->db->fetchAll(
-            "SELECT id, full_name, email FROM users WHERE status='active' ORDER BY full_name"
+            "SELECT id, full_name, email FROM nguoi_dung WHERE status='active' ORDER BY full_name"
         );
         $activePage = 'mail';
         require_once ROOT_PATH . '/views/admin/mail.php';
@@ -734,7 +734,7 @@ class AdminController {
 
             if ($email && $password) {
                 $admin = $this->db->fetch(
-                    "SELECT * FROM admins WHERE email = ? AND status = 'active'",
+                    "SELECT * FROM quan_tri_vien WHERE email = ? AND status = 'active'",
                     [$email]
                 );
                 if ($admin && password_verify($password, $admin['password'])) {

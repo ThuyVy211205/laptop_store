@@ -403,5 +403,16 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 
     // Load badge count ngay khi trang tải
     loadNotifications();
+
+    // Tự động kiểm tra thông báo mới mỗi 60 giây
+    setInterval(function() {
+        fetch(window.SITE_URL + '/api/notifications')
+            .then(function(r){ return r.json(); })
+            .then(function(data) {
+                updateBadge(data.unread);
+                if (isOpen) renderItems(data.items || []);
+            })
+            .catch(function(){});
+    }, 60000);
 })();
 </script>

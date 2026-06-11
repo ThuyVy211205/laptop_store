@@ -79,7 +79,7 @@ $to   = min($page * 15, $total);
             <a href="<?= SITE_URL ?>/admin/contacts" class="admin-nav-item">
                 <i class="fas fa-envelope"></i> Tin nhắn
                 <?php
-                $newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0;
+                $newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='new'")['c'] ?? 0;
                 if ($newContactCount > 0): ?>
                 <span class="badge-count"><?= $newContactCount ?></span>
                 <?php endif; ?>
@@ -471,7 +471,7 @@ $to   = min($page * 15, $total);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Clean up any stale Bootstrap backdrop left over from a previous page state
+// Dọn sạch Bootstrap backdrop bị kẹt từ trạng thái trang trước
 (function() {
     document.querySelectorAll('.modal-backdrop').forEach(function(el) { el.remove(); });
     document.body.classList.remove('modal-open');
@@ -561,7 +561,7 @@ document.getElementById('productForm').addEventListener('submit', function (e) {
     var msg    = '';
     var focusEl = null;
 
-    // Reset highlights
+    // Xóa highlight lỗi trên các trường
     [fName, fCat, fPrice].forEach(function(el) {
         el.style.borderColor = '';
     });
@@ -572,12 +572,12 @@ document.getElementById('productForm').addEventListener('submit', function (e) {
 
     if (msg) {
         e.preventDefault();
-        // Highlight invalid field
+        // Đánh dấu trường không hợp lệ
         if (focusEl) focusEl.style.borderColor = '#dc2626';
-        // Show error at top
+        // Hiển thị thông báo lỗi ở đầu form
         document.getElementById('formErrorMsg').textContent = msg;
         document.getElementById('formError').style.display = 'block';
-        // Scroll modal body to top so error is visible
+        // Cuộn modal lên đầu để lỗi hiển thị
         var modalBody = document.querySelector('#productModal .modal-body');
         if (modalBody) modalBody.scrollTop = 0;
     }
@@ -615,7 +615,7 @@ function clearImg() {
     document.getElementById('currentThumbnail').value = '';
 }
 
-// Reset modal on close
+// Đặt lại form khi đóng modal
 document.getElementById('productModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('productForm').reset();
     document.getElementById('formError').style.display = 'none';

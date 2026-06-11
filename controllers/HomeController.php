@@ -1,6 +1,7 @@
 <?php
 /**
- * Home Controller
+ * Controller Trang Chủ
+ * Tổng hợp dữ liệu: nổi bật, flash sale, hàng mới, bán chạy, banner
  */
 
 require_once ROOT_PATH . '/models/Product.php';
@@ -15,9 +16,7 @@ class HomeController {
         $this->categoryModel = new Category();
     }
 
-    /**
-     * Homepage
-     */
+    /** Hiển thị trang chủ với sản phẩm nổi bật, flash sale và banner */
     public function index() {
         $categories     = $this->categoryModel->getAll();
         $featured       = $this->productModel->getFeatured(8);
@@ -25,9 +24,9 @@ class HomeController {
         $newArrivals    = $this->productModel->getNewArrivals(8);
         $bestSellers    = $this->productModel->getBestSellers(8);
 
-        // Banners
+        // Lấy banner hero đang active từ DB
         $banners = db()->fetchAll(
-            "SELECT * FROM banners WHERE status = 'active' AND position = 'hero' ORDER BY sort_order ASC"
+            "SELECT * FROM bang_quang_cao WHERE status = 'active' AND position = 'hero' ORDER BY sort_order ASC"
         );
 
         require_once ROOT_PATH . '/views/home/index.php';

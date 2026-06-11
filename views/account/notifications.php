@@ -111,7 +111,7 @@
 </style>
 
 <script>
-// Mark individual notification as read on click
+// Đánh dấu đã đọc khi nhấn vào thông báo
 document.querySelectorAll('.notification-item').forEach(function(el) {
     el.addEventListener('click', function() {
         var id = this.dataset.id;

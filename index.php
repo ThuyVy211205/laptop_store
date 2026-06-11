@@ -1,7 +1,7 @@
 <?php
 /**
- * VQSTORE - Front Controller
- * Routes all requests to appropriate controllers
+ * Front Controller — Điều phối tất cả request đến controller tương ứng
+ * Phân tích URL → gọi đúng controller::action()
  */
 
 require_once __DIR__ . '/config/database.php';
@@ -9,7 +9,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/session.php';
 
-// Parse URL
+// Phân tích URL thành các segment
 $url = $_GET['url'] ?? '';
 $url = trim($url, '/');
 $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -21,7 +21,7 @@ $param = $segments[2] ?? null;
 $param2 = $segments[3] ?? null;
 
 // ============================================================
-//  ROUTING
+//  ĐỊNH TUYẾN (ROUTING)
 // ============================================================
 try {
     switch ($route) {

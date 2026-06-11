@@ -1,6 +1,7 @@
 <?php
 /**
- * Cart Controller
+ * Controller Giỏ Hàng
+ * Xử lý xem giỏ, thêm/xóa/cập nhật sản phẩm, mua ngay và mini cart sidebar
  */
 
 require_once ROOT_PATH . '/models/Cart.php';
@@ -12,9 +13,7 @@ class CartController {
         $this->cartModel = new Cart();
     }
 
-    /**
-     * Cart page
-     */
+    /** Hiển thị trang giỏ hàng */
     public function index() {
         $userId = isLoggedIn() ? $_SESSION['user_id'] : null;
         $items  = $this->cartModel->getItems($userId);
@@ -24,9 +23,7 @@ class CartController {
         require_once ROOT_PATH . '/views/cart/index.php';
     }
 
-    /**
-     * AJAX: Add product to cart
-     */
+    /** AJAX: Thêm sản phẩm vào giỏ hàng */
     public function add($param = null) {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -54,9 +51,7 @@ class CartController {
         exit;
     }
 
-    /**
-     * AJAX: Remove product from cart
-     */
+    /** AJAX: Xóa sản phẩm khỏi giỏ hàng */
     public function remove($param = null) {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -83,9 +78,7 @@ class CartController {
         exit;
     }
 
-    /**
-     * Buy Now — save product to session and redirect to checkout (skip cart)
-     */
+    /** Mua ngay — lưu sản phẩm vào session và chuyển thẳng đến trang thanh toán */
     public function buynow($param = null) {
         requireLogin();
 
@@ -110,9 +103,7 @@ class CartController {
         redirect('/checkout');
     }
 
-    /**
-     * AJAX: Get cart sidebar HTML
-     */
+    /** AJAX: Lấy HTML mini cart để hiển thị trên sidebar giỏ hàng */
     public function sidebar($param = null) {
         header('Content-Type: application/json');
         $userId = isLoggedIn() ? $_SESSION['user_id'] : null;

@@ -1,7 +1,7 @@
 <?php
 /**
- * Product Card Component (partial)
- * Expects: $product (array)
+ * Component Thẻ Sản Phẩm (partial)
+ * Nhận: $product (mảng thông tin sản phẩm)
  */
 $price      = $product['price'];
 $salePrice  = $product['sale_price'] ?? null;

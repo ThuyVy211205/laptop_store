@@ -1,12 +1,12 @@
 <?php
 /**
- * Admin Sidebar Partial
- * Expects: $admin (session admin array), $activePage (string)
+ * Thanh điều hướng Admin (Sidebar)
+ * Nhận: $admin (mảng session admin), $activePage (chuỗi định danh trang hiện tại)
  */
 $admin      = $admin      ?? $_SESSION['admin'] ?? ['full_name' => 'Admin', 'role' => 'Admin'];
 $activePage = $activePage ?? '';
-$newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0;
-$pendingOrders   = db()->fetch("SELECT COUNT(*) AS c FROM orders WHERE status='pending'")['c'] ?? 0;
+$newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='new'")['c'] ?? 0;
+$pendingOrders   = db()->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE status='pending'")['c'] ?? 0;
 ?>
 <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
 

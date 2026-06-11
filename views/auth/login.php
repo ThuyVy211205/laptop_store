@@ -76,7 +76,7 @@ include ROOT_PATH . '/views/layouts/header.php';
 </div>
 
 <script>
-    // Toggle password
+    // Hiện/ẩn mật khẩu
     document.getElementById('togglePwd').addEventListener('click', function () {
         const input = document.getElementById('passwordInput');
         const icon = document.getElementById('eyeIcon');

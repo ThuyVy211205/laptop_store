@@ -75,7 +75,7 @@ $statusLabels = [
             <a href="<?= SITE_URL ?>/admin/contacts" class="admin-nav-item">
                 <i class="fas fa-envelope"></i> Tin nhắn
                 <?php
-                $newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM contacts WHERE status='new'")['c'] ?? 0;
+                $newContactCount = db()->fetch("SELECT COUNT(*) AS c FROM lien_he WHERE status='new'")['c'] ?? 0;
                 if ($newContactCount > 0): ?>
                 <span class="badge-count"><?= $newContactCount ?></span>
                 <?php endif; ?>
@@ -321,7 +321,7 @@ $statusLabels = [
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Mobile sidebar toggle
+// Mở/đóng sidebar trên mobile
 document.getElementById('sidebarToggle').addEventListener('click', function () {
     document.getElementById('adminSidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -331,7 +331,7 @@ document.getElementById('sidebarOverlay').addEventListener('click', function () 
     this.classList.remove('show');
 });
 
-// Revenue chart
+// Khởi tạo biểu đồ doanh thu bằng Chart.js
 (function () {
     const labels = <?= json_encode(array_column($revenueData, 'month')) ?>;
     const data   = <?= json_encode(array_map('floatval', array_column($revenueData, 'total'))) ?>;

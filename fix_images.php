@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $conn = new mysqli('localhost', 'root', '', 'laptop_store');
-$result = $conn->query('SELECT id, name, slug FROM products');
+$result = $conn->query('SELECT id, name, slug FROM san_pham');
 $files = scandir('assets/images');
 while ($row = $result->fetch_assoc()) {
     $id = $row['id'];

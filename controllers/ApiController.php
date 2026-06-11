@@ -304,13 +304,13 @@ class ApiController {
 
         $items = $db->fetchAll(
             "SELECT id, title, content, type, link, is_read, created_at
-             FROM notifications WHERE user_id = ?
+             FROM thong_bao WHERE user_id = ?
              ORDER BY created_at DESC LIMIT 20",
             [$userId]
         );
 
         $unread = (int)($db->fetch(
-            "SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0",
+            "SELECT COUNT(*) AS c FROM thong_bao WHERE user_id = ? AND is_read = 0",
             [$userId]
         )['c'] ?? 0);
 
@@ -331,18 +331,18 @@ class ApiController {
 
         if ($id) {
             $db->execute(
-                "UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?",
+                "UPDATE thong_bao SET is_read = 1 WHERE id = ? AND user_id = ?",
                 [$id, $userId]
             );
         } else {
             $db->execute(
-                "UPDATE notifications SET is_read = 1 WHERE user_id = ?",
+                "UPDATE thong_bao SET is_read = 1 WHERE user_id = ?",
                 [$userId]
             );
         }
 
         $unread = (int)($db->fetch(
-            "SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0",
+            "SELECT COUNT(*) AS c FROM thong_bao WHERE user_id = ? AND is_read = 0",
             [$userId]
         )['c'] ?? 0);
 

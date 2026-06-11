@@ -1,6 +1,7 @@
 <?php
 /**
- * Checkout Controller
+ * Controller Thanh Toán
+ * Xử lý toàn bộ luồng đặt hàng: hiển thị trang, áp voucher, tạo đơn, gửi email xác nhận
  */
 
 require_once ROOT_PATH . '/models/Cart.php';
@@ -24,9 +25,7 @@ class CheckoutController {
         $this->voucherModel = new Voucher();
     }
 
-    /**
-     * Checkout page
-     */
+    /** Hiển thị trang thanh toán (yêu cầu đăng nhập) */
     public function index() {
         requireLogin();
 
@@ -70,9 +69,7 @@ class CheckoutController {
         require_once ROOT_PATH . '/views/checkout/index.php';
     }
 
-    /**
-     * Place order (POST)
-     */
+    /** Xử lý đặt hàng: tạo đơn, lưu chi tiết, giảm tồn kho, gửi email xác nhận */
     public function place() {
         requireLogin();
 
@@ -116,7 +113,7 @@ class CheckoutController {
             $subtotal = $this->cartModel->getTotal($userId);
         }
 
-        // Validate input
+        // Kiểm tra dữ liệu giao hàng đầu vào
         $name    = trim($_POST['shipping_name']    ?? '');
         $phone   = trim($_POST['shipping_phone']   ?? '');
         $email   = trim($_POST['shipping_email']   ?? '');
@@ -143,7 +140,7 @@ class CheckoutController {
             return;
         }
 
-        // Calculate totals
+        // Tính tổng tiền và áp dụng voucher giảm giá
         $discount = 0;
         $voucherId = null;
 
@@ -158,7 +155,7 @@ class CheckoutController {
         $total = $subtotal - $discount;
         if ($total < 0) $total = 0;
 
-        // Check stock availability
+        // Kiểm tra tồn kho từng sản phẩm trước khi tạo đơn
         foreach ($items as $item) {
             if ($item['stock'] < $item['quantity']) {
                 setFlash('error', 'Sản phẩm "' . $item['name'] . '" chỉ còn ' . $item['stock'] . ' sản phẩm');
@@ -167,12 +164,12 @@ class CheckoutController {
             }
         }
 
-        // Begin transaction
+        // Bắt đầu transaction — đảm bảo toàn vẹn dữ liệu
         $db = db();
         $db->beginTransaction();
 
         try {
-            // Create order
+            // Tạo bản ghi đơn hàng
             $orderId = $this->orderModel->create([
                 'order_code'       => generateOrderCode(),
                 'user_id'          => $userId,
@@ -190,24 +187,24 @@ class CheckoutController {
                 'status'           => 'pending',
             ]);
 
-            // Add order details + decrease stock
+            // Thêm chi tiết sản phẩm vào đơn và giảm tồn kho
             foreach ($items as $item) {
                 $this->orderModel->addDetail($orderId, $item, $item['quantity']);
                 $this->productModel->decreaseStock($item['product_id'] ?? $item['id'], $item['quantity']);
             }
 
-            // Use voucher
+            // Đánh dấu voucher đã được sử dụng
             if ($voucherId) {
                 $this->voucherModel->use($voucherId);
             }
 
-            // Update user stats & rank
+            // Cập nhật thống kê mua hàng và hạng thành viên
             $this->userModel->incrementStats($userId, $total);
             $this->userModel->updateRank($userId);
 
-            // Notification
+            // Tạo thông báo đặt hàng thành công cho người dùng
             $orderCode = $this->orderModel->getById($orderId)['order_code'];
-            $db->insert('notifications', [
+            $db->insert('thong_bao', [
                 'user_id' => $userId,
                 'title'   => 'Đặt hàng thành công',
                 'content' => 'Đơn hàng #' . $orderCode . ' đã được tạo thành công. Cảm ơn bạn đã mua hàng!',
@@ -215,7 +212,7 @@ class CheckoutController {
                 'link'    => SITE_URL . '/order/detail/' . $orderId,
             ]);
 
-            // Clear cart or buy-now session
+            // Xóa giỏ hàng hoặc session mua ngay
             if ($isBuyNow) {
                 unset($_SESSION['buy_now']);
             } else {
@@ -228,7 +225,7 @@ class CheckoutController {
             try {
                 $orderRow = $this->orderModel->getById($orderId);
                 // Địa chỉ email nhận: ưu tiên email nhập khi checkout, fallback về email tài khoản
-                $toEmail = $email ?: ($db->fetch("SELECT email FROM users WHERE id=?", [$userId])['email'] ?? '');
+                $toEmail = $email ?: ($db->fetch("SELECT email FROM nguoi_dung WHERE id=?", [$userId])['email'] ?? '');
 
                 if ($toEmail) {
                     $mailResult = buildOrderConfirmEmail(

@@ -245,6 +245,30 @@
     align-items: stretch;
 }
 
+/* ── Category group (khi lọc nhiều dòng máy) ── */
+.pl-category-group {
+    margin-bottom: 2.5rem;
+}
+.pl-category-group:last-child {
+    margin-bottom: 0;
+}
+.pl-category-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    background: var(--color-surface-2);
+    border-left: 4px solid var(--color-primary);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.pl-category-group-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+}
+
 /* ── Product card ── */
 .product-card {
     background: var(--color-surface);

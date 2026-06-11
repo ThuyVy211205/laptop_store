@@ -14,6 +14,7 @@ $selectedPriceRanges= $selectedPriceRanges?? [];
 $products           = $products           ?? [];
 $totalCount         = $totalCount         ?? 0;
 $totalPages         = $totalPages         ?? 1;
+$groupedProducts    = $groupedProducts    ?? null;
 
 $priceRangeOptions = [
     ['value' => '0-10000000',         'label' => 'Dưới 10 triệu'],
@@ -30,24 +31,24 @@ $qParams = $_GET;
 // ── Extra data for category deal tabs ──
 $gamingProducts = db()->fetchAll(
     "SELECT p.*, c.name AS category_name, c.slug AS category_slug
-     FROM products p
-     LEFT JOIN categories c ON p.category_id = c.id
+     FROM san_pham p
+     LEFT JOIN danh_muc c ON p.category_id = c.id
      WHERE (c.slug LIKE '%gaming%' OR c.name LIKE '%Gaming%')
        AND p.stock > 0
      ORDER BY p.created_at DESC LIMIT 4"
 );
 $officeProducts = db()->fetchAll(
     "SELECT p.*, c.name AS category_name, c.slug AS category_slug
-     FROM products p
-     LEFT JOIN categories c ON p.category_id = c.id
+     FROM san_pham p
+     LEFT JOIN danh_muc c ON p.category_id = c.id
      WHERE (c.slug LIKE '%laptop%' AND c.slug NOT LIKE '%gaming%')
        AND p.stock > 0
      ORDER BY p.created_at DESC LIMIT 4"
 );
 $accessoryProducts = db()->fetchAll(
     "SELECT p.*, c.name AS category_name, c.slug AS category_slug
-     FROM products p
-     LEFT JOIN categories c ON p.category_id = c.id
+     FROM san_pham p
+     LEFT JOIN danh_muc c ON p.category_id = c.id
      WHERE (c.slug LIKE '%phu-kien%'
             OR c.name LIKE '%chuột%'
             OR c.name LIKE '%tai nghe%'
@@ -200,7 +201,7 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
                 $fpTotal    = $fpSold + $fpStock;
                 $fpPct      = $fpTotal > 0 ? min(100, round(($fpSold / $fpTotal) * 100)) : 30;
 
-                // Sync badge counters with _product-card.php — max 3 discounts per page
+                // Đồng bộ bộ đếm badge với _product-card.php — tối đa 3 badge giảm giá mỗi trang
                 if (!isset($GLOBALS['_pc_badge_discount'])) $GLOBALS['_pc_badge_discount'] = 0;
                 if (!isset($GLOBALS['_pc_badge_flash']))    $GLOBALS['_pc_badge_flash']    = 0;
                 $fpShowDiscount = $fpDiscount > 0                     && $GLOBALS['_pc_badge_discount'] < 3;
@@ -307,7 +308,7 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
 </section>
 
 <script>
-// Countdown to midnight
+// Đếm ngược đến 23:59:59 cho flash sale
 (function() {
     function tick() {
         var now  = new Date();
@@ -324,7 +325,7 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
     setInterval(tick, 1000);
 })();
 
-// Copy voucher code
+// Sao chép mã voucher vào clipboard
 function copyVoucher(id, btn) {
     var code = document.getElementById(id).textContent.trim();
     navigator.clipboard.writeText(code).then(function() {
@@ -337,7 +338,7 @@ function copyVoucher(id, btn) {
     });
 }
 
-// Category tabs
+// Chuyển đổi tab danh mục trong phần deals
 document.querySelectorAll('.deals-tab-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.deals-tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -482,8 +483,25 @@ document.querySelectorAll('.deals-tab-btn').forEach(function(btn) {
                 </div>
             </div>
 
-            <!-- Product grid -->
-            <?php if (!empty($products)): ?>
+            <!-- Product grid — grouped by category when multiple selected -->
+            <?php if (!empty($groupedProducts)): ?>
+                <?php foreach ($groupedProducts as $group): ?>
+                <div class="pl-category-group">
+                    <div class="pl-category-group-header">
+                        <h5 class="pl-category-group-title">
+                            <i class="fas fa-layer-group me-2"></i><?= htmlspecialchars($group['name']) ?>
+                        </h5>
+                        <span class="badge bg-secondary"><?= count($group['products']) ?> sản phẩm</span>
+                    </div>
+                    <div class="pl-product-grid">
+                        <?php foreach ($group['products'] as $product): ?>
+                        <?php include __DIR__ . '/_product-card.php'; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+            <?php elseif (!empty($products)): ?>
             <div class="pl-product-grid">
                 <?php foreach ($products as $product): ?>
                 <?php include __DIR__ . '/_product-card.php'; ?>

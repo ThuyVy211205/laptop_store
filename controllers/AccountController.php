@@ -1,6 +1,7 @@
 <?php
 /**
- * Account Controller
+ * Controller Tài Khoản
+ * Quản lý trang cá nhân: thông tin, đổi mật khẩu, đơn hàng, thông báo
  */
 
 require_once ROOT_PATH . '/models/User.php';
@@ -15,9 +16,7 @@ class AccountController {
         $this->orderModel = new Order();
     }
 
-    /**
-     * Account dashboard
-     */
+    /** Trang tổng quan tài khoản cá nhân */
     public function index() {
         requireLogin();
 
@@ -37,7 +36,7 @@ class AccountController {
         }
         unset($ord);
 
-        // Stats
+        // Thống kê đơn hàng của người dùng
         $totalOrders = count($this->orderModel->getByUser($_SESSION['user_id']));
         $successOrders = count($this->orderModel->getByUser($_SESSION['user_id'], 'completed'));
 
@@ -45,30 +44,26 @@ class AccountController {
         require_once ROOT_PATH . '/views/account/profile.php';
     }
 
-    /**
-     * Danh sách đơn hàng — delegate sang OrderController
-     */
+    /** Danh sách đơn hàng — ủy quyền sang OrderController */
     public function orders() {
         require_once ROOT_PATH . '/controllers/OrderController.php';
         (new OrderController())->index();
     }
 
-    /**
-     * Notifications / Inbox — xem thông báo và email từ admin
-     */
+    /** Hộp thư / thông báo — xem thông báo và email từ admin */
     public function notifications() {
         requireLogin();
         $userId = $_SESSION['user_id'];
 
         // Đánh dấu đã đọc toàn bộ nếu có param ?read=all
         if (isset($_GET['read']) && $_GET['read'] === 'all') {
-            db()->execute("UPDATE notifications SET is_read=1 WHERE user_id=?", [$userId]);
+            db()->execute("UPDATE thong_bao SET is_read=1 WHERE user_id=?", [$userId]);
             redirect('/account/notifications');
             return;
         }
 
         $notifications = db()->fetchAll(
-            "SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 100",
+            "SELECT * FROM thong_bao WHERE user_id=? ORDER BY created_at DESC LIMIT 100",
             [$userId]
         );
 
@@ -76,16 +71,14 @@ class AccountController {
         require_once ROOT_PATH . '/views/account/notifications.php';
     }
 
-    /**
-     * Mark a single notification as read (AJAX)
-     */
+    /** AJAX: Đánh dấu thông báo đã đọc */
     public function markRead() {
         requireLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id) {
                 db()->execute(
-                    "UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?",
+                    "UPDATE thong_bao SET is_read=1 WHERE id=? AND user_id=?",
                     [$id, $_SESSION['user_id']]
                 );
             }
@@ -96,9 +89,7 @@ class AccountController {
         redirect('/account/notifications');
     }
 
-    /**
-     * Update profile
-     */
+    /** Cập nhật thông tin cá nhân và đổi mật khẩu */
     public function update() {
         requireLogin();
 
@@ -131,7 +122,7 @@ class AccountController {
                 return;
             }
 
-            // Handle avatar upload
+            // Xử lý upload ảnh đại diện
             if (!empty($_FILES['avatar']['tmp_name'])) {
                 $avatar = uploadImage($_FILES['avatar'], 'avatars');
                 if ($avatar) $data['avatar'] = $avatar;

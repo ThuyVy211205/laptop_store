@@ -1,6 +1,7 @@
 <?php
 /**
- * Voucher Model
+ * Model Phiếu Giảm Giá — bảng: phieu_giam_gia
+ * Xử lý kiểm tra, áp dụng và quản lý mã giảm giá
  */
 
 class Voucher {
@@ -10,26 +11,20 @@ class Voucher {
         $this->db = db();
     }
 
-    /**
-     * Get voucher by code
-     */
+    /** Lấy voucher theo mã (chỉ trả về voucher đang kích hoạt) */
     public function getByCode($code) {
         return $this->db->fetch(
-            "SELECT * FROM vouchers WHERE code = ? AND is_active = 1",
+            "SELECT * FROM phieu_giam_gia WHERE code = ? AND is_active = 1",
             [strtoupper($code)]
         );
     }
 
-    /**
-     * Get all vouchers
-     */
+    /** Lấy tất cả voucher (admin) */
     public function getAll() {
-        return $this->db->fetchAll("SELECT * FROM vouchers ORDER BY created_at DESC");
+        return $this->db->fetchAll("SELECT * FROM phieu_giam_gia ORDER BY created_at DESC");
     }
 
-    /**
-     * Apply voucher - returns ['success' => bool, 'message' => str, 'discount' => float]
-     */
+    /** Áp dụng voucher — trả về ['success', 'message', 'discount', 'voucher'] */
     public function apply($code, $orderTotal) {
         $voucher = $this->getByCode($code);
 
@@ -70,27 +65,21 @@ class Voucher {
         ];
     }
 
-    /**
-     * Mark voucher as used
-     */
+    /** Tăng biến đếm lượt sử dụng voucher */
     public function use($voucherId) {
         return $this->db->execute(
-            "UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?",
+            "UPDATE phieu_giam_gia SET used_count = used_count + 1 WHERE id = ?",
             [$voucherId]
         );
     }
 
-    /**
-     * Create voucher
-     */
+    /** Tạo voucher mới, tự chuyển mã thành chữ hoa */
     public function create($data) {
         $data['code'] = strtoupper($data['code']);
-        return $this->db->insert('vouchers', $data);
+        return $this->db->insert('phieu_giam_gia', $data);
     }
 
-    /**
-     * Update voucher
-     */
+    /** Cập nhật thông tin voucher */
     public function update($id, $data) {
         $set = [];
         $params = [];
@@ -99,13 +88,11 @@ class Voucher {
             $params[] = $val;
         }
         $params[] = $id;
-        return $this->db->execute("UPDATE vouchers SET " . implode(', ', $set) . " WHERE id = ?", $params);
+        return $this->db->execute("UPDATE phieu_giam_gia SET " . implode(', ', $set) . " WHERE id = ?", $params);
     }
 
-    /**
-     * Delete voucher
-     */
+    /** Xóa voucher */
     public function delete($id) {
-        return $this->db->execute("DELETE FROM vouchers WHERE id = ?", [$id]);
+        return $this->db->execute("DELETE FROM phieu_giam_gia WHERE id = ?", [$id]);
     }
 }

@@ -49,11 +49,13 @@ $flash       = getFlash();
         <div class="d-flex justify-content-between align-items-center">
             <div class="top-bar-left d-none d-md-flex gap-3">
                 <span><i class="fas fa-phone-alt me-1"></i> Hotline: 1900 9999</span>
-                <span><i class="fas fa-envelope me-1"></i> support@vqstore.vn</span>
+                <a href="mailto:<?= SMTP_USER ?>" class="top-link" style="text-decoration:none;color:inherit">
+                    <i class="fas fa-envelope me-1"></i><?= SMTP_USER ?>
+                </a>
             </div>
             <div class="top-bar-right d-flex gap-3 align-items-center">
                 <span class="d-none d-md-inline"><i class="fas fa-shipping-fast me-1"></i> Miễn phí giao hàng đơn từ 500K</span>
-                <a href="<?= SITE_URL ?>/order" class="top-link"><i class="fas fa-search me-1"></i>Tra cứu đơn hàng</a>
+                <a href="<?= SITE_URL ?>/order/lookup" class="top-link"><i class="fas fa-search me-1"></i>Tra cứu đơn hàng</a>
             </div>
         </div>
     </div>

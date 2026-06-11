@@ -1,6 +1,7 @@
 <?php
 /**
- * Order Controller
+ * Controller Đơn Hàng
+ * Cho phép người dùng xem danh sách, chi tiết đơn hàng và hủy đơn
  */
 
 require_once ROOT_PATH . '/models/Order.php';
@@ -15,9 +16,7 @@ class OrderController {
         $this->userModel  = new User();
     }
 
-    /**
-     * User's orders list
-     */
+    /** Danh sách đơn hàng của người dùng đang đăng nhập */
     public function index() {
         requireLogin();
 
@@ -35,9 +34,7 @@ class OrderController {
         require_once ROOT_PATH . '/views/account/orders.php';
     }
 
-    /**
-     * Order detail
-     */
+    /** Hiển thị chi tiết một đơn hàng */
     public function detail($id) {
         requireLogin();
 
@@ -52,9 +49,7 @@ class OrderController {
         require_once ROOT_PATH . '/views/account/order-detail.php';
     }
 
-    /**
-     * Order success page
-     */
+    /** Trang xác nhận đặt hàng thành công */
     public function success($id) {
         requireLogin();
 
@@ -69,9 +64,27 @@ class OrderController {
         require_once ROOT_PATH . '/views/checkout/success.php';
     }
 
-    /**
-     * Cancel order
-     */
+    /** Tra cứu đơn hàng công khai theo mã đơn — không yêu cầu đăng nhập */
+    public function lookup($param = null) {
+        $code    = trim($_GET['code'] ?? '');
+        $order   = null;
+        $details = null;
+        $error   = null;
+
+        if ($code !== '') {
+            $order = $this->orderModel->getByCode($code);
+            if ($order) {
+                $details = $this->orderModel->getDetails($order['id']);
+            } else {
+                $error = 'Không tìm thấy đơn hàng với mã <strong>' . htmlspecialchars($code) . '</strong>. Vui lòng kiểm tra lại.';
+            }
+        }
+
+        $pageTitle = 'Tra cứu đơn hàng';
+        require_once ROOT_PATH . '/views/order/lookup.php';
+    }
+
+    /** Hủy đơn hàng kèm lý do (kiểm tra quyền trước khi hủy) */
     public function cancel($id) {
         requireLogin();
 
@@ -94,7 +107,7 @@ class OrderController {
         $this->userModel->decrementStats($order['user_id'], $order['total_amount']);
         $this->userModel->updateRank($order['user_id']);
 
-        db()->insert('notifications', [
+        db()->insert('thong_bao', [
             'user_id' => $order['user_id'],
             'title'   => 'Đơn hàng đã bị hủy',
             'content' => 'Đơn hàng #' . $order['order_code'] . ' đã bị hủy. Lý do: ' . $reason,

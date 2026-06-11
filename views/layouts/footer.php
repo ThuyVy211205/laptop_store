@@ -51,7 +51,7 @@
                     <ul class="footer-contact-list">
                         <li><i class="fas fa-map-marker-alt"></i> 123 Nguyễn Văn Cừ, Q.5, TP.HCM</li>
                         <li><i class="fas fa-phone"></i> Hotline: <strong>1900 9999</strong></li>
-                        <li><i class="fas fa-envelope"></i> support@vqstore.vn</li>
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:<?= SMTP_USER ?>" style="color:inherit"><?= SMTP_USER ?></a></li>
                         <li><i class="fas fa-clock"></i> 8:00 - 22:00 (Tất cả các ngày)</li>
                     </ul>
 

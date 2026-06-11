@@ -150,7 +150,7 @@ include ROOT_PATH . '/views/layouts/header.php';
         if (!okEmail || !okPhone) { e.preventDefault(); return; }
     });
 
-    // Password strength meter
+    // Thanh đánh giá độ mạnh mật khẩu
     document.getElementById('pwdInput').addEventListener('input', function () {
         const val = this.value;
         let strength = 0;
@@ -172,7 +172,7 @@ include ROOT_PATH . '/views/layouts/header.php';
         text.style.color = colors[strength];
     });
 
-    // Check password match
+    // Kiểm tra mật khẩu xác nhận khớp
     document.getElementById('pwdConfirmInput').addEventListener('input', function () {
         const pwd = document.getElementById('pwdInput').value;
         if (this.value && this.value !== pwd) {

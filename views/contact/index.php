@@ -90,7 +90,7 @@ include ROOT_PATH . '/views/layouts/header.php';
                             </span>
                             <div class="tc-info__body">
                                 <span class="tc-info__label">Email</span>
-                                <a href="mailto:support@vqstore.vn" class="tc-info__value tc-info__link">support@vqstore.vn</a>
+                                <a href="mailto:<?= SMTP_USER ?>" class="tc-info__value tc-info__link"><?= SMTP_USER ?></a>
                                 <span class="tc-info__note">Phản hồi trong vòng 24 giờ</span>
                             </div>
                         </li>
@@ -285,20 +285,20 @@ include ROOT_PATH . '/views/layouts/header.php';
                                 <option value="" <?= empty($_POST['subject']) ? 'selected' : '' ?>>
                                     -- Chọn chủ đề --
                                 </option>
-                                <option value="technical-support"
-                                    <?= ($_POST['subject'] ?? '') === 'technical-support'  ? 'selected' : '' ?>>
+                                <option value="Hỗ trợ kỹ thuật"
+                                    <?= ($_POST['subject'] ?? '') === 'Hỗ trợ kỹ thuật'  ? 'selected' : '' ?>>
                                     Hỗ trợ kỹ thuật
                                 </option>
-                                <option value="buying-advice"
-                                    <?= ($_POST['subject'] ?? '') === 'buying-advice'      ? 'selected' : '' ?>>
+                                <option value="Tư vấn mua hàng"
+                                    <?= ($_POST['subject'] ?? '') === 'Tư vấn mua hàng'  ? 'selected' : '' ?>>
                                     Tư vấn mua hàng
                                 </option>
-                                <option value="warranty-check"
-                                    <?= ($_POST['subject'] ?? '') === 'warranty-check'     ? 'selected' : '' ?>>
+                                <option value="Kiểm tra bảo hành"
+                                    <?= ($_POST['subject'] ?? '') === 'Kiểm tra bảo hành' ? 'selected' : '' ?>>
                                     Kiểm tra bảo hành
                                 </option>
-                                <option value="others"
-                                    <?= ($_POST['subject'] ?? '') === 'others'             ? 'selected' : '' ?>>
+                                <option value="Khác"
+                                    <?= ($_POST['subject'] ?? '') === 'Khác'              ? 'selected' : '' ?>>
                                     Khác
                                 </option>
                             </select>

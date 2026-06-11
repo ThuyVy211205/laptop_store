@@ -1,42 +1,33 @@
 <?php
 /**
- * Common utility functions
+ * Các hàm tiện ích dùng chung cho toàn dự án
+ * Định dạng, validate, upload, email, phân trang, slug...
  */
 
-/**
- * Format price to VND
- */
+/** Định dạng số tiền sang VND (ví dụ: 1.500.000đ) */
 function formatPrice($amount) {
     return number_format($amount, 0, ',', '.') . 'đ';
 }
 
-/**
- * Calculate discount percentage
- */
+/** Tính phần trăm giảm giá giữa giá gốc và giá sale */
 function calcDiscount($original, $sale) {
     if ($original <= 0 || $sale <= 0 || $sale >= $original) return 0;
     return round((($original - $sale) / $original) * 100);
 }
 
-/**
- * Format date dd/mm/yyyy
- */
+/** Định dạng ngày: dd/mm/yyyy */
 function formatDate($date) {
     if (!$date) return '';
     return date('d/m/Y', strtotime($date));
 }
 
-/**
- * Format datetime dd/mm/yyyy H:i
- */
+/** Định dạng ngày giờ: dd/mm/yyyy H:i */
 function formatDateTime($datetime) {
     if (!$datetime) return '';
     return date('d/m/Y H:i', strtotime($datetime));
 }
 
-/**
- * Create URL-friendly slug from Vietnamese text
- */
+/** Tạo slug thân thiện URL từ văn bản tiếng Việt (bỏ dấu, thay khoảng trắng bằng '-') */
 function createSlug($text) {
     $text = mb_strtolower($text, 'UTF-8');
     $accents = [
@@ -54,24 +45,18 @@ function createSlug($text) {
     return trim($text, '-');
 }
 
-/**
- * Truncate text
- */
+/** Cắt ngắn chuỗi văn bản theo số ký tự, thêm '...' nếu bị cắt */
 function truncate($text, $length = 100) {
     if (mb_strlen($text) <= $length) return $text;
     return mb_substr($text, 0, $length) . '...';
 }
 
-/**
- * Generate order code
- */
+/** Tạo mã đơn hàng ngẫu nhiên dạng TSyymmddhh + 5 ký tự */
 function generateOrderCode() {
     return 'TS' . date('ymd') . strtoupper(substr(uniqid(), -5));
 }
 
-/**
- * Redirect helper
- */
+/** Chuyển hướng trang — hỗ trợ cả URL tương đối và tuyệt đối */
 function redirect($url) {
     if (strpos($url, 'http') !== 0) {
         $url = SITE_URL . '/' . ltrim($url, '/');
@@ -80,9 +65,7 @@ function redirect($url) {
     exit;
 }
 
-/**
- * Flash messages
- */
+/** Thông báo tạm thời (flash message) — lưu/đọc từ session */
 function setFlash($type, $message) {
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
@@ -96,9 +79,7 @@ function getFlash() {
     return null;
 }
 
-/**
- * Sanitize input
- */
+/** Làm sạch dữ liệu đầu vào (htmlspecialchars + trim), hỗ trợ cả mảng */
 function sanitize($input) {
     if (is_array($input)) {
         return array_map('sanitize', $input);
@@ -106,24 +87,18 @@ function sanitize($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
-/**
- * Validate email
- */
+/** Kiểm tra email hợp lệ (chỉ chấp nhận @gmail.com) */
 function isValidEmail($email) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return false;
     return (bool) preg_match('/^[^@\s]+@gmail\.com$/i', $email);
 }
 
-/**
- * Validate Vietnamese phone number
- */
+/** Kiểm tra số điện thoại Việt Nam hợp lệ (bắt đầu 0 hoặc +84, 10 số) */
 function isValidPhone($phone) {
     return preg_match('/^(0|\+84)[3-9]\d{8}$/', $phone);
 }
 
-/**
- * Upload image
- */
+/** Tải ảnh lên server — kiểm tra loại file, kích thước và lưu vào uploads/ */
 function uploadImage($file, $folder = 'products') {
     if (!isset($file['tmp_name']) || empty($file['tmp_name'])) return null;
 
@@ -157,9 +132,7 @@ function noImageUrl() {
          . "%3C/svg%3E";
 }
 
-/**
- * Get image URL (with fallback)
- */
+/** Lấy URL ảnh đầy đủ — fallback về SVG placeholder nếu đường dẫn trống */
 function imgUrl($path) {
     if (empty($path)) return noImageUrl();
     if (strpos($path, 'http') === 0) return $path;
@@ -168,9 +141,7 @@ function imgUrl($path) {
     return UPLOAD_URL . '/' . ltrim($path, '/');
 }
 
-/**
- * Star rating HTML
- */
+/** Tạo HTML hiển thị sao đánh giá (★) từ điểm số thập phân */
 function starRating($rating, $size = '') {
     $html = '<div class="star-rating ' . $size . '">';
     for ($i = 1; $i <= 5; $i++) {
@@ -186,9 +157,7 @@ function starRating($rating, $size = '') {
     return $html;
 }
 
-/**
- * Time ago
- */
+/** Hiển thị thời gian tương đối: 'Vừa xong', 'X phút trước', 'X giờ trước'... */
 function timeAgo($datetime) {
     $diff = time() - strtotime($datetime);
     if ($diff < 60) return 'Vừa xong';
@@ -198,16 +167,14 @@ function timeAgo($datetime) {
     return formatDate($datetime);
 }
 
-/**
- * Simple paginate helper
- */
+/** Tạo HTML phân trang Bootstrap — trả về chuỗi rỗng nếu chỉ có 1 trang */
 function paginate($total, $perPage, $currentPage, $baseUrl) {
     $totalPages = ceil($total / $perPage);
     if ($totalPages <= 1) return '';
 
     $html = '<ul class="pagination justify-content-center">';
 
-    // Previous
+    // Nút trang trước
     if ($currentPage > 1) {
         $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?page=' . ($currentPage - 1) . '"><i class="fas fa-chevron-left"></i></a></li>';
     }
@@ -274,7 +241,7 @@ function buildOrderConfirmEmail(array $order, array $items)
         $pid   = $item['product_id'] ?? ($item['id'] ?? null);
         if ($pid) {
             $firstImg = $dbInst->fetch(
-                "SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1",
+                "SELECT image_path FROM anh_san_pham WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1",
                 [$pid]
             );
             if ($firstImg) $thumb = $firstImg['image_path'];
@@ -443,9 +410,7 @@ function buildOrderConfirmEmail(array $order, array $items)
     return ['html' => $html, 'images' => $cidImages];
 }
 
-/**
- * Build a branded HTML email template.
- */
+/** Tạo khung HTML email có thương hiệu (wrapper chung) */
 function buildMailHtml($subject, $bodyHtml)
 {
     return '<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8">

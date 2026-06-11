@@ -13,6 +13,7 @@ $selectedPriceRanges = $selectedPriceRanges ?? [];
 $products            = $products            ?? [];
 $totalCount          = $totalCount          ?? 0;
 $totalPages          = $totalPages          ?? 1;
+$groupedProducts     = $groupedProducts     ?? null;
 
 $priceRangeOptions = [
     ['value' => '0-10000000',        'label' => 'Dưới 10 triệu'],
@@ -145,8 +146,25 @@ $qParams = $_GET;
                 </div>
             </div>
 
-            <!-- Product grid -->
-            <?php if (!empty($products)): ?>
+            <!-- Product grid — grouped by category when multiple selected -->
+            <?php if (!empty($groupedProducts)): ?>
+                <?php foreach ($groupedProducts as $group): ?>
+                <div class="pl-category-group">
+                    <div class="pl-category-group-header">
+                        <h5 class="pl-category-group-title">
+                            <i class="fas fa-layer-group me-2"></i><?= htmlspecialchars($group['name']) ?>
+                        </h5>
+                        <span class="badge bg-secondary"><?= count($group['products']) ?> sản phẩm</span>
+                    </div>
+                    <div class="pl-product-grid">
+                        <?php foreach ($group['products'] as $product): ?>
+                        <?php include __DIR__ . '/_product-card.php'; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+            <?php elseif (!empty($products)): ?>
             <div class="pl-product-grid">
                 <?php foreach ($products as $product): ?>
                 <?php include __DIR__ . '/_product-card.php'; ?>

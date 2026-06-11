@@ -219,7 +219,7 @@
 </div>
 
 <script>
-// Avatar preview
+// Xem trước ảnh đại diện khi chọn file
 document.getElementById('avatarInput')?.addEventListener('change', function(e) {
     if (e.target.files[0]) {
         const reader = new FileReader();
@@ -228,7 +228,7 @@ document.getElementById('avatarInput')?.addEventListener('change', function(e) {
     }
 });
 
-// Phone validation
+// Kiểm tra định dạng số điện thoại Việt Nam
 const PHONE_RE = /^(0|\+84)[3-9]\d{8}$/;
 const profilePhone = document.getElementById('profilePhone');
 

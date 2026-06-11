@@ -15,10 +15,12 @@ class ContactController {
 
             if (!$name || !$email || !$order_id || !$message) {
                 $error = 'Vui lòng điền đầy đủ các trường bắt buộc.';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $error = 'Email không hợp lệ.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/\.[a-zA-Z]{2,10}$/', $email)) {
+                $error = 'Email không hợp lệ (ví dụ: example@gmail.com).';
+            } elseif ($phone && !isValidPhone($phone)) {
+                $error = 'Số điện thoại không hợp lệ (ví dụ: 0901234567).';
             } else {
-                db()->insert('contacts', [
+                db()->insert('lien_he', [
                     'name'     => $name,
                     'email'    => $email,
                     'phone'    => $phone    ?: null,
