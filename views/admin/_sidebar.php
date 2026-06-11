@@ -49,7 +49,6 @@ $pendingOrders   = db()->fetch("SELECT COUNT(*) AS c FROM orders WHERE status='p
             <span class="badge-count"><?= $newContactCount ?></span>
             <?php endif; ?>
         </a>
-
         <span class="admin-nav-label">Báo cáo</span>
         <a href="<?= SITE_URL ?>/admin/revenue" class="admin-nav-item <?= $activePage === 'revenue' ? 'active' : '' ?>">
             <i class="fas fa-chart-line"></i> Doanh thu

@@ -60,10 +60,9 @@ include ROOT_PATH . '/views/layouts/header.php';
 
                         <div class="auth-divider"><span>HOẶC</span></div>
 
-                        <button type="button" class="btn btn-google w-100" disabled title="Tính năng đang phát triển"
-                            style="opacity:.5;cursor:not-allowed;">
+                        <a href="<?= SITE_URL ?>/auth/googleLogin" class="btn btn-google w-100">
                             <i class="fab fa-google me-2"></i>Đăng nhập với Google
-                        </button>
+                        </a>
 
                         <p class="auth-footer-text">
                             Chưa có tài khoản?

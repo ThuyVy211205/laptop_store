@@ -84,6 +84,9 @@ $to   = min($page * 15, $total);
                 <span class="badge-count"><?= $newContactCount ?></span>
                 <?php endif; ?>
             </a>
+            <a href="<?= SITE_URL ?>/admin/mail" class="admin-nav-item">
+                <i class="fas fa-paper-plane"></i> Gửi Email
+            </a>
 
             <span class="admin-nav-label">Báo cáo</span>
             <a href="<?= SITE_URL ?>/admin/revenue" class="admin-nav-item">
@@ -140,8 +143,7 @@ $to   = min($page * 15, $total);
                         <span> / Sản phẩm</span>
                     </div>
                 </div>
-                <button class="btn-admin btn-admin-primary" data-bs-toggle="modal" data-bs-target="#productModal"
-                        onclick="openAddModal()">
+                <button class="btn-admin btn-admin-primary" onclick="openAddModal()">
                     <i class="fas fa-plus"></i> Thêm sản phẩm
                 </button>
             </div>
@@ -324,108 +326,117 @@ $to   = min($page * 15, $total);
                 <h5 class="modal-title" id="productModalTitle">Thêm sản phẩm mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="<?= SITE_URL ?>/admin/products" enctype="multipart/form-data" id="productForm">
+            <div class="modal-body">
+                <form method="POST" action="<?= SITE_URL ?>/admin/products" enctype="multipart/form-data" id="productForm" novalidate>
                 <input type="hidden" name="action" id="formAction" value="add">
                 <input type="hidden" name="id"     id="productId"   value="">
                 <input type="hidden" name="current_thumbnail" id="currentThumbnail" value="">
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <!-- Name -->
-                        <div class="col-12">
-                            <label class="admin-form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                            <input type="text" name="name" id="fName" class="admin-form-control"
-                                   placeholder="VD: Laptop Dell Inspiron 15 3520" required>
-                        </div>
+                <div class="row g-3">
+                    <!-- Validation error -->
+                    <div class="col-12" id="formError" style="display:none;">
+                        <div class="alert alert-danger py-2 mb-0" id="formErrorMsg"></div>
+                    </div>
 
-                        <!-- Category + Brand -->
-                        <div class="col-md-6">
-                            <label class="admin-form-label">Danh mục <span class="text-danger">*</span></label>
-                            <select name="category_id" id="fCategory" class="admin-form-control" required>
-                                <option value="">-- Chọn danh mục --</option>
-                                <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="admin-form-label">Thương hiệu</label>
-                            <input type="text" name="brand" id="fBrand" class="admin-form-control"
-                                   placeholder="Dell, HP, Apple...">
-                        </div>
+                    <!-- Name -->
+                    <div class="col-12">
+                        <label class="admin-form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="fName" class="admin-form-control"
+                               placeholder="VD: Laptop Dell Inspiron 15 3520"
+                               oninput="this.style.borderColor=''">
+                    </div>
 
-                        <!-- SKU -->
-                        <div class="col-md-6">
-                            <label class="admin-form-label">Mã SKU</label>
-                            <input type="text" name="sku" id="fSku" class="admin-form-control"
-                                   placeholder="DELL-INS-15-3520">
-                        </div>
+                    <!-- Category + Brand -->
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Danh mục <span class="text-danger">*</span></label>
+                        <select name="category_id" id="fCategory" class="admin-form-control"
+                                onchange="this.style.borderColor=''"
+                                onfocus="this.style.borderColor=''">
+                            <option value="">-- Chọn danh mục --</option>
+                            <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Thương hiệu</label>
+                        <input type="text" name="brand" id="fBrand" class="admin-form-control"
+                               placeholder="Dell, HP, Apple...">
+                    </div>
 
-                        <!-- Price + Sale price -->
-                        <div class="col-md-3">
-                            <label class="admin-form-label">Giá gốc (đ) <span class="text-danger">*</span></label>
-                            <input type="number" name="price" id="fPrice" class="admin-form-control"
-                                   placeholder="0" min="0" required>
+                    <!-- Thumbnail — placed here so it's always visible without scrolling -->
+                    <div class="col-12">
+                        <label class="admin-form-label">Ảnh đại diện</label>
+                        <div id="uploadZone" class="upload-zone" onclick="document.getElementById('thumbnailInput').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div style="font-weight:600;margin-bottom:4px;">Nhấn để chọn ảnh</div>
+                            <div style="font-size:12px;">JPG, PNG, WEBP — tối đa 5MB</div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="admin-form-label">Giá khuyến mãi (đ)</label>
-                            <input type="number" name="sale_price" id="fSalePrice" class="admin-form-control"
-                                   placeholder="0" min="0">
-                        </div>
-
-                        <!-- Stock + Status -->
-                        <div class="col-md-4">
-                            <label class="admin-form-label">Tồn kho</label>
-                            <input type="number" name="stock" id="fStock" class="admin-form-control"
-                                   placeholder="0" min="0" value="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="admin-form-label">Trạng thái</label>
-                            <select name="status" id="fStatus" class="admin-form-control">
-                                <option value="active">Đang bán</option>
-                                <option value="inactive">Ẩn</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end pb-2">
-                            <label class="admin-switch">
-                                <input type="checkbox" name="is_featured" id="fFeatured" value="1">
-                                <span class="admin-switch-track"></span>
-                                <span>Nổi bật</span>
-                            </label>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="col-12">
-                            <label class="admin-form-label">Mô tả</label>
-                            <textarea name="description" id="fDescription" class="admin-form-control"
-                                      placeholder="Mô tả sản phẩm..."></textarea>
-                        </div>
-
-                        <!-- Thumbnail -->
-                        <div class="col-12">
-                            <label class="admin-form-label">Ảnh đại diện</label>
-                            <div id="uploadZone" class="upload-zone" onclick="document.getElementById('thumbnailInput').click()">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <div style="font-weight:600;margin-bottom:4px;">Nhấn để chọn ảnh</div>
-                                <div style="font-size:12px;">JPG, PNG, WEBP — tối đa 5MB</div>
-                            </div>
-                            <input type="file" name="thumbnail" id="thumbnailInput" accept="image/*"
-                                   style="display:none;" onchange="previewImg(this)">
-                            <div id="imgPreviewWrap" class="mt-2" style="display:none;">
-                                <img id="imgPreview" src="" alt="" class="img-preview">
-                                <button type="button" class="btn btn-sm btn-light ms-2" onclick="clearImg()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <input type="file" name="thumbnail" id="thumbnailInput" accept="image/*"
+                               style="display:none;" onchange="previewImg(this)">
+                        <div id="imgPreviewWrap" class="mt-2" style="display:none;">
+                            <img id="imgPreview" src="" alt="" class="img-preview">
+                            <button type="button" class="btn btn-sm btn-light ms-2" onclick="clearImg()">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
+
+                    <!-- SKU -->
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Mã SKU</label>
+                        <input type="text" name="sku" id="fSku" class="admin-form-control"
+                               placeholder="DELL-INS-15-3520">
+                    </div>
+
+                    <!-- Price + Sale price -->
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Giá gốc (đ) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" id="fPrice" class="admin-form-control"
+                               placeholder="Nhập giá" min="0" oninput="this.style.borderColor=''"
+                               onchange="this.style.borderColor=''">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Giá KM (đ)</label>
+                        <input type="number" name="sale_price" id="fSalePrice" class="admin-form-control"
+                               placeholder="0" min="0">
+                    </div>
+
+                    <!-- Stock + Status -->
+                    <div class="col-md-4">
+                        <label class="admin-form-label">Tồn kho</label>
+                        <input type="number" name="stock" id="fStock" class="admin-form-control"
+                               placeholder="0" min="0" value="0">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="admin-form-label">Trạng thái</label>
+                        <select name="status" id="fStatus" class="admin-form-control">
+                            <option value="active">Đang bán</option>
+                            <option value="inactive">Ẩn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end pb-2">
+                        <label class="admin-switch">
+                            <input type="checkbox" name="is_featured" id="fFeatured" value="1">
+                            <span class="admin-switch-track"></span>
+                            <span>Nổi bật</span>
+                        </label>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label class="admin-form-label">Mô tả</label>
+                        <textarea name="description" id="fDescription" class="admin-form-control"
+                                  placeholder="Mô tả sản phẩm..." rows="3"></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-admin btn-admin-outline" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn-admin btn-admin-primary" id="submitBtn">
-                        <i class="fas fa-save me-1"></i> Lưu sản phẩm
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-outline" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="productForm" class="btn-admin btn-admin-primary" id="submitBtn">
+                    <i class="fas fa-save me-1"></i> Lưu sản phẩm
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -460,6 +471,14 @@ $to   = min($page * 15, $total);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// Clean up any stale Bootstrap backdrop left over from a previous page state
+(function() {
+    document.querySelectorAll('.modal-backdrop').forEach(function(el) { el.remove(); });
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+})();
+
 // ---- Mobile sidebar ----
 document.getElementById('sidebarToggle').addEventListener('click', function () {
     document.getElementById('adminSidebar').classList.toggle('open');
@@ -470,6 +489,14 @@ document.getElementById('sidebarOverlay').addEventListener('click', function () 
     this.classList.remove('show');
 });
 
+var _productModal = null;
+function getProductModal() {
+    if (!_productModal) {
+        _productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    }
+    return _productModal;
+}
+
 // ---- Add modal ----
 function openAddModal() {
     document.getElementById('productModalTitle').textContent = 'Thêm sản phẩm mới';
@@ -477,7 +504,9 @@ function openAddModal() {
     document.getElementById('productId').value   = '';
     document.getElementById('submitBtn').innerHTML = '<i class="fas fa-plus me-1"></i> Thêm sản phẩm';
     document.getElementById('productForm').reset();
+    document.getElementById('formError').style.display = 'none';
     clearImg();
+    getProductModal().show();
 }
 
 // ---- Edit modal ----
@@ -497,8 +526,8 @@ function openEditModal(p) {
     document.getElementById('fFeatured').checked      = p.is_featured == 1;
     document.getElementById('currentThumbnail').value = p.thumbnail  || '';
     document.getElementById('submitBtn').innerHTML    = '<i class="fas fa-save me-1"></i> Cập nhật';
+    document.getElementById('formError').style.display = 'none';
 
-    // Show current thumbnail
     if (p.thumbnail) {
         const isAsset = p.thumbnail.startsWith('assets/');
         document.getElementById('imgPreview').src = isAsset
@@ -510,7 +539,7 @@ function openEditModal(p) {
         clearImg();
     }
 
-    new bootstrap.Modal(document.getElementById('productModal')).show();
+    getProductModal().show();
 }
 
 // ---- Delete confirm ----
@@ -521,29 +550,75 @@ function confirmDelete(id, name) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
+// ---- JS validation ----
+document.getElementById('productForm').addEventListener('submit', function (e) {
+    var fName  = document.getElementById('fName');
+    var fCat   = document.getElementById('fCategory');
+    var fPrice = document.getElementById('fPrice');
+    var name   = fName.value.trim();
+    var catId  = fCat.value;
+    var price  = parseFloat(fPrice.value);
+    var msg    = '';
+    var focusEl = null;
+
+    // Reset highlights
+    [fName, fCat, fPrice].forEach(function(el) {
+        el.style.borderColor = '';
+    });
+
+    if (!name)              { msg = 'Vui lòng nhập tên sản phẩm.';  focusEl = fName; }
+    else if (!catId)        { msg = 'Vui lòng chọn danh mục.';       focusEl = fCat; }
+    else if (!(price > 0))  { msg = 'Giá gốc phải lớn hơn 0.';      focusEl = fPrice; }
+
+    if (msg) {
+        e.preventDefault();
+        // Highlight invalid field
+        if (focusEl) focusEl.style.borderColor = '#dc2626';
+        // Show error at top
+        document.getElementById('formErrorMsg').textContent = msg;
+        document.getElementById('formError').style.display = 'block';
+        // Scroll modal body to top so error is visible
+        var modalBody = document.querySelector('#productModal .modal-body');
+        if (modalBody) modalBody.scrollTop = 0;
+    }
+});
+
 // ---- Image preview ----
 function previewImg(input) {
     if (input.files && input.files[0]) {
-        const reader = new FileReader();
+        var file = input.files[0];
+        var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowed.includes(file.type)) {
+            alert('Chỉ chấp nhận ảnh JPG, PNG, WEBP');
+            input.value = '';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Ảnh không được vượt quá 5MB');
+            input.value = '';
+            return;
+        }
+        var reader = new FileReader();
         reader.onload = function (e) {
             document.getElementById('imgPreview').src = e.target.result;
             document.getElementById('imgPreviewWrap').style.display = 'flex';
             document.getElementById('imgPreviewWrap').style.alignItems = 'center';
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 }
 
 function clearImg() {
-    document.getElementById('thumbnailInput').value    = '';
-    document.getElementById('imgPreview').src          = '';
+    document.getElementById('thumbnailInput').value = '';
+    document.getElementById('imgPreview').src       = '';
     document.getElementById('imgPreviewWrap').style.display = 'none';
-    document.getElementById('currentThumbnail').value  = '';
+    document.getElementById('currentThumbnail').value = '';
 }
 
 // Reset modal on close
 document.getElementById('productModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('productForm').reset();
+    document.getElementById('formError').style.display = 'none';
     clearImg();
     document.getElementById('formAction').value = 'add';
     document.getElementById('productId').value  = '';

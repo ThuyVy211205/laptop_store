@@ -185,7 +185,6 @@ class CheckoutController {
                 'discount_amount'  => $discount,
                 'total_amount'     => $total,
                 'voucher_id'       => $voucherId,
-                'voucher_code'     => $voucherCode ?: null,
                 'payment_method'   => $payMethod,
                 'payment_status'   => 'pending',
                 'status'           => 'pending',
@@ -194,7 +193,7 @@ class CheckoutController {
             // Add order details + decrease stock
             foreach ($items as $item) {
                 $this->orderModel->addDetail($orderId, $item, $item['quantity']);
-                $this->productModel->decreaseStock($item['id'], $item['quantity']);
+                $this->productModel->decreaseStock($item['product_id'] ?? $item['id'], $item['quantity']);
             }
 
             // Use voucher
@@ -224,6 +223,29 @@ class CheckoutController {
             }
 
             $db->commit();
+
+            // Gửi email xác nhận đơn hàng (ngoài transaction — lỗi mail không hủy đơn)
+            try {
+                $orderRow = $this->orderModel->getById($orderId);
+                // Địa chỉ email nhận: ưu tiên email nhập khi checkout, fallback về email tài khoản
+                $toEmail = $email ?: ($db->fetch("SELECT email FROM users WHERE id=?", [$userId])['email'] ?? '');
+
+                if ($toEmail) {
+                    $mailResult = buildOrderConfirmEmail(
+                        array_merge($orderRow, ['id' => $orderId]),
+                        $items
+                    );
+                    sendOrderMail(
+                        $toEmail, $name,
+                        'Xác nhận đơn hàng #' . $orderCode,
+                        $mailResult['html'],
+                        $err,
+                        $mailResult['images']
+                    );
+                }
+            } catch (Exception $mailEx) {
+                error_log('Order confirm mail error: ' . $mailEx->getMessage());
+            }
 
             redirect('/order/success/' . $orderId);
         } catch (Exception $e) {

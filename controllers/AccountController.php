@@ -46,6 +46,57 @@ class AccountController {
     }
 
     /**
+     * Danh sách đơn hàng — delegate sang OrderController
+     */
+    public function orders() {
+        require_once ROOT_PATH . '/controllers/OrderController.php';
+        (new OrderController())->index();
+    }
+
+    /**
+     * Notifications / Inbox — xem thông báo và email từ admin
+     */
+    public function notifications() {
+        requireLogin();
+        $userId = $_SESSION['user_id'];
+
+        // Đánh dấu đã đọc toàn bộ nếu có param ?read=all
+        if (isset($_GET['read']) && $_GET['read'] === 'all') {
+            db()->execute("UPDATE notifications SET is_read=1 WHERE user_id=?", [$userId]);
+            redirect('/account/notifications');
+            return;
+        }
+
+        $notifications = db()->fetchAll(
+            "SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 100",
+            [$userId]
+        );
+
+        $pageTitle = 'Thông báo & Email';
+        require_once ROOT_PATH . '/views/account/notifications.php';
+    }
+
+    /**
+     * Mark a single notification as read (AJAX)
+     */
+    public function markRead() {
+        requireLogin();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id) {
+                db()->execute(
+                    "UPDATE notifications SET is_read=1 WHERE id=? AND user_id=?",
+                    [$id, $_SESSION['user_id']]
+                );
+            }
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => true]);
+            exit;
+        }
+        redirect('/account/notifications');
+    }
+
+    /**
      * Update profile
      */
     public function update() {

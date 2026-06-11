@@ -211,6 +211,167 @@ class AuthController
     }
 
     /**
+     * Google OAuth — khởi tạo đăng nhập, chuyển hướng sang Google
+     */
+    public function googleLogin()
+    {
+        if (isLoggedIn()) {
+            redirect('/account');
+            return;
+        }
+
+        if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+            setFlash('error', 'Chức năng đăng nhập Google chưa được cấu hình.');
+            redirect('/auth/login');
+            return;
+        }
+
+        $state = bin2hex(random_bytes(16));
+        $_SESSION['oauth_state'] = $state;
+
+        $params = http_build_query([
+            'client_id'     => GOOGLE_CLIENT_ID,
+            'redirect_uri'  => GOOGLE_REDIRECT_URI,
+            'response_type' => 'code',
+            'scope'         => 'openid email profile',
+            'state'         => $state,
+            'access_type'   => 'online',
+        ]);
+
+        header('Location: https://accounts.google.com/o/oauth2/v2/auth?' . $params);
+        exit;
+    }
+
+    /**
+     * Google OAuth — nhận callback, xử lý đăng nhập / đăng ký
+     */
+    public function googleCallback()
+    {
+        // Kiểm tra lỗi từ Google
+        if (!empty($_GET['error'])) {
+            setFlash('error', 'Đăng nhập Google bị từ chối.');
+            redirect('/auth/login');
+            return;
+        }
+
+        // Xác minh state chống CSRF
+        $state = $_GET['state'] ?? '';
+        if (!$state || $state !== ($_SESSION['oauth_state'] ?? '')) {
+            setFlash('error', 'Xác thực thất bại. Vui lòng thử lại.');
+            redirect('/auth/login');
+            return;
+        }
+        unset($_SESSION['oauth_state']);
+
+        $code = $_GET['code'] ?? '';
+        if (!$code) {
+            setFlash('error', 'Đăng nhập Google thất bại.');
+            redirect('/auth/login');
+            return;
+        }
+
+        // Đổi code lấy access token
+        $tokenData = $this->googleExchangeCode($code);
+        if (!$tokenData || empty($tokenData['access_token'])) {
+            setFlash('error', 'Không thể lấy token từ Google. Vui lòng thử lại.');
+            redirect('/auth/login');
+            return;
+        }
+
+        // Lấy thông tin người dùng từ Google
+        $googleUser = $this->googleGetUserInfo($tokenData['access_token']);
+        if (!$googleUser || empty($googleUser['email'])) {
+            setFlash('error', 'Không thể lấy thông tin tài khoản Google.');
+            redirect('/auth/login');
+            return;
+        }
+
+        $googleId = $googleUser['sub'] ?? '';
+        $email    = $googleUser['email'];
+        $name     = $googleUser['name'] ?? $email;
+        $avatar   = $googleUser['picture'] ?? null;
+
+        // Tìm user theo google_id hoặc email
+        $user = $googleId ? $this->userModel->getByGoogleId($googleId) : null;
+        if (!$user) {
+            $user = $this->userModel->getByEmail($email);
+        }
+
+        if ($user) {
+            if ($user['status'] === 'blocked') {
+                setFlash('error', 'Tài khoản đã bị khóa. Vui lòng liên hệ admin.');
+                redirect('/auth/login');
+                return;
+            }
+            // Lưu google_id nếu chưa có
+            if (empty($user['google_id']) && $googleId) {
+                db()->execute("UPDATE users SET google_id=? WHERE id=?", [$googleId, $user['id']]);
+            }
+        } else {
+            // Tạo tài khoản mới qua Google
+            $userId = db()->insert('users', [
+                'full_name' => $name,
+                'email'     => $email,
+                'google_id' => $googleId,
+                'avatar'    => $avatar,
+            ]);
+            $user = $this->userModel->getById($userId);
+
+            db()->insert('notifications', [
+                'user_id' => $userId,
+                'title'   => 'Chào mừng đến với VQSTORE!',
+                'content' => 'Cảm ơn bạn đã đăng ký tài khoản bằng Google. Hãy khám phá ngay các sản phẩm hot!',
+                'type'    => 'info',
+            ]);
+        }
+
+        // Đăng nhập
+        $_SESSION['user_id']    = $user['id'];
+        $_SESSION['user_name']  = $user['full_name'];
+        $_SESSION['user_email'] = $user['email'];
+        $_SESSION['user_rank']  = $user['rank'];
+
+        $cartModel = new Cart();
+        $cartModel->mergeSessionToDb($user['id']);
+
+        setFlash('success', 'Đăng nhập thành công! Chào mừng ' . $user['full_name']);
+        redirect('/account');
+    }
+
+    private function googleExchangeCode($code)
+    {
+        $ch = curl_init('https://oauth2.googleapis.com/token');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_POSTFIELDS     => http_build_query([
+                'code'          => $code,
+                'client_id'     => GOOGLE_CLIENT_ID,
+                'client_secret' => GOOGLE_CLIENT_SECRET,
+                'redirect_uri'  => GOOGLE_REDIRECT_URI,
+                'grant_type'    => 'authorization_code',
+            ]),
+        ]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response ? json_decode($response, true) : null;
+    }
+
+    private function googleGetUserInfo($accessToken)
+    {
+        $ch = curl_init('https://www.googleapis.com/oauth2/v3/userinfo');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $accessToken],
+        ]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response ? json_decode($response, true) : null;
+    }
+
+    /**
      * Reset password
      */
     public function resetPassword()

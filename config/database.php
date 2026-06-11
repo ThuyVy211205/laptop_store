@@ -44,14 +44,24 @@ if (DEBUG) {
     ini_set('display_errors', 0);
 }
 
-// ===== Mail Configuration (placeholder) =====
-define('MAIL_FROM', 'noreply@techstore.vn');
+// ===== Mail / SMTP Configuration =====
 define('MAIL_FROM_NAME', 'VQSTORE');
+define('SMTP_HOST',      'smtp.gmail.com');
+define('SMTP_PORT',      587);
+
+// Tài khoản gửi email marketing (admin → khách) — Yêu cầu 2
+define('SMTP_USER',      'vyphan21222005@gmail.com');
+define('SMTP_PASS',      'yfsdvgxfrgjizshb');
+
+// Tài khoản no-reply (xác nhận đơn hàng tự động) — Yêu cầu 1
+define('SMTP_NOREPLY_USER', 'vyphan21222005@gmail.com');
+define('SMTP_NOREPLY_PASS', 'yfsdvgxfrgjizshb');
+define('MAIL_FROM',          'vyphan21222005@gmail.com');
 
 // ===== Google OAuth (placeholder) =====
-define('GOOGLE_CLIENT_ID', '');
-define('GOOGLE_CLIENT_SECRET', '');
-define('GOOGLE_REDIRECT_URI', SITE_URL . '/auth/google-callback');
+define('GOOGLE_CLIENT_ID',     '80367818855-pdd5786ncki43103lstsae3gom0180r9.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_SECRET', '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');
+define('GOOGLE_REDIRECT_URI', SITE_URL . '/auth/googleCallback');
 
 /**
  * Database Class - PDO Singleton

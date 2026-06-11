@@ -23,7 +23,7 @@ class Order {
     public function addDetail($orderId, $product, $quantity) {
         return $this->db->insert('order_details', [
             'order_id'     => $orderId,
-            'product_id'   => $product['id'],
+            'product_id'   => $product['product_id'] ?? $product['id'],
             'product_name' => $product['name'],
             'thumbnail'    => $product['thumbnail'],
             'price'        => $product['sale_price'] ?: $product['price'],
@@ -37,9 +37,10 @@ class Order {
      */
     public function getById($id) {
         return $this->db->fetch(
-            "SELECT o.*, u.full_name, u.email
+            "SELECT o.*, u.full_name, u.email, v.code AS voucher_code
              FROM orders o
              LEFT JOIN users u ON o.user_id = u.id
+             LEFT JOIN vouchers v ON o.voucher_id = v.id
              WHERE o.id = ?",
             [$id]
         );
@@ -62,13 +63,16 @@ class Order {
      * Get orders by user
      */
     public function getByUser($userId, $status = null) {
-        $sql = "SELECT * FROM orders WHERE user_id = ?";
+        $sql = "SELECT o.*, v.code AS voucher_code
+                FROM orders o
+                LEFT JOIN vouchers v ON o.voucher_id = v.id
+                WHERE o.user_id = ?";
         $params = [$userId];
         if ($status) {
-            $sql .= " AND status = ?";
+            $sql .= " AND o.status = ?";
             $params[] = $status;
         }
-        $sql .= " ORDER BY created_at DESC";
+        $sql .= " ORDER BY o.created_at DESC";
         return $this->db->fetchAll($sql, $params);
     }
 
@@ -77,7 +81,10 @@ class Order {
      */
     public function getDetails($orderId) {
         return $this->db->fetchAll(
-            "SELECT od.*, p.slug
+            "SELECT od.*, p.slug, p.thumbnail AS product_thumbnail,
+                    (SELECT image_path FROM product_images
+                     WHERE product_id = od.product_id
+                     ORDER BY sort_order ASC LIMIT 1) AS first_image
              FROM order_details od
              LEFT JOIN products p ON od.product_id = p.id
              WHERE od.order_id = ?",

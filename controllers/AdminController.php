@@ -225,6 +225,12 @@ class AdminController {
             $allowed = ['pending','confirmed','shipping','delivered','completed','cancelled'];
             if ($id && in_array($status, $allowed)) {
                 $reason = trim($_POST['cancel_reason'] ?? '');
+
+                // Lấy thông tin đơn hàng trước khi cập nhật để gửi thông báo
+                $order = $this->db->fetch(
+                    "SELECT user_id, order_code FROM orders WHERE id=?", [$id]
+                );
+
                 if ($status === 'cancelled' && $reason) {
                     $this->db->execute(
                         "UPDATE orders SET status='cancelled', cancel_reason=? WHERE id=?",
@@ -236,13 +242,34 @@ class AdminController {
 
                 // COD: tự động đánh dấu đã thanh toán khi hoàn thành
                 if ($status === 'completed') {
-                    $order = $this->db->fetch(
+                    $orderExtra = $this->db->fetch(
                         "SELECT payment_method, payment_status FROM orders WHERE id=?", [$id]
                     );
-                    if ($order && $order['payment_method'] === 'cod' && $order['payment_status'] === 'pending') {
+                    if ($orderExtra && $orderExtra['payment_method'] === 'cod' && $orderExtra['payment_status'] === 'pending') {
                         $this->db->execute(
                             "UPDATE orders SET payment_status='paid' WHERE id=?", [$id]
                         );
+                    }
+                }
+
+                // Gửi thông báo cho khách hàng khi trạng thái thay đổi
+                if ($order && $order['user_id']) {
+                    $statusMessages = [
+                        'confirmed'  => ['title' => 'Đơn hàng đã được xác nhận', 'content' => 'Đơn hàng #%s đã được xác nhận và đang được chuẩn bị.'],
+                        'shipping'   => ['title' => 'Đơn hàng đang giao hàng', 'content' => 'Đơn hàng #%s đang trên đường giao đến bạn.'],
+                        'delivered'  => ['title' => 'Đơn hàng đã giao thành công', 'content' => 'Đơn hàng #%s đã được giao thành công. Vui lòng xác nhận đã nhận hàng.'],
+                        'completed'  => ['title' => 'Đơn hàng hoàn thành', 'content' => 'Đơn hàng #%s đã hoàn thành. Cảm ơn bạn đã mua hàng!'],
+                        'cancelled'  => ['title' => 'Đơn hàng đã bị hủy', 'content' => 'Đơn hàng #%s đã bị hủy' . ($reason ? '. Lý do: ' . $reason : '') . '.'],
+                    ];
+                    if (isset($statusMessages[$status])) {
+                        $msg = $statusMessages[$status];
+                        $this->db->insert('notifications', [
+                            'user_id' => $order['user_id'],
+                            'title'   => $msg['title'],
+                            'content' => sprintf($msg['content'], $order['order_code']),
+                            'type'    => 'order',
+                            'link'    => SITE_URL . '/order/detail/' . $id,
+                        ]);
                     }
                 }
 
@@ -612,6 +639,83 @@ class AdminController {
         ];
 
         include ROOT_PATH . '/views/admin/contacts.php';
+    }
+
+    /* ================================================================
+       Admin Mail — gửi email cho khách hàng
+       ================================================================ */
+    public function mail($param = null)
+    {
+        $this->requireAdmin();
+        $admin = $_SESSION['admin'];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $subject     = trim($_POST['subject']      ?? '');
+            $content     = trim($_POST['content']      ?? '');
+            $recipientId = $_POST['recipient_id']      ?? 'all';
+
+            if (!$subject || !$content) {
+                setFlash('error', 'Vui lòng nhập tiêu đề và nội dung email.');
+                redirect('/admin/mail');
+                return;
+            }
+
+            // Lấy danh sách người nhận
+            if ($recipientId === 'all') {
+                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM users WHERE status='active' AND email != ''");
+                $recipientType = 'all';
+            } else {
+                $recipients    = $this->db->fetchAll("SELECT id, full_name, email FROM users WHERE id=? AND status='active'", [(int)$recipientId]);
+                $recipientType = 'single';
+            }
+
+            if (empty($recipients)) {
+                setFlash('error', 'Không tìm thấy khách hàng nào để gửi.');
+                redirect('/admin/mail');
+                return;
+            }
+
+            $sentOk = 0;
+            $sentFail = 0;
+
+            foreach ($recipients as $user) {
+                // 1. Lưu vào notifications để khách xem trong tài khoản
+                $this->db->insert('notifications', [
+                    'user_id' => $user['id'],
+                    'title'   => $subject,
+                    'content' => $content,
+                    'type'    => 'admin_mail',
+                    'link'    => SITE_URL . '/account/notifications',
+                ]);
+
+                // 2. Gửi email thật qua SMTP
+                $htmlBody = buildMailHtml($subject, nl2br(htmlspecialchars($content)));
+                $smtpErr  = '';
+                if (sendMail($user['email'], $user['full_name'], $subject, $htmlBody, $smtpErr)) {
+                    $sentOk++;
+                } else {
+                    $sentFail++;
+                }
+            }
+
+            $total = count($recipients);
+            if ($sentFail === 0) {
+                setFlash('success', "Đã gửi thành công $sentOk/$total email!");
+            } elseif ($sentOk === 0) {
+                setFlash('error', "Đã lưu thông báo cho $total khách trong hệ thống, nhưng gửi SMTP thất bại ($sentFail lỗi). Kiểm tra App Password.");
+            } else {
+                setFlash('warning', "Đã lưu thông báo cho $total khách. Gửi SMTP: $sentOk thành công, $sentFail thất bại.");
+            }
+            redirect('/admin/mail');
+            return;
+        }
+
+        // GET — form soạn email
+        $users = $this->db->fetchAll(
+            "SELECT id, full_name, email FROM users WHERE status='active' ORDER BY full_name"
+        );
+        $activePage = 'mail';
+        require_once ROOT_PATH . '/views/admin/mail.php';
     }
 
     /* ================================================================

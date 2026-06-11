@@ -227,3 +227,257 @@ function paginate($total, $perPage, $currentPage, $baseUrl) {
     $html .= '</ul>';
     return $html;
 }
+
+/**
+ * Gửi email marketing (admin → khách) qua tài khoản SMTP_USER (vqstore296).
+ */
+function sendMail($toEmail, $toName, $subject, $htmlBody, &$error = '')
+{
+    require_once ROOT_PATH . '/helpers/Mailer.php';
+    return Mailer::send($toEmail, $toName, $subject, $htmlBody, $error, SMTP_USER, SMTP_PASS);
+}
+
+/**
+ * Gửi email tự động (xác nhận đơn hàng, trạng thái...) qua tài khoản SMTP_NOREPLY_USER.
+ */
+function sendOrderMail($toEmail, $toName, $subject, $htmlBody, &$error = '', array $inlineImages = [])
+{
+    require_once ROOT_PATH . '/helpers/Mailer.php';
+    return Mailer::send($toEmail, $toName, $subject, $htmlBody, $error, SMTP_NOREPLY_USER, SMTP_NOREPLY_PASS, $inlineImages);
+}
+
+/**
+ * Xây dựng HTML email xác nhận đơn hàng (format giống BKshop).
+ */
+function buildOrderConfirmEmail(array $order, array $items)
+{
+    $payLabels = [
+        'cod'           => 'Thanh toán khi nhận hàng (COD)',
+        'bank_transfer' => 'Chuyển khoản ngân hàng',
+        'momo'          => 'Ví MoMo',
+        'vnpay'         => 'VNPay',
+    ];
+    $payLabel  = $payLabels[$order['payment_method']] ?? $order['payment_method'];
+    $orderLink = SITE_URL . '/order/detail/' . $order['id'];
+
+    // --- Rows sản phẩm (layout mobile-friendly: ảnh trái, thông tin phải) ---
+    $dbInst   = db();
+    $rows     = '';
+    $cidImages = [];   // danh sách ảnh CID để gửi kèm email
+
+    foreach ($items as $idx => $item) {
+        $unitPrice = ($item['sale_price'] ?? 0) ?: ($item['price'] ?? 0);
+        $lineTotal = $unitPrice * $item['quantity'];
+
+        // Lấy ảnh: ưu tiên Product Thumbnails 1 → thumbnail sản phẩm
+        $thumb = $item['thumbnail'] ?? '';
+        $pid   = $item['product_id'] ?? ($item['id'] ?? null);
+        if ($pid) {
+            $firstImg = $dbInst->fetch(
+                "SELECT image_path FROM product_images WHERE product_id = ? ORDER BY sort_order ASC LIMIT 1",
+                [$pid]
+            );
+            if ($firstImg) $thumb = $firstImg['image_path'];
+        }
+
+        // Xác định đường dẫn file thật
+        $filePath = '';
+        if ($thumb) {
+            $filePath = strpos($thumb, 'assets/') === 0
+                ? ROOT_PATH . '/' . $thumb
+                : UPLOAD_PATH . '/' . ltrim($thumb, '/');
+        }
+
+        // Dùng CID inline (Gmail hỗ trợ, không bị chặn như URL localhost hay data:URI)
+        if ($filePath && file_exists($filePath)) {
+            $cid      = 'product_img_' . $idx . '_' . ($pid ?: 0) . '@vqstore';
+            $mime     = mime_content_type($filePath) ?: 'image/jpeg';
+            $cidImages[] = ['cid' => $cid, 'path' => $filePath, 'mime' => $mime];
+            $imgTag   = '<img src="cid:' . $cid . '" width="70" height="70"
+                             style="object-fit:cover;border-radius:8px;display:block;border:1px solid #e5e7eb;"
+                             alt="' . htmlspecialchars($item['name']) . '">';
+        } else {
+            $imgTag = '<div style="width:70px;height:70px;background:#f3f4f6;border-radius:8px;
+                           display:flex;align-items:center;justify-content:center;font-size:28px;
+                           border:1px solid #e5e7eb;">🖥️</div>';
+        }
+
+        $rows .= '
+        <!-- Sản phẩm: ' . htmlspecialchars($item['name']) . ' -->
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;width:82px;">
+            ' . $imgTag . '
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+            <div style="font-size:13.5px;font-weight:600;color:#1e2a3b;margin-bottom:6px;line-height:1.4;">
+              ' . htmlspecialchars($item['name']) . '
+            </div>
+            <div style="font-size:12.5px;color:#9ca3af;">
+              Số lượng: <strong style="color:#374151;">' . $item['quantity'] . '</strong>
+              &nbsp;|&nbsp;
+              Đơn giá: <strong style="color:#374151;">' . number_format($unitPrice, 0, ',', '.') . 'đ</strong>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#1d4ed8;margin-top:6px;">
+              Thành tiền: ' . number_format($lineTotal, 0, ',', '.') . 'đ
+            </div>
+          </td>
+        </tr>';
+    }
+
+    // --- Tổng tiền ---
+    $subtotal      = $order['subtotal']        ?? $order['total_amount'];
+    $discount      = $order['discount_amount'] ?? 0;
+    $total         = $order['total_amount'];
+
+    $discountRow = $discount > 0 ? '
+        <tr>
+            <td style="padding:7px 12px;text-align:right;font-size:13px;color:#6b7280;">Giảm giá (voucher):</td>
+            <td style="padding:7px 12px;text-align:right;font-size:13px;color:#16a34a;font-weight:600;white-space:nowrap;">
+                -' . number_format($discount, 0, ',', '.') . 'đ</td>
+        </tr>' : '';
+
+    $noteHtml = !empty($order['note'])
+        ? '<p style="margin:6px 0 0;font-size:13px;color:#6b7280;"><strong>Ghi chú:</strong> ' . htmlspecialchars($order['note']) . '</p>'
+        : '';
+
+    $html = '<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Xác nhận đơn hàng #' . $order['order_code'] . '</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:Inter,Arial,sans-serif;">
+<div style="max-width:620px;margin:28px auto;background:#fff;border-radius:14px;
+            overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.10);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);padding:32px;text-align:center;">
+    <div style="font-size:30px;font-weight:900;color:#fff;letter-spacing:2px;">VQSTORE</div>
+    <div style="color:#bfdbfe;font-size:13px;margin-top:6px;">Laptop &amp; Phụ kiện Công nghệ</div>
+    <div style="margin-top:18px;display:inline-block;background:rgba(255,255,255,.15);
+                border-radius:30px;padding:8px 22px;">
+      <span style="color:#fff;font-size:15px;font-weight:600;">✅ Đặt hàng thành công!</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div style="padding:28px 32px;">
+
+    <p style="font-size:16px;font-weight:700;margin:0 0 6px;color:#1e2a3b;">
+      Xin chào ' . htmlspecialchars($order['shipping_name']) . ',
+    </p>
+    <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.7;">
+      Cảm ơn bạn đã mua hàng tại <strong style="color:#1d4ed8;">VQSTORE</strong>!
+      Đơn hàng <strong style="color:#1d4ed8;">#' . $order['order_code'] . '</strong>
+      của bạn đã được ghi nhận thành công và đang chờ xác nhận.
+    </p>
+
+    <!-- Tiêu đề bảng -->
+    <h3 style="font-size:14px;font-weight:700;color:#1d4ed8;margin:0 0 12px;
+               padding-bottom:8px;border-bottom:2px solid #1d4ed8;">Chi tiết đơn hàng</h3>
+
+    <!-- Bảng sản phẩm: 2 cột (ảnh | thông tin) — hiển thị tốt trên mobile -->
+    <table width="100%" cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;
+                  overflow:hidden;margin-bottom:16px;font-size:13px;">
+      <tbody>' . $rows . '</tbody>
+    </table>
+
+    <!-- Tổng tiền: bảng riêng, căn phải -->
+    <table width="100%" cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;margin-bottom:20px;">
+      <tr>
+        <td style="padding:7px 0;font-size:13px;color:#6b7280;">Tạm tính:</td>
+        <td style="padding:7px 0;font-size:13px;color:#374151;font-weight:600;text-align:right;white-space:nowrap;">
+          ' . number_format($subtotal, 0, ',', '.') . 'đ</td>
+      </tr>
+      ' . $discountRow . '
+      <tr style="border-top:2px solid #e5e7eb;">
+        <td style="padding:10px 0 4px;font-size:14px;font-weight:700;color:#1e2a3b;">Tổng cộng:</td>
+        <td style="padding:10px 0 4px;font-size:17px;font-weight:800;color:#1d4ed8;text-align:right;white-space:nowrap;">
+          ' . number_format($total, 0, ',', '.') . 'đ</td>
+      </tr>
+    </table>
+
+    <!-- Thông tin giao hàng -->
+    <div style="background:#f8fafd;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+      <h4 style="font-size:13.5px;font-weight:700;margin:0 0 12px;color:#374151;">
+        📦 Thông tin giao hàng
+      </h4>
+      <table cellpadding="0" cellspacing="0" style="font-size:13px;color:#374151;width:100%;">
+        <tr><td style="padding:3px 0;width:130px;color:#9ca3af;">Người nhận:</td>
+            <td style="padding:3px 0;font-weight:600;">' . htmlspecialchars($order['shipping_name']) . '</td></tr>
+        <tr><td style="padding:3px 0;color:#9ca3af;">Điện thoại:</td>
+            <td style="padding:3px 0;">' . htmlspecialchars($order['shipping_phone']) . '</td></tr>
+        <tr><td style="padding:3px 0;color:#9ca3af;">Địa chỉ:</td>
+            <td style="padding:3px 0;">' . htmlspecialchars($order['shipping_address']) . '</td></tr>
+        <tr><td style="padding:3px 0;color:#9ca3af;">Thanh toán:</td>
+            <td style="padding:3px 0;">' . $payLabel . '</td></tr>
+      </table>
+      ' . $noteHtml . '
+    </div>
+
+    <!-- Nút theo dõi -->
+    <div style="text-align:center;">
+      <a href="' . $orderLink . '"
+         style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+                color:#fff;padding:14px 36px;border-radius:30px;font-weight:700;
+                font-size:15px;text-decoration:none;letter-spacing:.3px;">
+        Theo dõi đơn hàng →
+      </a>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- Footer -->
+  <div style="background:#f8fafd;padding:20px 32px;text-align:center;
+              font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;">
+    © ' . date('Y') . ' <strong style="color:#6b7280;">VQSTORE</strong> — Laptop &amp; Phụ kiện Công nghệ<br>
+    Email này được gửi tự động, vui lòng không phản hồi trực tiếp.
+  </div>
+
+</div>
+</body></html>';
+
+    return ['html' => $html, 'images' => $cidImages];
+}
+
+/**
+ * Build a branded HTML email template.
+ */
+function buildMailHtml($subject, $bodyHtml)
+{
+    return '<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>' . htmlspecialchars($subject) . '</title>
+<style>
+  body{margin:0;padding:0;background:#f4f6fb;font-family:Inter,sans-serif;color:#1e2a3b}
+  .wrap{max-width:600px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;
+        box-shadow:0 2px 12px rgba(0,0,0,.08)}
+  .header{background:linear-gradient(135deg,#1d4ed8,#2563eb);padding:28px 32px;text-align:center}
+  .header img{height:50px;width:auto}
+  .header h1{color:#fff;margin:12px 0 0;font-size:18px;font-weight:600}
+  .body{padding:32px}
+  .body h2{font-size:17px;color:#1d4ed8;margin:0 0 16px}
+  .body p{line-height:1.7;color:#374151;margin:0 0 12px}
+  .footer{background:#f8fafd;padding:20px 32px;text-align:center;
+          font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:1px;">VQSTORE</div>
+    <h1>' . htmlspecialchars($subject) . '</h1>
+  </div>
+  <div class="body">
+    ' . $bodyHtml . '
+  </div>
+  <div class="footer">
+    © ' . date('Y') . ' VQSTORE — Cửa hàng Laptop &amp; Phụ kiện Công nghệ<br>
+    Đây là email tự động, vui lòng không reply trực tiếp.
+  </div>
+</div>
+</body></html>';
+}
