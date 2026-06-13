@@ -191,6 +191,8 @@
 .admin-main {
     margin-left: var(--adm-sidebar-w);
     flex: 1;
+    min-width: 0;
+    max-width: calc(100% - var(--adm-sidebar-w));
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -751,7 +753,7 @@ textarea.admin-form-control { resize: vertical; min-height: 90px; }
 @media (max-width: 991px) {
     .admin-sidebar { transform: translateX(-100%); }
     .admin-sidebar.open { transform: translateX(0); }
-    .admin-main { margin-left: 0; }
+    .admin-main { margin-left: 0; max-width: 100%; }
     .admin-mobile-toggle { display: flex; }
 }
 

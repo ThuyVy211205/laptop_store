@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 /**
  * One-time fix: re-insert Vietnamese product names with correct UTF-8 via PDO
  * Run once at: http://localhost/laptop_store/fix_encoding.php
  * Auto-deletes itself after success.
  */
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/config/co_so_du_lieu.php';
 
 $fixes = [
     12 => 'Chuột có dây Aula AM104',
@@ -19,18 +19,18 @@ $pdo->exec("SET NAMES utf8mb4");
 // Apply fixes
 $results = [];
 foreach ($fixes as $id => $name) {
-    $stmt = $pdo->prepare("UPDATE san_pham SET name = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE san_pham SET ten = ? WHERE id = ?");
     $ok   = $stmt->execute([$name, $id]);
     $results[] = "ID $id → " . ($ok ? "✓ OK: $name" : "✗ FAILED");
 }
 
 // Verify fixed rows
 $fixed = $pdo->query(
-    "SELECT id, name FROM san_pham WHERE id IN (12,13,20,21) ORDER BY id"
+    "SELECT id, ten AS name FROM san_pham WHERE id IN (12,13,20,21) ORDER BY id"
 )->fetchAll();
 
 // Scan ALL products for suspicious characters (cp850 corruption markers)
-$allProducts = $pdo->query("SELECT id, name FROM san_pham ORDER BY id")->fetchAll();
+$allProducts = $pdo->query("SELECT id, ten AS name FROM san_pham ORDER BY id")->fetchAll();
 $suspicious  = [];
 foreach ($allProducts as $p) {
     // Box-drawing chars and mojibake common in cp850→utf8 double-encode
