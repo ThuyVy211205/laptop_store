@@ -144,7 +144,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
                             <small class="nav-role-badge" style="color:<?= $roleColor ?> !important;font-weight:600">
                                 <?= $roleIcon ?> <?= htmlspecialchars($roleLabel) ?>
                             </small>
-                            <small><?= htmlspecialchars($adminSession['thu_dien_tu']) ?></small>
+                            <small><?= htmlspecialchars($adminSession['thu_dien_tu'] ?? $adminSession['email'] ?? '') ?></small>
                         </div>
                         <a href="<?= SITE_URL ?>/admin">
                             <i class="fas fa-tachometer-alt"></i> Bảng điều khiển

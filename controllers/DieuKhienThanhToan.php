@@ -187,6 +187,14 @@ class DieuKhienThanhToan {
                 $this->sanPhamModel->decreaseStock($item['id_san_pham'] ?? $item['id'], $item['so_luong']);
             }
 
+            $db->insert('thanh_toan', [
+                'id_don_hang' => $orderId,
+                'phuong_thuc' => $payMethod,
+                'so_tien'     => $total,
+                'trang_thai'  => 'pending',
+                'ngay_tao'    => date('Y-m-d H:i:s'),
+            ]);
+
             if ($voucherId) {
                 $this->phieuGiamGiaModel->use($voucherId);
             }

@@ -655,4 +655,5 @@ class DieuKhienQuanTri {
 
         require_once ROOT_PATH . '/views/quan_tri/thu.php';
     }
+
 }

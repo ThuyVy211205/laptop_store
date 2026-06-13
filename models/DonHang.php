@@ -81,16 +81,22 @@ class DonHang {
         );
     }
 
-    /** Cập nhật trạng thái đơn hàng (đã giao → tự đánh dấu đã thanh toán nếu chưa) */
+    /** Cập nhật trạng thái đơn hàng. Nếu là trạng thái hoàn tất (hoan_thanh/da_giao), tự động cập nhật thanh_toan */
     public function updateStatus($orderId, $status) {
-        if ($status === 'delivered') {
-            return $this->db->execute(
-                "UPDATE don_hang SET trang_thai = ?,
-                    trang_thai_thanh_toan = IF(trang_thai_thanh_toan = 'unpaid', 'paid', trang_thai_thanh_toan)
-                 WHERE id = ?",
+        $finalStatuses = ['delivered', 'completed', 'hoan_thanh', 'da_giao'];
+
+        if (in_array($status, $finalStatuses)) {
+            $this->db->execute(
+                "UPDATE don_hang SET trang_thai = ?, trang_thai_thanh_toan = 'paid' WHERE id = ?",
                 [$status, $orderId]
             );
+            $this->db->execute(
+                "UPDATE thanh_toan SET trang_thai = 'success', ngay_thanh_toan = NOW() WHERE id_don_hang = ?",
+                [$orderId]
+            );
+            return true;
         }
+
         return $this->db->execute("UPDATE don_hang SET trang_thai = ? WHERE id = ?", [$status, $orderId]);
     }
 
