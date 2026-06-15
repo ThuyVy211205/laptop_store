@@ -16,3 +16,6 @@ define('MAIL_FROM',         'vyphan21222005@gmail.com');
 // ===== Google OAuth =====
 define('GOOGLE_CLIENT_ID',     '80367818855-pdd5786ncki43103lstsae3gom0180r9.apps.googleusercontent.com');
 define('GOOGLE_CLIENT_SECRET', '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');
+
+//define('GOOGLE_CLIENT_ID',     '615960483704-vot7re0isi1ncqn10ocguqfqcipuc9k1.apps.googleusercontent.com');
+//define('GOOGLE_CLIENT_SECRET', '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');

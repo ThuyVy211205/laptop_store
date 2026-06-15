@@ -146,6 +146,31 @@ html.dark ::-webkit-scrollbar-thumb { background: #2a3558; }
     flex-shrink: 0;
     color: inherit;
 }
+.logo-img{
+    height:65px;
+    width:auto;
+    display:block;
+}
+
+@media (max-width:768px){
+
+    .navbar-row{
+        display:flex;
+        align-items:center;
+        flex-wrap:wrap;
+    }
+
+    .logo-img{
+        height:42px;
+    }
+
+    .nav-search-wrap{
+        order:99;
+        width:100%;
+        max-width:100%;
+        margin-top:8px;
+    }
+}
 .nav-logo:hover { color: inherit; }
 
 .nav-logo-icon {
@@ -293,7 +318,24 @@ html.dark ::-webkit-scrollbar-thumb { background: #2a3558; }
 .nav-dropdown .text-danger { color: var(--color-red) !important; }
 .nav-dropdown .text-danger:hover { background: rgba(220,38,38,.07); color: var(--color-red) !important; }
 .nav-user-dropdown { min-width: 220px; }
+/* Sửa lỗi menu tài khoản bị tràn mép phải điện thoại */
+@media (max-width: 768px) {
+    /* BƯỚC 1: Ép thẻ cha ngừng cô lập hộp thoại (Bỏ relative để hộp thoại nhảy lề theo khung lớn) */
+    .nav-item {
+        position: static !important;
+    }
 
+    /* BƯỚC 2: Đoạn code của bạn — chỉnh lại right về 0 hoặc 8px */
+    div.nav-dropdown.nav-user-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        right: 5px !important;          /* Sửa thành 0 (hoặc 8px nếu muốn hở nhẹ một chút cho tinh tế) */
+        left: auto !important;        
+        transform: none !important;    
+        min-width: 200px !important;   
+        box-sizing: border-box !important;
+    }
+}
 /* Plain link */
 .nav-link-plain {
     display: flex; align-items: center;
@@ -373,6 +415,23 @@ html.dark ::-webkit-scrollbar-thumb { background: #2a3558; }
     max-height: 380px;
     overflow-y: auto;
     scrollbar-width: thin;
+}
+/* Sửa lỗi hiển thị hộp thông báo trên điện thoại */
+@media (max-width: 768px) {
+    /* Đảm bảo khung bọc cái chuông làm tâm điểm */
+    .nav-notif-wrap {
+        position: relative !important;
+    }
+
+    /* Ép hộp thông báo căn theo lề phải của cái chuông */
+    .nav-notif-dropdown {
+        position: absolute !important;
+        left: auto !important;          /* Hủy bỏ hoàn toàn căn lề trái cũ */
+        right: -180px !important;        /* Đẩy hộp thoại về phía phải (điều chỉnh số này nếu muốn dịch qua lại) */
+        width: 300px !important;        /* Thu gọn nhẹ chiều rộng thành 300px để vừa vặn mọi màn hình dọc */
+        max-width: 85vw !important;     /* Giới hạn an toàn, không vượt quá 85% chiều rộng màn hình */
+        transform: none !important;     /* Xóa bỏ các lệnh dịch chuyển kéo ngang cũ */
+    }
 }
 .notif-item {
     display: flex; align-items: flex-start; gap: 10px;

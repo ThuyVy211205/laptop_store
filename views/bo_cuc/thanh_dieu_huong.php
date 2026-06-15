@@ -24,7 +24,9 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
 
             <!-- Logo -->
             <a href="<?= SITE_URL ?>" class="nav-logo">
-                <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" alt="Laptop Store" style="height:65px;width:auto;display:block;">
+               <img src="<?= ASSETS_URL ?>/images/logo_VQSTORE.png?v=<?= filemtime(ROOT_PATH.'/assets/images/logo_VQSTORE.png') ?>" 
+                    alt="Laptop Store"
+                    class="logo-img">
             </a>
 
             <!-- Search -->
@@ -104,7 +106,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
                             <?php $rank = getUserRankInfo($currentUser['hang'] ?? 'silver'); ?>
                             <strong><?= htmlspecialchars($currentUser['ho_ten']) ?></strong>
                             <small style="color:<?= $rank['color'] ?>"><?= $rank['icon'] ?> <?= $rank['name'] ?></small>
-                            <small><?= htmlspecialchars($currentUser['thu_dien_tu']) ?></small>
+                            <small><?= htmlspecialchars($currentUser['thu_dien_tu'] ?? '') ?></small>
                         </div>
                         <a href="<?= SITE_URL ?>/account"><i class="fas fa-user"></i> Tài khoản</a>
                         <a href="<?= SITE_URL ?>/order"><i class="fas fa-box"></i> Đơn hàng</a>
