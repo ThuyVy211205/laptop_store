@@ -15,6 +15,8 @@ class DieuKhienGioHang {
 
     /** Hiển thị trang giỏ hàng */
     public function index() {
+        unset($_SESSION['buy_now']);
+
         $userId = isLoggedIn() ? $_SESSION['id_nguoi_dung'] : null;
         $items  = $this->gioHangModel->getItems($userId);
         $total  = $this->gioHangModel->getTotal($userId);
@@ -41,12 +43,19 @@ class DieuKhienGioHang {
 
         $userId = isLoggedIn() ? $_SESSION['id_nguoi_dung'] : null;
         $result = $this->gioHangModel->add($productId, $quantity, $userId);
-        $count  = $this->gioHangModel->count($userId);
+        if (!$result) {
+            echo json_encode([
+                'success'    => false,
+                'message'    => 'Số lượng sản phẩm trong giỏ vượt quá tồn kho hiện có',
+            ]);
+            exit;
+        }
 
+        $count  = $this->gioHangModel->count($userId);
         echo json_encode([
-            'success'    => (bool)$result,
+            'success'    => true,
             'cart_count' => (int)$count,
-            'message'    => $result ? 'Đã thêm vào giỏ hàng' : 'Có lỗi xảy ra',
+            'message'    => 'Đã thêm vào giỏ hàng',
         ]);
         exit;
     }
@@ -92,6 +101,35 @@ class DieuKhienGioHang {
 
         if (!$productId) {
             redirect('/products');
+            return;
+        }
+
+        $product = db()->fetch(
+            "SELECT ton_kho, duong_dan FROM san_pham WHERE id = ? AND trang_thai = 'active'",
+            [$productId]
+        );
+        if (!$product) {
+            redirect('/products');
+            return;
+        }
+
+        // Check against cart's existing quantity for the same product
+        $gioHang = new GioHang();
+        $userId  = $_SESSION['id_nguoi_dung'];
+        $items   = $gioHang->getItems($userId);
+        $trongGio = 0;
+        foreach ($items as $item) {
+            if (($item['id_san_pham'] ?? $item['id']) == $productId) {
+                $trongGio = (int)($item['so_luong'] ?? 0);
+                break;
+            }
+        }
+
+        $totalQty = $trongGio + $quantity;
+        if ($totalQty > $product['ton_kho']) {
+            setFlash('error', 'Bạn đã có 50 sản phẩm này trong giỏ hàng.
+                               Tổng số lượng yêu cầu (51) vượt quá tồn kho hiện có  (' . $product['ton_kho'] . ')');
+            redirect('/product/' . $product['duong_dan']);
             return;
         }
 

@@ -29,7 +29,7 @@ include ROOT_PATH . '/views/bo_cuc/dau_trang.php';
                             <label class="form-label-tech">Họ và tên <span class="text-danger">*</span></label>
                             <div class="input-wrap">
                                 <i class="fas fa-user input-icon"></i>
-                                <input type="text" name="full_name" class="form-control form-tech"
+                                <input type="text" name="ho_ten" class="form-control form-tech"
                                     placeholder="Nguyễn Văn A" required
                                     value="<?= htmlspecialchars($old['ho_ten'] ?? '') ?>">
                             </div>

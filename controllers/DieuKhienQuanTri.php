@@ -295,9 +295,18 @@ class DieuKhienQuanTri {
             if ($id && $status) {
                 $order = $donHangModel->getById($id);
                 if ($status === 'cancelled') {
-                    $donHangModel->cancel($id, $reason);
+                    $result = $donHangModel->cancel($id, $reason);
                 } else {
-                    $donHangModel->updateStatus($id, $status);
+                    $result = $donHangModel->updateStatus($id, $status);
+                }
+
+                if (!$result) {
+                    $labels = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'shipping' => 'Đang giao', 'delivered' => 'Đã giao', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
+                    $from = $labels[$order['trang_thai']] ?? $order['trang_thai'];
+                    $to   = $labels[$status] ?? $status;
+                    setFlash('danger', "Không thể cập nhật trạng thái. Chuyển từ \"$from\" sang \"$to\" không hợp lệ.");
+                    redirect('/admin/orders');
+                    return;
                 }
 
                 // Thông báo chuông cho khách hàng
@@ -344,6 +353,24 @@ class DieuKhienQuanTri {
         }
 
         require_once ROOT_PATH . '/views/quan_tri/don_hang.php';
+    }
+
+    /** Chi tiết đơn hàng dành cho admin */
+    public function orderDetail($id) {
+        $this->requireAdmin();
+
+        require_once ROOT_PATH . '/models/DonHang.php';
+        $donHangModel = new DonHang();
+
+        $order   = $donHangModel->getById($id);
+        if (!$order) {
+            redirect('/admin/orders');
+            return;
+        }
+
+        $details = $donHangModel->getDetails($id);
+        $pageTitle = 'Chi tiết đơn hàng #' . $order['ma_don_hang'];
+        require_once ROOT_PATH . '/views/quan_tri/chi_tiet_don.php';
     }
 
     // ── Khách hàng ────────────────────────────────────────────

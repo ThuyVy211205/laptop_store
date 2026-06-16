@@ -95,12 +95,12 @@ class DieuKhienAPI {
             $this->json(['success' => false, 'message' => 'Sản phẩm không tồn tại'], 404);
         }
 
-        if ($product['ton_kho'] < $quantity) {
-            $this->json(['success' => false, 'message' => 'Sản phẩm đã hết hàng']);
-        }
-
         $userId = isLoggedIn() ? $_SESSION['id_nguoi_dung'] : null;
-        $this->gioHangModel->add($productId, $quantity, $userId);
+        $result = $this->gioHangModel->add($productId, $quantity, $userId);
+
+        if (!$result) {
+            $this->json(['success' => false, 'message' => 'Số lượng sản phẩm trong giỏ vượt quá tồn kho (' . $product['ton_kho'] . ')']);
+        }
 
         $this->json([
             'success'  => true,
@@ -120,7 +120,11 @@ class DieuKhienAPI {
         }
 
         $userId = isLoggedIn() ? $_SESSION['id_nguoi_dung'] : null;
-        $this->gioHangModel->update($productId, $quantity, $userId);
+        $result = $this->gioHangModel->update($productId, $quantity, $userId);
+
+        if (!$result) {
+            $this->json(['success' => false, 'message' => 'Số lượng vượt quá tồn kho hiện có']);
+        }
 
         $total = $this->gioHangModel->getTotal($userId);
         $this->json([

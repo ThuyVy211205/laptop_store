@@ -7,8 +7,22 @@
 class DonHang {
     private $db;
 
+    private static $validTransitions = [
+        'pending'   => ['confirmed', 'cancelled'],
+        'confirmed' => ['shipping', 'cancelled'],
+        'shipping'  => ['delivered', 'cancelled'],
+        'delivered' => ['completed'],
+        'completed' => [],
+        'cancelled' => [],
+    ];
+
     public function __construct() {
         $this->db = db();
+    }
+
+    private function isValidTransition($currentStatus, $newStatus) {
+        if ($currentStatus === $newStatus) return false;
+        return in_array($newStatus, self::$validTransitions[$currentStatus] ?? []);
     }
 
     /** Tạo đơn hàng mới, trả về ID vừa tạo */
@@ -81,8 +95,13 @@ class DonHang {
         );
     }
 
-    /** Cập nhật trạng thái đơn hàng. Nếu là trạng thái hoàn tất (hoan_thanh/da_giao), tự động cập nhật thanh_toan */
+    /** Cập nhật trạng thái đơn hàng. Nếu là trạng thái hoàn tất (delivered/completed), tự động cập nhật thanh_toan */
     public function updateStatus($orderId, $status) {
+        $order = $this->getById($orderId);
+        if (!$order || !$this->isValidTransition($order['trang_thai'], $status)) {
+            return false;
+        }
+
         $finalStatuses = ['delivered', 'completed', 'hoan_thanh', 'da_giao'];
 
         if (in_array($status, $finalStatuses)) {
@@ -102,6 +121,10 @@ class DonHang {
 
     /** Hủy đơn hàng, lưu lý do hủy */
     public function cancel($orderId, $reason = '') {
+        $order = $this->getById($orderId);
+        if (!$order || !$this->isValidTransition($order['trang_thai'], 'cancelled')) {
+            return false;
+        }
         return $this->db->execute(
             "UPDATE don_hang SET trang_thai = 'cancelled', ly_do_huy = ? WHERE id = ?",
             [$reason, $orderId]

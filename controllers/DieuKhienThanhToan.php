@@ -214,6 +214,7 @@ class DieuKhienThanhToan {
             if ($isBuyNow) {
                 unset($_SESSION['buy_now']);
             } else {
+                unset($_SESSION['buy_now']);
                 $this->gioHangModel->clear($userId);
             }
 

@@ -43,16 +43,31 @@ class GioHang {
 
     /** Thêm sản phẩm vào giỏ hàng (tự tăng số lượng nếu đã tồn tại) */
     public function add($productId, $quantity = 1, $userId = null) {
+        $product = $this->db->fetch(
+            "SELECT ton_kho FROM san_pham WHERE id = ? AND trang_thai = 'active'",
+            [$productId]
+        );
+        if (!$product || $product['ton_kho'] <= 0) {
+            return false;
+        }
+
         if ($userId) {
             $existing = $this->db->fetch(
                 "SELECT * FROM gio_hang WHERE id_nguoi_dung = ? AND id_san_pham = ?",
                 [$userId, $productId]
             );
             if ($existing) {
+                $newQty = $existing['so_luong'] + $quantity;
+                if ($newQty > $product['ton_kho']) {
+                    return false;
+                }
                 return $this->db->execute(
-                    "UPDATE gio_hang SET so_luong = so_luong + ? WHERE id_nguoi_dung = ? AND id_san_pham = ?",
-                    [$quantity, $userId, $productId]
+                    "UPDATE gio_hang SET so_luong = ? WHERE id_nguoi_dung = ? AND id_san_pham = ?",
+                    [$newQty, $userId, $productId]
                 );
+            }
+            if ($quantity > $product['ton_kho']) {
+                return false;
             }
             return $this->db->insert('gio_hang', [
                 'id_nguoi_dung' => $userId,
@@ -62,14 +77,15 @@ class GioHang {
         }
 
         if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-        if (isset($_SESSION['cart'][$productId])) {
-            $_SESSION['cart'][$productId]['so_luong'] += $quantity;
-        } else {
-            $_SESSION['cart'][$productId] = [
-                'id_san_pham' => $productId,
-                'so_luong'    => $quantity,
-            ];
+        $existingQty = $_SESSION['cart'][$productId]['so_luong'] ?? 0;
+        $newQty = $existingQty + $quantity;
+        if ($newQty > $product['ton_kho']) {
+            return false;
         }
+        $_SESSION['cart'][$productId] = [
+            'id_san_pham' => $productId,
+            'so_luong'    => $newQty,
+        ];
         return true;
     }
 
@@ -77,6 +93,14 @@ class GioHang {
     public function update($productId, $quantity, $userId = null) {
         if ($quantity <= 0) {
             return $this->remove($productId, $userId);
+        }
+
+        $product = $this->db->fetch(
+            "SELECT ton_kho FROM san_pham WHERE id = ? AND trang_thai = 'active'",
+            [$productId]
+        );
+        if (!$product || $quantity > $product['ton_kho']) {
+            return false;
         }
 
         if ($userId) {
@@ -142,7 +166,31 @@ class GioHang {
     public function mergeSessionToDb($userId) {
         if (empty($_SESSION['cart'])) return;
         foreach ($_SESSION['cart'] as $productId => $item) {
-            $this->add($productId, $item['so_luong'] ?? $item['quantity'] ?? 1, $userId);
+            $product = $this->db->fetch(
+                "SELECT ton_kho FROM san_pham WHERE id = ? AND trang_thai = 'active'",
+                [$productId]
+            );
+            if (!$product || $product['ton_kho'] <= 0) continue;
+
+            $existing = $this->db->fetch(
+                "SELECT so_luong FROM gio_hang WHERE id_nguoi_dung = ? AND id_san_pham = ?",
+                [$userId, $productId]
+            );
+            $requested = ($existing['so_luong'] ?? 0) + ($item['so_luong'] ?? $item['quantity'] ?? 1);
+            $quantity  = min($requested, $product['ton_kho']);
+
+            if ($existing) {
+                $this->db->execute(
+                    "UPDATE gio_hang SET so_luong = ? WHERE id_nguoi_dung = ? AND id_san_pham = ?",
+                    [$quantity, $userId, $productId]
+                );
+            } else {
+                $this->db->insert('gio_hang', [
+                    'id_nguoi_dung' => $userId,
+                    'id_san_pham'   => $productId,
+                    'so_luong'      => $quantity,
+                ]);
+            }
         }
         $_SESSION['cart'] = [];
     }

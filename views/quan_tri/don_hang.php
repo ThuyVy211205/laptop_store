@@ -129,7 +129,7 @@ $statusColors = [
                                         onclick="openStatusModal(<?= htmlspecialchars(json_encode($o), ENT_QUOTES) ?>)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <a href="<?= SITE_URL ?>/order/detail/<?= $o['id'] ?>" target="_blank"
+                                <a href="<?= SITE_URL ?>/admin/orderDetail/<?= $o['id'] ?>"
                                    class="admin-action-btn" title="Xem chi tiết" style="color:#6366f1;">
                                     <i class="fas fa-eye"></i>
                                 </a>
