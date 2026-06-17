@@ -21,7 +21,7 @@ require_once __DIR__ . '/bi_mat.php';
 
 // ===== Other Settings =====
 define('LOW_STOCK_WARNING', 5);
-define('ITEMS_PER_PAGE', 12);
+define('ITEMS_PER_PAGE', 8);
 define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5MB
 
 // ===== Session & Timezone =====

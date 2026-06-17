@@ -13,6 +13,7 @@ $selectedPriceRanges = $selectedPriceRanges ?? [];
 $products            = $products            ?? [];
 $totalCount          = $totalCount          ?? 0;
 $totalPages          = $totalPages          ?? 1;
+$currentPage         = max(1, (int)($_GET['page'] ?? 1));
 $groupedProducts     = $groupedProducts     ?? null;
 
 $priceRangeOptions = [
@@ -171,57 +172,7 @@ $qParams = $_GET;
                 <?php endforeach; ?>
             </div>
 
-            <!-- Pagination -->
-            <?php if (!empty($totalPages) && $totalPages > 1):
-                $currentPage = (int)($_GET['page'] ?? 1);
-            ?>
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <?php if ($currentPage > 1):
-                        $pp = $qParams; $pp['page'] = $currentPage - 1; ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= $baseUrl . '?' . http_build_query($pp) ?>">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    <?php endif; ?>
-
-                    <?php
-                    $start = max(1, $currentPage - 3);
-                    $end   = min($totalPages, $currentPage + 3);
-                    if ($start > 1) {
-                        $pp = $qParams; $pp['page'] = 1;
-                        echo '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?' . http_build_query($pp) . '">1</a></li>';
-                        if ($start > 2)
-                            echo '<li class="page-item disabled"><span class="page-link">…</span></li>';
-                    }
-                    for ($i = $start; $i <= $end; $i++):
-                        $pp = $qParams; $pp['page'] = $i;
-                    ?>
-                    <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= $baseUrl . '?' . http_build_query($pp) ?>"><?= $i ?></a>
-                    </li>
-                    <?php endfor; ?>
-
-                    <?php
-                    if ($end < $totalPages) {
-                        if ($end < $totalPages - 1)
-                            echo '<li class="page-item disabled"><span class="page-link">…</span></li>';
-                        $pp = $qParams; $pp['page'] = $totalPages;
-                        echo '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?' . http_build_query($pp) . '">' . $totalPages . '</a></li>';
-                    }
-                    if ($currentPage < $totalPages):
-                        $pp = $qParams; $pp['page'] = $currentPage + 1;
-                    ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= $baseUrl . '?' . http_build_query($pp) ?>">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                </ul>
-            </nav>
-            <?php endif; ?>
+            <?= paginate($totalPages, $currentPage, $baseUrl, $qParams) ?>
 
             <?php else: ?>
             <div class="empty-state text-center py-5">

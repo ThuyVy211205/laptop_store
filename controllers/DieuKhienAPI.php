@@ -80,7 +80,7 @@ class DieuKhienAPI {
         ]);
     }
 
-    /** POST /api/cart/add */
+    /** POST /api/cart/add - Thêm sản phẩm vào database*/
     public function cartAdd() {
         $data      = $this->getPostData();
         $productId = (int)($data['product_id'] ?? 0);

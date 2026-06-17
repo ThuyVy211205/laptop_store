@@ -284,7 +284,7 @@ $to   = min($page * 15, $total);
                     </table>
                 </div>
 
-                <!-- Pagination -->
+                <!--Phân trang-->
                 <?php if ($total > 0): ?>
                 <div class="admin-pagination">
                     <div class="admin-pagination-info">
@@ -318,7 +318,7 @@ $to   = min($page * 15, $total);
     </div><!-- /.admin-main -->
 </div><!-- /.admin-wrapper -->
 
-<!-- ===== ADD / EDIT PRODUCT MODAL ===== -->
+<!-- ===== THÊM / CHỈNH SỬA SẢN PHẨM ===== -->
 <div class="modal fade admin-modal" id="productModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -332,12 +332,12 @@ $to   = min($page * 15, $total);
                 <input type="hidden" name="id"     id="productId"   value="">
                 <input type="hidden" name="current_thumbnail" id="currentThumbnail" value="">
                 <div class="row g-3">
-                    <!-- Validation error -->
+                    <!-- Lỗi xác thực -->
                     <div class="col-12" id="formError" style="display:none;">
                         <div class="alert alert-danger py-2 mb-0" id="formErrorMsg"></div>
                     </div>
 
-                    <!-- Name -->
+                    <!-- Tên -->
                     <div class="col-12">
                         <label class="admin-form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                         <input type="text" name="name" id="fName" class="admin-form-control"
@@ -345,7 +345,7 @@ $to   = min($page * 15, $total);
                                oninput="this.style.borderColor=''">
                     </div>
 
-                    <!-- Category + Brand -->
+                    <!--Danh mục + Thương hiệu-->
                     <div class="col-md-6">
                         <label class="admin-form-label">Danh mục <span class="text-danger">*</span></label>
                         <select name="category_id" id="fCategory" class="admin-form-control"
@@ -363,7 +363,7 @@ $to   = min($page * 15, $total);
                                placeholder="Dell, HP, Apple...">
                     </div>
 
-                    <!-- Variant group -->
+                    <!-- Nhóm biến thể-->
                     <div class="col-12">
                         <label class="admin-form-label">Nhóm biến thể màu sắc
                             <span style="font-weight:400;color:#9ca3af;font-size:12px;">(để trống nếu không có biến thể — nhập cùng tên nhóm cho các sản phẩm cùng dòng)</span>
@@ -372,7 +372,7 @@ $to   = min($page * 15, $total);
                                placeholder="VD: hp-pavilion-15-series">
                     </div>
 
-                    <!-- Thumbnail — placed here so it's always visible without scrolling -->
+                    <!-- Ảnh thu nhỏ — được đặt ở đây để luôn hiển thị mà không cần cuộn chuột -->
                     <div class="col-12">
                         <label class="admin-form-label">Ảnh đại diện</label>
                         <div id="uploadZone" class="upload-zone" onclick="document.getElementById('thumbnailInput').click()">
@@ -397,7 +397,7 @@ $to   = min($page * 15, $total);
                                placeholder="DELL-INS-15-3520">
                     </div>
 
-                    <!-- Price + Sale price -->
+                    <!-- Giá + Giá bán-->
                     <div class="col-md-3">
                         <label class="admin-form-label">Giá gốc (đ) <span class="text-danger">*</span></label>
                         <input type="number" name="price" id="fPrice" class="admin-form-control"
@@ -410,7 +410,7 @@ $to   = min($page * 15, $total);
                                placeholder="0" min="0">
                     </div>
 
-                    <!-- Stock + Status -->
+                    <!-- Kho + Tình trạng -->
                     <div class="col-md-4">
                         <label class="admin-form-label">Tồn kho</label>
                         <input type="number" name="stock" id="fStock" class="admin-form-control"
@@ -431,14 +431,14 @@ $to   = min($page * 15, $total);
                         </label>
                     </div>
 
-                    <!-- Description -->
+                    <!-- Mô tả -->
                     <div class="col-12">
                         <label class="admin-form-label">Mô tả</label>
                         <textarea name="description" id="fDescription" class="admin-form-control"
                                   placeholder="Mô tả sản phẩm..." rows="3"></textarea>
                     </div>
 
-                    <!-- Gallery ảnh (tối đa 4) -->
+                    <!-- Trưng bày ảnh (tối đa 4) -->
                     <div class="col-12">
                         <label class="admin-form-label">Ảnh gallery (tối đa 4 ảnh)
                             <span style="font-weight:400;color:#9ca3af;font-size:12px;">— để trống ô nào thì giữ nguyên ảnh cũ</span>
@@ -476,7 +476,7 @@ $to   = min($page * 15, $total);
     </div>
 </div>
 
-<!-- ===== DELETE CONFIRM MODAL ===== -->
+<!-- ===== XÓA XÁC NHẬN ===== -->
 <div class="modal fade admin-modal" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content">
@@ -514,7 +514,7 @@ $to   = min($page * 15, $total);
     document.body.style.removeProperty('padding-right');
 })();
 
-// ---- Mobile sidebar ----
+// ---- Thanh bên di động
 document.getElementById('sidebarToggle').addEventListener('click', function () {
     document.getElementById('adminSidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -532,7 +532,7 @@ function getProductModal() {
     return _productModal;
 }
 
-// ---- Gallery helpers ----
+// ---- Người trợ giúp thư viện----
 function previewGallery(input, slot) {
     if (!input.files || !input.files[0]) return;
     var file = input.files[0];
@@ -561,7 +561,7 @@ function clearGalleryPreviews() {
     }
 }
 
-// ---- Add modal ----
+// ----Người trợ giúp thư viện ----
 function openAddModal() {
     document.getElementById('productModalTitle').textContent = 'Thêm sản phẩm mới';
     document.getElementById('formAction').value  = 'add';
@@ -574,7 +574,7 @@ function openAddModal() {
     getProductModal().show();
 }
 
-// ---- Edit modal ----
+// ---- Chỉnh sửa phương thức ----
 function openEditModal(p) {
     document.getElementById('productModalTitle').textContent = 'Chỉnh sửa sản phẩm';
     document.getElementById('formAction').value       = 'edit';
@@ -620,7 +620,7 @@ function openEditModal(p) {
     getProductModal().show();
 }
 
-// ---- Delete confirm ----
+// ---- Xóa xác nhận----
 function confirmDelete(id, name) {
     document.getElementById('deleteProductName').textContent = '"' + name + '"';
     document.getElementById('deleteConfirmBtn').href =
@@ -628,7 +628,7 @@ function confirmDelete(id, name) {
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
-// ---- JS validation ----
+// ---- JS xác nhận----
 document.getElementById('productForm').addEventListener('submit', function (e) {
     var fName  = document.getElementById('fName');
     var fCat   = document.getElementById('fCategory');
@@ -661,7 +661,7 @@ document.getElementById('productForm').addEventListener('submit', function (e) {
     }
 });
 
-// ---- Image preview ----
+// ---- Xem trước hình ảnh ----
 function previewImg(input) {
     if (input.files && input.files[0]) {
         var file = input.files[0];

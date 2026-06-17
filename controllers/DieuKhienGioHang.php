@@ -113,7 +113,7 @@ class DieuKhienGioHang {
             return;
         }
 
-        // Check against cart's existing quantity for the same product
+        // Kiểm tra số lượng hiện có trong giỏ hàng của cùng một sản phẩm.
         $gioHang = new GioHang();
         $userId  = $_SESSION['id_nguoi_dung'];
         $items   = $gioHang->getItems($userId);

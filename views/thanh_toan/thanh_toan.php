@@ -195,8 +195,8 @@ document.getElementById('applyVoucherBtn').addEventListener('click', async () =>
             document.getElementById('voucherResult').innerHTML =
                 '<small class="text-success"><i class="fas fa-check-circle me-1"></i>' + data.message + '</small>';
             document.getElementById('discountRow').style.display = 'flex';
-            document.getElementById('summaryDiscount').textContent = '-' + data.discount_formatted;
-            document.getElementById('summaryTotal').textContent = data.new_total_formatted;
+            document.getElementById('summaryDiscount').textContent = '-' + data.giam_gia_dinh_dang;
+            document.getElementById('summaryTotal').textContent = data.tong_moi_dinh_dang;
         } else {
             document.getElementById('voucherResult').innerHTML =
                 '<small class="text-danger"><i class="fas fa-times-circle me-1"></i>' + data.message + '</small>';

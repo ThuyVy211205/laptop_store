@@ -167,31 +167,70 @@ function timeAgo($datetime) {
     return formatDate($datetime);
 }
 
-/** Tạo HTML phân trang Bootstrap — trả về chuỗi rỗng nếu chỉ có 1 trang */
-function paginate($total, $perPage, $currentPage, $baseUrl) {
-    $totalPages = ceil($total / $perPage);
+/**
+ * Tạo HTML phân trang — bảo toàn query params, hỗ trợ dấu "…" khi nhiều trang.
+ * @param int    $totalPages   Tổng số trang (đã tính sẵn từ controller)
+ * @param int    $currentPage  Trang hiện tại
+ * @param string $baseUrl      URL gốc (không chứa query string)
+ * @param array  $queryParams  Mảng GET params cần giữ lại (vd: $_GET)
+ * @return string HTML phân trang, hoặc chuỗi rỗng nếu ≤ 1 trang
+ */
+function paginate($totalPages, $currentPage, $baseUrl, $queryParams = []) {
     if ($totalPages <= 1) return '';
 
-    $html = '<ul class="pagination justify-content-center">';
+    $html = '<nav class="mt-4"><ul class="pagination justify-content-center">';
 
-    // Nút trang trước
+    // ── Nút Prev ──
     if ($currentPage > 1) {
-        $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?page=' . ($currentPage - 1) . '"><i class="fas fa-chevron-left"></i></a></li>';
+        $pp = $queryParams;
+        $pp['page'] = $currentPage - 1;
+        $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?' . http_build_query($pp)) . '"><i class="fas fa-chevron-left"></i></a></li>';
+    } else {
+        $html .= '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>';
     }
 
-    for ($i = 1; $i <= $totalPages; $i++) {
-        if ($i == $currentPage) {
-            $html .= '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-        } else {
-            $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?page=' . $i . '">' . $i . '</a></li>';
+    // ── Số trang (có ellipsis) ──
+    $start = max(1, $currentPage - 3);
+    $end   = min($totalPages, $currentPage + 3);
+
+    if ($start > 1) {
+        $pp = $queryParams;
+        $pp['page'] = 1;
+        $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?' . http_build_query($pp)) . '">1</a></li>';
+        if ($start > 2) {
+            $html .= '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
         }
     }
 
-    if ($currentPage < $totalPages) {
-        $html .= '<li class="page-item"><a class="page-link" href="' . $baseUrl . '?page=' . ($currentPage + 1) . '"><i class="fas fa-chevron-right"></i></a></li>';
+    for ($i = $start; $i <= $end; $i++) {
+        $pp = $queryParams;
+        $pp['page'] = $i;
+        if ($i == $currentPage) {
+            $html .= '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+        } else {
+            $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?' . http_build_query($pp)) . '">' . $i . '</a></li>';
+        }
     }
 
-    $html .= '</ul>';
+    if ($end < $totalPages) {
+        if ($end < $totalPages - 1) {
+            $html .= '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+        }
+        $pp = $queryParams;
+        $pp['page'] = $totalPages;
+        $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?' . http_build_query($pp)) . '">' . $totalPages . '</a></li>';
+    }
+
+    // ── Nút Next ──
+    if ($currentPage < $totalPages) {
+        $pp = $queryParams;
+        $pp['page'] = $currentPage + 1;
+        $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?' . http_build_query($pp)) . '"><i class="fas fa-chevron-right"></i></a></li>';
+    } else {
+        $html .= '<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>';
+    }
+
+    $html .= '</ul></nav>';
     return $html;
 }
 
