@@ -34,6 +34,7 @@
                 <ul class="account-nav">
                     <li><a href="<?= SITE_URL ?>/account" class="active"><i class="fas fa-user"></i> Hồ sơ</a></li>
                     <li><a href="<?= SITE_URL ?>/order"><i class="fas fa-box"></i> Đơn hàng</a></li>
+                    <li><a href="<?= SITE_URL ?>/account/history"><i class="fas fa-history"></i> Lịch sử mua hàng</a></li>
                     <li><a href="<?= SITE_URL ?>/wishlist"><i class="fas fa-heart"></i> Yêu thích</a></li>
                     <li><a href="<?= SITE_URL ?>/auth/logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
                 </ul>

@@ -339,8 +339,8 @@ $curIdx     = array_search($order['trang_thai'], $steps);
     font-weight: 600;
     color: var(--color-text);
     display: block;
-    margin-bottom: 4px;
     line-height: 1.4;
+    word-break: break-word;
 }
 .order-item-subtotal {
     font-size: 15px;
@@ -348,6 +348,7 @@ $curIdx     = array_search($order['trang_thai'], $steps);
     color: var(--color-warning, #f59e0b);
     white-space: nowrap;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 /* ── Info list ── */

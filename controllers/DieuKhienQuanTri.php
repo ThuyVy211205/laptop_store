@@ -101,11 +101,20 @@ class DieuKhienQuanTri {
         );
 
         $topProducts = $db->fetchAll(
-            "SELECT p.ten, p.so_luong_ban,
+            "SELECT p.id, p.ten, p.so_luong_ban,
                     COALESCE(p.gia_khuyen_mai, p.gia) AS gia_cuoi
              FROM san_pham p
              WHERE p.trang_thai = 'active'
              ORDER BY p.so_luong_ban DESC
+             LIMIT 5"
+        );
+
+        $worstProducts = $db->fetchAll(
+            "SELECT p.id, p.ten, p.so_luong_ban, p.ton_kho,
+                    COALESCE(p.gia_khuyen_mai, p.gia) AS gia_cuoi
+             FROM san_pham p
+             WHERE p.trang_thai = 'active'
+             ORDER BY p.so_luong_ban ASC, p.ngay_tao DESC
              LIMIT 5"
         );
 
@@ -249,14 +258,16 @@ class DieuKhienQuanTri {
         $search      = trim($_GET['search']      ?? '');
         $category_id = (int)($_GET['id_danh_muc'] ?? 0) ?: null;
         $status      = trim($_GET['status']       ?? '');
+        $sort        = trim($_GET['sort']         ?? '');
+        $limit       = (int)($_GET['limit']       ?? 0);
         $page        = max(1, (int)($_GET['page'] ?? 1));
-        $perPage     = 15;
-        $offset      = ($page - 1) * $perPage;
+        $perPage     = $limit ?: 15;
+        $offset      = $limit ? 0 : ($page - 1) * $perPage;
 
-        $products   = $sanPhamModel->adminGetAll($search, $category_id, $status);
-        $total      = count($products);
-        $products   = array_slice($products, $offset, $perPage);
-        $totalPages = (int)ceil($total / $perPage);
+        $allProducts = $sanPhamModel->adminGetAll($search, $category_id, $status, $sort);
+        $total       = count($allProducts);
+        $products    = $limit ? array_slice($allProducts, 0, $limit) : array_slice($allProducts, $offset, $perPage);
+        $totalPages  = $limit ? 1 : (int)ceil($total / $perPage);
         $categories = $danhMucModel->getAll();
 
         // Batch load gallery images cho trang hiện tại
@@ -294,8 +305,44 @@ class DieuKhienQuanTri {
             $reason = trim($_POST['cancel_reason'] ?? '');
             if ($id && $status) {
                 $order = $donHangModel->getById($id);
+
                 if ($status === 'cancelled') {
-                    $result = $donHangModel->cancel($id, $reason);
+                    $details = $donHangModel->getDetails($id);
+                    $db = db();
+                    $db->beginTransaction();
+                    try {
+                        $result = $donHangModel->cancel($id, $reason);
+                        if (!$result) {
+                            $db->rollback();
+                            $labels = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'shipping' => 'Đang giao', 'delivered' => 'Đã giao', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
+                            $from = $labels[$order['trang_thai']] ?? $order['trang_thai'];
+                            $to   = $labels[$status] ?? $status;
+                            setFlash('danger', "Không thể cập nhật trạng thái. Chuyển từ \"$from\" sang \"$to\" không hợp lệ.");
+                            redirect('/admin/orders');
+                            return;
+                        }
+
+                        require_once ROOT_PATH . '/models/SanPham.php';
+                        require_once ROOT_PATH . '/models/NguoiDung.php';
+                        $sanPhamModel   = new SanPham();
+                        $nguoiDungModel = new NguoiDung();
+
+                        foreach ($details as $item) {
+                            $sanPhamModel->increaseStock($item['id_san_pham'], $item['so_luong']);
+                        }
+
+                        if ($order && !empty($order['id_nguoi_dung'])) {
+                            $nguoiDungModel->decrementStats($order['id_nguoi_dung'], $order['tong_tien']);
+                            $nguoiDungModel->updateRank($order['id_nguoi_dung']);
+                        }
+
+                        $db->commit();
+                    } catch (Exception $e) {
+                        $db->rollback();
+                        setFlash('danger', 'Hủy đơn hàng thất bại. Vui lòng thử lại.');
+                        redirect('/admin/orders');
+                        return;
+                    }
                 } else {
                     $result = $donHangModel->updateStatus($id, $status);
                 }
@@ -622,6 +669,38 @@ class DieuKhienQuanTri {
             'completed_orders' => $db->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE trang_thai='completed'")['c'] ?? 0,
             'cancelled_orders' => $db->fetch("SELECT COUNT(*) AS c FROM don_hang WHERE trang_thai='cancelled'")['c'] ?? 0,
         ];
+
+        $trend = [
+            'yesterday'  => (float)($db->fetch(
+                "SELECT COALESCE(SUM(tong_tien),0) AS t FROM don_hang WHERE trang_thai IN ('completed','delivered') AND DATE(ngay_tao) = CURDATE() - INTERVAL 1 DAY"
+            )['t'] ?? 0),
+            'last_week'  => (float)($db->fetch(
+                "SELECT COALESCE(SUM(tong_tien),0) AS t FROM don_hang WHERE trang_thai IN ('completed','delivered') AND YEARWEEK(ngay_tao,1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK,1)"
+            )['t'] ?? 0),
+            'last_month' => (float)($db->fetch(
+                "SELECT COALESCE(SUM(tong_tien),0) AS t FROM don_hang WHERE trang_thai IN ('completed','delivered') AND MONTH(ngay_tao) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(ngay_tao) = YEAR(CURDATE() - INTERVAL 1 MONTH)"
+            )['t'] ?? 0),
+            'last_year'  => (float)($db->fetch(
+                "SELECT COALESCE(SUM(tong_tien),0) AS t FROM don_hang WHERE trang_thai IN ('completed','delivered') AND YEAR(ngay_tao) = YEAR(CURDATE()) - 1"
+            )['t'] ?? 0),
+        ];
+
+        $trendPct = [
+            'today' => $trend['yesterday'] > 0 ? round((($summary['today'] - $trend['yesterday']) / $trend['yesterday']) * 100) : ($summary['today'] > 0 ? 100 : 0),
+            'week'  => $trend['last_week'] > 0  ? round((($summary['week']  - $trend['last_week'])  / $trend['last_week'])  * 100) : ($summary['week']  > 0 ? 100 : 0),
+            'month' => $trend['last_month'] > 0 ? round((($summary['month'] - $trend['last_month']) / $trend['last_month']) * 100) : ($summary['month'] > 0 ? 100 : 0),
+            'year'  => $trend['last_year'] > 0  ? round((($summary['year']  - $trend['last_year'])  / $trend['last_year'])  * 100) : ($summary['year']  > 0 ? 100 : 0),
+        ];
+
+        $topProducts = $db->fetchAll(
+            "SELECT p.id, p.ten, p.hinh_thu_nho, p.so_luong_ban,
+                    COALESCE(p.gia_khuyen_mai, p.gia) AS gia_cuoi,
+                    COALESCE(p.gia_khuyen_mai, p.gia) * p.so_luong_ban AS revenue
+             FROM san_pham p
+             WHERE p.trang_thai = 'active'
+             ORDER BY revenue DESC
+             LIMIT 8"
+        );
 
         require_once ROOT_PATH . '/views/quan_tri/doanh_thu.php';
     }

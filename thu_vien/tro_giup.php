@@ -96,3 +96,15 @@ function getUserRankInfo($rank) {
     ];
     return $ranks[$rank] ?? $ranks['silver'];
 }
+
+/** Lấy danh sách ID sản phẩm được gắn cờ Mới (la_moi = 1, cache static) */
+function getNewProductIds() {
+    static $ids = null;
+    if ($ids === null) {
+        $rows = db()->fetchAll(
+            "SELECT id FROM san_pham WHERE trang_thai = 'active' AND la_moi = 1 ORDER BY id DESC"
+        );
+        $ids = array_column($rows, 'id');
+    }
+    return $ids;
+}

@@ -722,6 +722,7 @@ textarea.admin-form-control { resize: vertical; min-height: 90px; }
 .mini-stat-rank.gold   { background: rgba(217,119,6,.1); color: #d97706; }
 .mini-stat-rank.silver { background: rgba(99,102,241,.1); color: #6366f1; }
 .mini-stat-rank.bronze { background: rgba(180,83,9,.1);   color: #b45309; }
+.mini-stat-rank.muted  { background: rgba(148,163,184,.12); color: #94a3b8; }
 
 .mini-stat-info { flex: 1; min-width: 0; }
 

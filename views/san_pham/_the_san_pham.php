@@ -9,8 +9,17 @@ $discount   = $salePrice ? calcDiscount($price, $salePrice) : 0;
 $finalPrice = $salePrice ?: $price;
 
 $showDiscount = $discount > 0;
+$isOutOfStock = (int)($product['ton_kho'] ?? 0) <= 0;
+$isNew        = in_array((int)$product['id'], getNewProductIds());
 ?>
-<div class="product-card" data-product-id="<?= $product['id'] ?>" data-cat="<?= htmlspecialchars($product['duong_dan_danh_muc'] ?? '') ?>">
+<div class="product-card<?= $isOutOfStock ? ' out-of-stock' : '' ?>" data-product-id="<?= $product['id'] ?>" data-cat="<?= htmlspecialchars($product['duong_dan_danh_muc'] ?? '') ?>">
+
+    <!-- Badges (top‑left) -->
+    <div class="product-badges">
+        <?php if ($isNew && !$isOutOfStock): ?>
+        <span class="badge-new">Mới</span>
+        <?php endif; ?>
+    </div>
 
     <!-- Wishlist & Quick view -->
     <div class="product-actions">
@@ -26,6 +35,11 @@ $showDiscount = $discount > 0;
     <!-- Image -->
     <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['duong_dan']) ?>"
        class="product-img-wrap">
+        <?php if ($isOutOfStock): ?>
+        <div class="out-of-stock-overlay">
+            <span class="out-of-stock-badge">Hết hàng</span>
+        </div>
+        <?php endif; ?>
         <img src="<?= imgUrl($product['hinh_thu_nho']) ?>"
              alt="<?= htmlspecialchars($product['ten']) ?>" loading="lazy"
              onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'">
@@ -56,7 +70,7 @@ $showDiscount = $discount > 0;
 
         <!-- Price — vertical layout: current on top, old + discount tag below (max 3 discounts shown) -->
         <div class="product-price">
-            <span class="price-current"><?= formatPrice($finalPrice) ?></span>
+            <span class="price-current<?= $isOutOfStock ? ' text-muted' : '' ?>"><?= formatPrice($finalPrice) ?></span>
             <?php if ($showDiscount && $salePrice && $salePrice < $price): ?>
             <div class="price-row-old">
                 <span class="price-old"><?= formatPrice($price) ?></span>
@@ -64,6 +78,10 @@ $showDiscount = $discount > 0;
             </div>
             <?php endif; ?>
         </div>
+
+        <?php if ($isOutOfStock): ?>
+        <div class="card-out-of-stock-label">Tạm hết hàng</div>
+        <?php endif; ?>
 
     </div>
 </div>

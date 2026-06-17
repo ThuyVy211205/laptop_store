@@ -43,53 +43,55 @@ $periodLabel = ['week'=>'7 ngày qua','month'=>'Tháng này','year'=>'Năm nay']
         </div>
 
         <!-- Summary cards -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3 col-6">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon" style="background:rgba(16,185,129,.12);color:#10b981;">
-                        <i class="fas fa-calendar-day"></i>
-                    </div>
-                    <div class="admin-stat-body">
-                        <div class="admin-stat-value"><?= formatPrice($summary['today'] ?? 0) ?></div>
-                        <div class="admin-stat-label">Hôm nay</div>
-                    </div>
-                </div>
+     <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div style="background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:1px solid #f1f5f9; display:flex; align-items:center; gap:10px; height:100%;">
+            <div style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:rgba(16,185,129,.12); color:#10b981;">
+                <i class="fas fa-calendar-day"></i>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon" style="background:rgba(37,99,235,.12);color:#2563eb;">
-                        <i class="fas fa-calendar-week"></i>
-                    </div>
-                    <div class="admin-stat-body">
-                        <div class="admin-stat-value"><?= formatPrice($summary['week'] ?? 0) ?></div>
-                        <div class="admin-stat-label">Tuần này</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="admin-stat-body">
-                        <div class="admin-stat-value"><?= formatPrice($summary['month'] ?? 0) ?></div>
-                        <div class="admin-stat-label">Tháng này</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="admin-stat-card">
-                    <div class="admin-stat-icon" style="background:rgba(220,38,38,.12);color:#dc2626;">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="admin-stat-body">
-                        <div class="admin-stat-value"><?= formatPrice($summary['year'] ?? 0) ?></div>
-                        <div class="admin-stat-label">Năm nay</div>
-                    </div>
-                </div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:700; color:#1e293b; line-height:1.2; letter-spacing:-0.2px; word-break:break-all;"><?= formatPrice($summary['today'] ?? 0) ?></div>
+                <div style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; margin-top:3px;">Hôm nay</div>
             </div>
         </div>
-
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div style="background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:1px solid #f1f5f9; display:flex; align-items:center; gap:10px; height:100%;">
+            <div style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:rgba(37,99,235,.12); color:#2563eb;">
+                <i class="fas fa-calendar-week"></i>
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:700; color:#1e293b; line-height:1.2; letter-spacing:-0.2px; word-break:break-all;"><?= formatPrice($summary['week'] ?? 0) ?></div>
+                <div style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; margin-top:3px;">Tuần này</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div style="background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:1px solid #f1f5f9; display:flex; align-items:center; gap:10px; height:100%;">
+            <div style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:rgba(245,158,11,.12); color:#f59e0b;">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:700; color:#1e293b; line-height:1.2; letter-spacing:-0.2px; word-break:break-all;"><?= formatPrice($summary['month'] ?? 0) ?></div>
+                <div style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; margin-top:3px;">Tháng này</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-6">
+        <div style="background:#fff; border-radius:10px; padding:12px; box-shadow:0 4px 15px rgba(0,0,0,0.03); border:1px solid #f1f5f9; display:flex; align-items:center; gap:10px; height:100%;">
+            <div style="width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:rgba(220,38,38,.12); color:#dc2626;">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:700; color:#1e293b; line-height:1.2; letter-spacing:-0.2px; word-break:break-all;"><?= formatPrice($summary['year'] ?? 0) ?></div>
+                <div style="font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; margin-top:3px;">Năm nay</div>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Order stats -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">

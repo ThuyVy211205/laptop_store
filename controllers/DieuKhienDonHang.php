@@ -6,6 +6,7 @@
 
 require_once ROOT_PATH . '/models/DonHang.php';
 require_once ROOT_PATH . '/models/NguoiDung.php';
+require_once ROOT_PATH . '/models/SanPham.php';
 
 class DieuKhienDonHang {
     private $donHangModel;
@@ -101,20 +102,35 @@ class DieuKhienDonHang {
         }
 
         $reason = $_POST['reason'] ?? 'Khách hàng tự hủy';
-        $this->donHangModel->cancel($id, $reason);
 
-        $this->nguoiDungModel->decrementStats($order['id_nguoi_dung'], $order['tong_tien']);
-        $this->nguoiDungModel->updateRank($order['id_nguoi_dung']);
+        $details = $this->donHangModel->getDetails($id);
+        $db = db();
+        $db->beginTransaction();
+        try {
+            $this->donHangModel->cancel($id, $reason);
 
-        db()->insert('thong_bao', [
-            'id_nguoi_dung' => $order['id_nguoi_dung'],
-            'tieu_de'       => 'Đơn hàng đã bị hủy',
-            'noi_dung'      => 'Đơn hàng #' . $order['ma_don_hang'] . ' đã bị hủy. Lý do: ' . $reason,
-            'loai'          => 'order',
-            'lien_ket'      => SITE_URL . '/order/detail/' . $id,
-        ]);
+            $sanPhamModel = new SanPham();
+            foreach ($details as $item) {
+                $sanPhamModel->increaseStock($item['id_san_pham'], $item['so_luong']);
+            }
 
-        setFlash('success', 'Đã hủy đơn hàng thành công');
+            $this->nguoiDungModel->decrementStats($order['id_nguoi_dung'], $order['tong_tien']);
+            $this->nguoiDungModel->updateRank($order['id_nguoi_dung']);
+
+            db()->insert('thong_bao', [
+                'id_nguoi_dung' => $order['id_nguoi_dung'],
+                'tieu_de'       => 'Đơn hàng đã bị hủy',
+                'noi_dung'      => 'Đơn hàng #' . $order['ma_don_hang'] . ' đã bị hủy. Lý do: ' . $reason,
+                'loai'          => 'order',
+                'lien_ket'      => SITE_URL . '/order/detail/' . $id,
+            ]);
+
+            $db->commit();
+            setFlash('success', 'Đã hủy đơn hàng thành công');
+        } catch (Exception $e) {
+            $db->rollback();
+            setFlash('error', 'Hủy đơn hàng thất bại. Vui lòng thử lại.');
+        }
         redirect('/order/detail/' . $id);
     }
 }

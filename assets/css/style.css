@@ -688,6 +688,87 @@ html.dark .nav-theme-btn:hover  { color: #fbbf24; opacity: .85; }
     font-size: 11px; font-weight: 700;
 }
 
+/* ── Out of stock — product card ── */
+.product-card.out-of-stock {
+    opacity: .62;
+    filter: grayscale(.5);
+}
+.product-card.out-of-stock:hover {
+    transform: none;
+    box-shadow: none;
+}
+.product-card.out-of-stock:hover .product-img-wrap img {
+    transform: none !important;
+}
+.out-of-stock-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.55);
+}
+.out-of-stock-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 6px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 12px rgba(220,38,38,.3);
+}
+.card-out-of-stock-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #DC2626;
+    text-align: center;
+    margin-top: 8px;
+    padding: 4px 0;
+}
+.product-card.out-of-stock .price-current {
+    color: #9CA3AF !important;
+}
+
+/* ── Out of stock — flash card ── */
+.flash-card.out-of-stock {
+    opacity: .62;
+    filter: grayscale(.5);
+}
+.flash-card.out-of-stock:hover {
+    transform: none;
+    box-shadow: none;
+}
+.flash-card.out-of-stock:hover .fc-img img {
+    transform: none !important;
+}
+.fc-img {
+    position: relative;
+}
+.flash-card.out-of-stock .fc-price-new {
+    color: #9CA3AF !important;
+}
+
+html.dark .product-card.out-of-stock,
+html.dark .flash-card.out-of-stock {
+    opacity: .5;
+}
+html.dark .out-of-stock-overlay {
+    background: rgba(15,23,42,.55);
+}
+html.dark .out-of-stock-badge {
+    background: #991B1B;
+}
+html.dark .card-out-of-stock-label {
+    color: #F87171;
+}
+html.dark .product-card.out-of-stock .price-current,
+html.dark .flash-card.out-of-stock .fc-price-new {
+    color: #6B7280 !important;
+}
+
 .product-actions {
     position: absolute; top: 12px; right: 12px;
     display: flex; flex-direction: column; gap: 6px; z-index: 2;

@@ -210,11 +210,17 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
                 if ($fpShowDiscount) $GLOBALS['_pc_badge_discount']++;
                 if ($fpShowFlash)    $GLOBALS['_pc_badge_flash']++;
             ?>
-            <div class="flash-card">
-                <?php if ($fpShowDiscount): ?>
+            <?php $fpIsOut = $fpStock <= 0; ?>
+            <div class="flash-card<?= $fpIsOut ? ' out-of-stock' : '' ?>">
+                <?php if ($fpShowDiscount && !$fpIsOut): ?>
                 <div class="fc-badge">-<?= $fpDiscount ?>%</div>
                 <?php endif; ?>
                 <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($fp['duong_dan']) ?>" class="fc-img">
+                    <?php if ($fpIsOut): ?>
+                    <div class="out-of-stock-overlay">
+                        <span class="out-of-stock-badge">Hết hàng</span>
+                    </div>
+                    <?php endif; ?>
                     <img src="<?= imgUrl($fp['hinh_thu_nho']) ?>"
                          alt="<?= htmlspecialchars($fp['ten']) ?>"
                          onerror="this.onerror=null;this.src='<?= noImageUrl() ?>'"
@@ -222,14 +228,18 @@ if (empty($accessoryProducts)) $accessoryProducts = array_slice($products, 0, 4)
                 <div class="fc-body">
                     <p class="fc-name"><?= htmlspecialchars($fp['ten']) ?></p>
                     <div class="fc-prices">
-                        <span class="fc-price-new"><?= formatPrice($fpSale) ?></span>
-                        <?php if ($fpShowDiscount): ?>
+                        <span class="fc-price-new<?= $fpIsOut ? ' text-muted' : '' ?>"><?= formatPrice($fpSale) ?></span>
+                        <?php if ($fpShowDiscount && !$fpIsOut): ?>
                         <span class="fc-price-old"><?= formatPrice($fpOrig) ?></span>
                         <?php endif; ?>
                     </div>
+                    <?php if ($fpIsOut): ?>
+                    <span class="card-out-of-stock-label">Tạm hết hàng</span>
+                    <?php else: ?>
                     <button class="fc-btn btn-add-cart" data-id="<?= (int)$fp['id'] ?>">
                         <i class="fas fa-cart-plus"></i> Thêm vào giỏ
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>

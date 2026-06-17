@@ -5,8 +5,9 @@ $final    = $sale ?: $price;
 $discount = $sale ? calcDiscount($price, $sale) : 0;
 
 $qvShowDiscount = $discount > 0;
-$thumb        = !empty($images) ? imgUrl($images[0]['duong_dan_anh']) : imgUrl($product['hinh_thu_nho']);
-$thumbFallback = imgUrl($product['hinh_thu_nho']);
+$qvOutOfStock   = (int)($product['ton_kho'] ?? 0) <= 0;
+$thumb          = !empty($images) ? imgUrl($images[0]['duong_dan_anh']) : imgUrl($product['hinh_thu_nho']);
+$thumbFallback  = imgUrl($product['hinh_thu_nho']);
 ?>
 <div class="row g-0">
     <div class="col-md-5">
@@ -34,20 +35,26 @@ $thumbFallback = imgUrl($product['hinh_thu_nho']);
         </p>
         <?php endif; ?>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <?php if ($qvOutOfStock): ?>
+            <button class="btn btn-tech" disabled style="flex:1;min-width:130px;padding:10px 22px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:0!important;width:auto!important;opacity:.5;cursor:not-allowed;">
+                <i class="fas fa-times-circle"></i> Hết hàng
+            </button>
+            <?php else: ?>
             <button class="btn btn-tech btn-add-cart" data-id="<?= $product['id'] ?>" style="flex:1;min-width:130px;padding:10px 22px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:0!important;width:auto!important">
                 <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
             </button>
+            <?php endif; ?>
             <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($product['duong_dan']) ?>" class="btn btn-outline" style="flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:8px">
                 Xem chi tiết <i class="fas fa-arrow-right"></i>
             </a>
         </div>
-        <?php if(!empty($product['ton_kho']) && $product['ton_kho'] > 0): ?>
-        <p style="color:var(--color-green);font-size:13px;margin-top:12px">
-            <i class="fas fa-check-circle"></i> Còn hàng (<?= $product['ton_kho'] ?> sản phẩm)
+        <?php if ($qvOutOfStock): ?>
+        <p style="color:var(--color-red);font-size:13px;margin-top:12px">
+            <i class="fas fa-times-circle"></i> Sản phẩm tạm hết hàng
         </p>
         <?php else: ?>
-        <p style="color:var(--color-red);font-size:13px;margin-top:12px">
-            <i class="fas fa-times-circle"></i> Hết hàng
+        <p style="color:var(--color-green);font-size:13px;margin-top:12px">
+            <i class="fas fa-check-circle"></i> Còn hàng (<?= $product['ton_kho'] ?> sản phẩm)
         </p>
         <?php endif; ?>
     </div>

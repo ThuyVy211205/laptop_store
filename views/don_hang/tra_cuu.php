@@ -1,5 +1,25 @@
 <?php include ROOT_PATH . '/views/bo_cuc/dau_trang.php'; ?>
 
+<?php
+$statusMap = [
+    'pending'   => ['label' => 'Chờ xác nhận', 'badge' => 'bg-warning text-dark'],
+    'confirmed' => ['label' => 'Đã xác nhận',  'badge' => 'bg-info text-white'],
+    'shipping'  => ['label' => 'Đang giao',     'badge' => 'bg-primary text-white'],
+    'delivered' => ['label' => 'Đã giao',        'badge' => 'bg-success text-white'],
+    'completed' => ['label' => 'Hoàn thành',     'badge' => 'bg-success text-white'],
+    'cancelled' => ['label' => 'Đã hủy',         'badge' => 'bg-danger text-white'],
+];
+$payMap = [
+    'cod'           => 'Tiền mặt khi nhận (COD)',
+    'bank_transfer' => 'Chuyển khoản ngân hàng',
+    'momo'          => 'Ví MoMo',
+    'vnpay'         => 'VNPay',
+];
+$steps      = ['pending','confirmed','shipping','delivered','completed'];
+$stepLabels = ['Chờ xác nhận','Đã xác nhận','Đang giao','Đã giao','Hoàn thành'];
+$stepIcons  = ['clock','check-circle','truck','box-open','star'];
+?>
+
 <!-- Breadcrumb -->
 <nav class="breadcrumb-wrap">
     <div class="container">
@@ -10,14 +30,14 @@
     </div>
 </nav>
 
-<div class="container py-5" style="max-width:760px;">
+<div class="container py-4">
 
     <!-- Search form -->
     <div class="checkout-card mb-4">
-        <h1 class="page-heading mb-1" style="font-size:1.5rem;">
+        <h1 class="page-heading mb-1">
             <i class="fas fa-search me-2 text-primary"></i>Tra cứu đơn hàng
         </h1>
-        <p class="text-muted mb-4" style="font-size:14px;">Nhập mã đơn hàng để xem trạng thái và thông tin giao hàng.</p>
+        <p class="text-muted mb-3" style="font-size:14px;">Nhập mã đơn hàng để xem trạng thái và thông tin giao hàng.</p>
 
         <form method="GET" action="<?= SITE_URL ?>/order/lookup" class="d-flex gap-2">
             <input type="text"
@@ -39,43 +59,25 @@
         <?php endif; ?>
     </div>
 
-    <?php if ($order): ?>
-    <?php
-    $statusMap = [
-        'pending'   => ['label' => 'Chờ xác nhận', 'badge' => 'bg-warning text-dark'],
-        'confirmed' => ['label' => 'Đã xác nhận',  'badge' => 'bg-info text-white'],
-        'shipping'  => ['label' => 'Đang giao',     'badge' => 'bg-primary text-white'],
-        'delivered' => ['label' => 'Đã giao',        'badge' => 'bg-success text-white'],
-        'completed' => ['label' => 'Hoàn thành',     'badge' => 'bg-success text-white'],
-        'cancelled' => ['label' => 'Đã hủy',         'badge' => 'bg-danger text-white'],
-    ];
-    $payMap = [
-        'cod'           => 'Tiền mặt khi nhận (COD)',
-        'bank_transfer' => 'Chuyển khoản ngân hàng',
-        'momo'          => 'Ví MoMo',
-        'vnpay'         => 'VNPay',
-    ];
-    $statusInfo = $statusMap[$order['trang_thai']] ?? ['label' => $order['trang_thai'], 'badge' => 'bg-secondary'];
-    $steps      = ['pending','confirmed','shipping','delivered','completed'];
-    $stepLabels = ['Chờ xác nhận','Đã xác nhận','Đang giao','Đã giao','Hoàn thành'];
-    $stepIcons  = ['clock','check-circle','truck','box-open','star'];
-    $curIdx     = array_search($order['trang_thai'], $steps);
+    <?php if ($order):
+        $statusInfo = $statusMap[$order['trang_thai']] ?? ['label' => $order['trang_thai'], 'badge' => 'bg-secondary'];
+        $curIdx     = array_search($order['trang_thai'], $steps);
     ?>
 
-    <!-- Order header -->
-    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
         <div>
-            <h5 class="fw-bold mb-1">Đơn hàng #<?= htmlspecialchars($order['ma_don_hang']) ?></h5>
-            <small class="text-muted">
-                <i class="fas fa-clock me-1"></i><?= formatDateTime($order['ngay_tao']) ?>
-            </small>
+            <h1 class="page-heading mb-1">Đơn hàng #<?= htmlspecialchars($order['ma_don_hang']) ?></h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <small class="text-muted"><i class="fas fa-clock me-1"></i><?= formatDateTime($order['ngay_tao']) ?></small>
+                <span class="badge <?= $statusInfo['badge'] ?>"><?= $statusInfo['label'] ?></span>
+            </div>
         </div>
-        <span class="badge <?= $statusInfo['badge'] ?> px-3 py-2"><?= $statusInfo['label'] ?></span>
     </div>
 
     <!-- Status Timeline -->
     <div class="checkout-card mb-4">
-        <h6 class="fw-bold mb-3"><i class="fas fa-route me-2 text-primary"></i>Trạng thái đơn hàng</h6>
+        <h5 class="checkout-card-title"><i class="fas fa-route me-2 text-primary"></i>Trạng thái đơn hàng</h5>
 
         <?php if ($order['trang_thai'] === 'cancelled'): ?>
         <div class="alert alert-danger d-flex align-items-center gap-3 mb-0">
@@ -94,7 +96,9 @@
                 $isActive = ($order['trang_thai'] === $step);
             ?>
             <div class="ot-step <?= $isDone ? 'done' : '' ?> <?= $isActive ? 'active' : '' ?>">
-                <div class="ot-dot"><i class="fas fa-<?= $isDone ? 'check' : $stepIcons[$i] ?>"></i></div>
+                <div class="ot-dot">
+                    <i class="fas fa-<?= $isDone ? 'check' : $stepIcons[$i] ?>"></i>
+                </div>
                 <div class="ot-label"><?= $stepLabels[$i] ?></div>
             </div>
             <?php if ($i < count($steps) - 1): ?>
@@ -106,60 +110,85 @@
     </div>
 
     <div class="row g-4">
-        <!-- Products -->
-        <div class="col-lg-7">
+
+        <!-- Left: Products -->
+        <div class="col-lg-8">
             <div class="checkout-card">
-                <h6 class="fw-bold mb-3">
-                    <i class="fas fa-box-open me-2 text-primary"></i>Sản phẩm đã đặt
-                    <span class="badge bg-secondary ms-1"><?= count($details) ?></span>
-                </h6>
+                <h5 class="checkout-card-title">
+                    <i class="fas fa-box-open me-2 text-primary"></i>
+                    Sản phẩm đã đặt
+                    <span class="badge bg-secondary ms-2"><?= count($details) ?> sản phẩm</span>
+                </h5>
+
                 <?php foreach ($details as $item): ?>
                 <div class="order-item-row">
                     <div class="order-item-img-wrap">
                         <?php $imgSrc = $item['anh_dau'] ?: $item['hinh_thu_nho'] ?: $item['hinh_san_pham'] ?? ''; ?>
                         <img src="<?= htmlspecialchars(imgUrl($imgSrc)) ?>"
                              alt="<?= htmlspecialchars($item['ten_san_pham']) ?>"
-                             onerror="this.onerror=null;this.style.display='none'">
+                             onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2268%22 height=%2268%22%3E%3Crect fill=%22%23f3f4f6%22 width=%2268%22 height=%2268%22/%3E%3Ctext fill=%22%23adb5bd%22 font-family=%22sans-serif%22 font-size=%2224%22 text-anchor=%22middle%22 x=%2234%22 y=%2244%22%3E%F0%9F%96%A5%3C/text%3E%3C/svg%3E'">
                     </div>
                     <div class="order-item-info">
+                        <?php if (!empty($item['duong_dan'])): ?>
+                        <a href="<?= SITE_URL ?>/product/<?= htmlspecialchars($item['duong_dan']) ?>"
+                           class="order-item-name text-decoration-none">
+                            <?= htmlspecialchars($item['ten_san_pham']) ?>
+                        </a>
+                        <?php else: ?>
                         <span class="order-item-name"><?= htmlspecialchars($item['ten_san_pham']) ?></span>
+                        <?php endif; ?>
                         <small class="text-muted">
-                            <?= formatPrice($item['gia']) ?> &times; <strong><?= $item['so_luong'] ?></strong>
+                            Đơn giá: <?= formatPrice($item['gia']) ?>
+                            &nbsp;×&nbsp;
+                            <strong><?= $item['so_luong'] ?></strong>
                         </small>
                     </div>
-                    <div class="order-item-subtotal"><?= formatPrice($item['tam_tinh']) ?></div>
+                    <div class="order-item-subtotal">
+                        <?= formatPrice($item['tam_tinh']) ?>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>
         </div>
 
-        <!-- Summary + Shipping -->
-        <div class="col-lg-5 d-flex flex-column gap-3">
+        <!-- Right: Summary + Shipping + Payment -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
 
-            <!-- Tổng tiền -->
+            <!-- Order Summary -->
             <div class="order-summary-card">
-                <h6 class="summary-title"><i class="fas fa-receipt me-2 text-primary"></i>Tóm tắt</h6>
+                <h5 class="summary-title"><i class="fas fa-receipt me-2 text-primary"></i>Tóm tắt đơn hàng</h5>
+
                 <div class="summary-row">
                     <span class="text-muted">Tạm tính</span>
                     <span><?= formatPrice($order['tam_tinh']) ?></span>
                 </div>
-                <?php if ($order['giam_gia'] > 0): ?>
+
+                <?php if ($order['so_tien_giam'] > 0): ?>
                 <div class="summary-row text-success">
-                    <span>Giảm giá</span>
-                    <span>-<?= formatPrice($order['giam_gia']) ?></span>
+                    <span>
+                        Giảm giá
+                        <?php if (!empty($order['ma_phieu_voucher'])): ?>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success ms-1" style="font-size:11px;">
+                            <?= htmlspecialchars($order['ma_phieu_voucher']) ?>
+                        </span>
+                        <?php endif; ?>
+                    </span>
+                    <span>-<?= formatPrice($order['so_tien_giam']) ?></span>
                 </div>
                 <?php endif; ?>
+
                 <div class="summary-row">
                     <span class="text-muted">Phí vận chuyển</span>
                     <span class="text-success fw-semibold">Miễn phí</span>
                 </div>
+
                 <div class="summary-row summary-total mt-1">
                     <span class="fw-bold">Tổng cộng</span>
                     <strong class="text-warning fs-5"><?= formatPrice($order['tong_tien']) ?></strong>
                 </div>
             </div>
 
-            <!-- Giao hàng -->
+            <!-- Shipping Info -->
             <div class="checkout-card">
                 <h6 class="fw-bold mb-3"><i class="fas fa-truck me-2 text-primary"></i>Thông tin giao hàng</h6>
                 <div class="info-list">
@@ -169,8 +198,14 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label"><i class="fas fa-phone fa-fw"></i></span>
-                        <span><?= htmlspecialchars($order['so_dien_thoai_giao_hang']) ?></span>
+                        <span><?= htmlspecialchars($order['sdt_giao_hang'] ?? '') ?></span>
                     </div>
+                    <?php if (!empty($order['thu_dien_tu_giao_hang'])): ?>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-envelope fa-fw"></i></span>
+                        <span><?= htmlspecialchars($order['thu_dien_tu_giao_hang']) ?></span>
+                    </div>
+                    <?php endif; ?>
                     <div class="info-row align-items-start">
                         <span class="info-label"><i class="fas fa-map-marker-alt fa-fw"></i></span>
                         <span><?= htmlspecialchars($order['dia_chi_giao_hang']) ?></span>
@@ -184,7 +219,7 @@
                 </div>
             </div>
 
-            <!-- Thanh toán -->
+            <!-- Payment Info -->
             <div class="checkout-card">
                 <h6 class="fw-bold mb-3"><i class="fas fa-credit-card me-2 text-primary"></i>Thanh toán</h6>
                 <div class="info-list">
@@ -215,30 +250,107 @@
 </div>
 
 <style>
-.order-timeline { display:flex; align-items:center; gap:0; overflow-x:auto; padding-bottom:4px; }
-.ot-step { display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; min-width:80px; }
-.ot-dot { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-          background:var(--color-surface-2); border:2px solid var(--color-border); color:var(--color-text-3);
-          font-size:16px; transition:all .25s; }
-.ot-label { font-size:12px; color:var(--color-text-3); font-weight:500; text-align:center; white-space:nowrap; }
-.ot-step.done .ot-dot  { background:var(--color-green); border-color:var(--color-green); color:#fff; }
-.ot-step.done .ot-label { color:var(--color-text); font-weight:600; }
-.ot-step.active .ot-dot { background:var(--bs-primary,#1d4ed8); border-color:var(--bs-primary,#1d4ed8); color:#fff;
-                           box-shadow:0 0 0 4px rgba(29,78,216,.18); }
-.ot-step.active .ot-label { color:var(--bs-primary,#1d4ed8); font-weight:700; }
-.ot-line { flex:1; height:2px; background:var(--color-border); min-width:20px; margin-bottom:28px; transition:background .25s; }
-.ot-line.done { background:var(--color-green); }
-.order-item-img-wrap { width:64px; height:64px; border-radius:10px; overflow:hidden; flex-shrink:0;
-                        background:var(--color-surface-2); border:1px solid var(--color-border); }
-.order-item-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
-.order-item-name { font-size:14px; font-weight:600; color:var(--color-text); display:block; margin-bottom:4px; line-height:1.4; }
-.order-item-subtotal { font-size:15px; font-weight:700; color:var(--color-warning,#f59e0b); white-space:nowrap; flex-shrink:0; }
-.info-list { display:flex; flex-direction:column; gap:10px; }
-.info-row { display:flex; align-items:center; gap:10px; font-size:14px; }
-.info-label { color:var(--color-text-3); flex-shrink:0; min-width:24px; }
-@media(max-width:576px) {
-    .ot-step { min-width:64px; } .ot-dot { width:36px; height:36px; font-size:13px; }
-    .ot-label { font-size:11px; } .ot-line { min-width:10px; margin-bottom:24px; }
+/* ── Order Timeline (horizontal) ── */
+.order-timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+.ot-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 80px;
+}
+.ot-dot {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--color-surface-2);
+    border: 2px solid var(--color-border);
+    color: var(--color-text-3);
+    font-size: 16px;
+    transition: all .25s;
+}
+.ot-label {
+    font-size: 12px;
+    color: var(--color-text-3);
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+}
+.ot-step.done .ot-dot {
+    background: var(--color-green);
+    border-color: var(--color-green);
+    color: #fff;
+}
+.ot-step.done .ot-label { color: var(--color-text); font-weight: 600; }
+
+.ot-step.active .ot-dot {
+    background: var(--bs-primary, #1d4ed8);
+    border-color: var(--bs-primary, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(29,78,216,.18);
+}
+.ot-step.active .ot-label { color: var(--bs-primary, #1d4ed8); font-weight: 700; }
+
+.ot-line {
+    flex: 1;
+    height: 2px;
+    background: var(--color-border);
+    min-width: 20px;
+    margin-bottom: 28px;
+    transition: background .25s;
+}
+.ot-line.done { background: var(--color-green); }
+
+/* ── Product item image wrapper ── */
+.order-item-img-wrap {
+    width: 68px; height: 68px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+}
+.order-item-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.order-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    display: block;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.order-item-subtotal {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-warning, #f59e0b);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* ── Info list ── */
+.info-list { display: flex; flex-direction: column; gap: 10px; }
+.info-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.info-label { color: var(--color-text-3); flex-shrink: 0; min-width: 24px; }
+
+/* ── Mobile ── */
+@media (max-width: 576px) {
+    .ot-step { min-width: 64px; }
+    .ot-dot { width: 36px; height: 36px; font-size: 13px; }
+    .ot-label { font-size: 11px; }
+    .ot-line { min-width: 10px; margin-bottom: 24px; }
+    .order-item-img-wrap { width: 56px; height: 56px; }
 }
 </style>
 

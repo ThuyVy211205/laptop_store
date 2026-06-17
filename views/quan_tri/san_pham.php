@@ -13,14 +13,18 @@ $page       = $page       ?? 1;
 $search     = $search     ?? '';
 $category_id= $category_id?? '';
 $status     = $status     ?? '';
+$sort       = $sort       ?? '';
+$limit      = $limit      ?? 0;
 
 /* Build query-string helper */
 function adminQs($extra = []) {
-    global $search, $category_id, $status, $page;
+    global $search, $category_id, $status, $sort, $limit;
     $base = [];
     if ($search)     $base['search']      = $search;
     if ($category_id)$base['id_danh_muc'] = $category_id;
     if ($status)     $base['status']      = $status;
+    if ($sort)       $base['sort']        = $sort;
+    if ($limit)      $base['limit']       = $limit;
     $merged = array_merge($base, $extra);
     return $merged ? '?' . http_build_query($merged) : '';
 }
@@ -123,7 +127,13 @@ $to   = min($page * 15, $total);
             </button>
             <div class="admin-topbar-title">
                 <h5>Quản lý sản phẩm</h5>
-                <small>Tổng cộng <?= number_format($total) ?> sản phẩm</small>
+                <small>Tổng cộng <?= number_format($total) ?> sản phẩm
+                    <?php if ($sort === 'bestseller'): ?>
+                    <span style="color:#d97706;margin-left:4px;"><i class="fas fa-fire"></i> Bán chạy nhất</span>
+                    <?php elseif ($sort === 'worstseller'): ?>
+                    <span style="color:#94a3b8;margin-left:4px;"><i class="fas fa-snowflake"></i> Bán chậm nhất</span>
+                    <?php endif; ?>
+                </small>
             </div>
             <div class="admin-topbar-right">
                 <a href="<?= SITE_URL ?>/admin/orders?status=pending" class="admin-topbar-btn" title="Đơn hàng chờ">
@@ -188,7 +198,7 @@ $to   = min($page * 15, $total);
                         </select>
 
                         <?php if ($search || $category_id || $status): ?>
-                        <a href="<?= SITE_URL ?>/admin/products" class="btn-admin btn-admin-outline btn-admin-sm">
+                        <a href="<?= SITE_URL ?>/admin/products<?= $sort ? adminQs([]) : '' ?>" class="btn-admin btn-admin-outline btn-admin-sm">
                             <i class="fas fa-times"></i> Xoá bộ lọc
                         </a>
                         <?php endif; ?>
@@ -285,7 +295,7 @@ $to   = min($page * 15, $total);
                 </div>
 
                 <!--Phân trang-->
-                <?php if ($total > 0): ?>
+                <?php if ($total > 0 && !$limit): ?>
                 <div class="admin-pagination">
                     <div class="admin-pagination-info">
                         Hiển thị <?= $from ?>–<?= $to ?> trong <?= number_format($total) ?> sản phẩm

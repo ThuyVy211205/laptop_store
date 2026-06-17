@@ -66,7 +66,7 @@ $_isAccessory = (bool) preg_match('/chu[oô]t|tai[\s-]?nghe|b[àa]n[\s-]?ph[íi]
                 <?php if ($showDetailDiscount): ?>
                 <span class="pd-gallery__badge pd-gallery__badge--sale">-<?= $discount ?>%</span>
                 <?php endif; ?>
-                <?php if (!empty($product['la_moi'])): ?>
+                <?php if (in_array((int)$product['id'], getNewProductIds())): ?>
                 <span class="pd-gallery__badge pd-gallery__badge--new">Mới</span>
                 <?php endif; ?>
                 <img

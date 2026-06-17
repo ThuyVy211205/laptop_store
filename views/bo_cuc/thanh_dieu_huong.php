@@ -110,6 +110,7 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
                         </div>
                         <a href="<?= SITE_URL ?>/account"><i class="fas fa-user"></i> Tài khoản</a>
                         <a href="<?= SITE_URL ?>/order"><i class="fas fa-box"></i> Đơn hàng</a>
+                        <a href="<?= SITE_URL ?>/account/history"><i class="fas fa-history"></i> Lịch sử mua hàng</a>
                         <a href="<?= SITE_URL ?>/wishlist"><i class="fas fa-heart"></i> Yêu thích</a>
                         <hr>
                         <a href="<?= SITE_URL ?>/auth/logout" class="text-danger">
@@ -215,6 +216,9 @@ $_accCats = array_values(array_filter($_navCats, function($c) {
         <?php if (isLoggedIn() && $currentUser): ?>
         <a href="<?= SITE_URL ?>/account">
             <i class="fas fa-user-circle"></i> Xin chào, <?= htmlspecialchars(mb_substr($currentUser['ho_ten'], 0, 15)) ?>
+        </a>
+        <a href="<?= SITE_URL ?>/account/history">
+            <i class="fas fa-history"></i> Lịch sử mua hàng
         </a>
         <a href="<?= SITE_URL ?>/auth/logout" style="color:#ef4444">
             <i class="fas fa-sign-out-alt"></i> Đăng xuất

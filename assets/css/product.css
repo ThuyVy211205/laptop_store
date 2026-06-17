@@ -1053,7 +1053,7 @@ html.dark .price-old { color: var(--color-text-3); }
 }
 .pd-action:hover { border-color: #dc2626; color: #dc2626; background: #FEF2F2; }
 
-/* Out of stock */
+/* Out of stock — detail page */
 .pd-outofstock {
     padding: 14px 18px; margin-top: 16px;
     background: #FEF2F2; border: 1px solid #FECACA;

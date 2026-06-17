@@ -30,8 +30,51 @@ class DieuKhienTaiKhoan {
         $successOrders = count(array_filter($allOrders, fn($o) => $o['trang_thai'] === 'completed'));
         $recentOrders  = array_slice($allOrders, 0, 5);
 
+        $collection = db()->fetchAll(
+            "SELECT od.id_don_hang, od.id_san_pham, od.ten_san_pham, od.hinh_thu_nho,
+                    od.gia AS gia_mua, od.so_luong, od.tam_tinh,
+                    o.ma_don_hang, o.ngay_tao AS ngay_mua,
+                    p.duong_dan
+             FROM chi_tiet_don od
+             JOIN don_hang o ON od.id_don_hang = o.id
+             LEFT JOIN san_pham p ON od.id_san_pham = p.id
+             WHERE o.id_nguoi_dung = ? AND o.trang_thai = 'completed'
+             ORDER BY o.ngay_tao DESC",
+            [$userId]
+        );
+
+        $collectionCount = count($collection);
+        $totalSpent      = array_sum(array_column($collection, 'tam_tinh'));
+
         $pageTitle = 'Tài khoản của tôi';
         require_once ROOT_PATH . '/views/tai_khoan/ho_so.php';
+    }
+
+    /** Trang lịch sử mua hàng — tất cả sản phẩm từ đơn hoàn thành */
+    public function history() {
+        $this->requireLogin();
+        $userId = $_SESSION['id_nguoi_dung'];
+
+        $nguoiDung = new NguoiDung();
+        $user      = $nguoiDung->getById($userId);
+
+        $collection = db()->fetchAll(
+            "SELECT od.id_don_hang, od.id_san_pham, od.ten_san_pham, od.hinh_thu_nho,
+                    od.gia AS gia_mua, od.so_luong, od.tam_tinh,
+                    o.ma_don_hang, o.ngay_tao AS ngay_mua,
+                    p.duong_dan
+             FROM chi_tiet_don od
+             JOIN don_hang o ON od.id_don_hang = o.id
+             LEFT JOIN san_pham p ON od.id_san_pham = p.id
+             WHERE o.id_nguoi_dung = ? AND o.trang_thai = 'completed'
+             ORDER BY o.ngay_tao DESC",
+            [$userId]
+        );
+
+        $collectionCount = count($collection);
+        $totalSpent      = array_sum(array_column($collection, 'tam_tinh'));
+        $pageTitle       = 'Lịch sử mua hàng';
+        require_once ROOT_PATH . '/views/tai_khoan/lich_su_mua_hang.php';
     }
 
     /** Cập nhật hồ sơ hoặc đổi mật khẩu (POST) */

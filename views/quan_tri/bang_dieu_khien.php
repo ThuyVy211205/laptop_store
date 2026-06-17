@@ -9,6 +9,7 @@ $admin       = $_SESSION['admin'];
 $stats       = $stats       ?? ['total_revenue'=>0,'total_orders'=>0,'total_products'=>0,'total_customers'=>0,'pending_orders'=>0];
 $recentOrders= $recentOrders?? [];
 $topProducts = $topProducts ?? [];
+$worstProducts = $worstProducts ?? [];
 $revenueData = $revenueData ?? [];
 
 $statusLabels = [
@@ -188,10 +189,10 @@ $statusLabels = [
                 </div>
             </div>
 
-            <!-- ===== CHARTS ROW ===== -->
+            <!-- ===== CHARTS & TOP/ WORST ===== -->
+            <!-- Revenue chart -->
             <div class="row g-4 mb-4">
-                <!-- Revenue chart -->
-                <div class="col-lg-8">
+                <div class="col-12">
                     <div class="admin-card mb-0">
                         <div class="admin-card-header">
                             <h6 class="admin-card-title">
@@ -208,15 +209,19 @@ $statusLabels = [
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Top sellers + Slowest sellers -->
+            <div class="row g-4 mb-4">
 
                 <!-- Top products -->
-                <div class="col-lg-4">
+                <div class="col-lg-6">
                     <div class="admin-card mb-0" style="height:100%;">
                         <div class="admin-card-header">
                             <h6 class="admin-card-title">
                                 <i class="fas fa-fire"></i> Top sản phẩm bán chạy
                             </h6>
-                            <a href="<?= SITE_URL ?>/admin/products" class="btn-admin btn-admin-outline btn-admin-sm">Xem tất cả</a>
+                            <a href="<?= SITE_URL ?>/admin/products?sort=bestseller&limit=5" class="btn-admin btn-admin-outline btn-admin-sm">Xem tất cả</a>
                         </div>
                         <div class="admin-card-body" style="padding-top:8px;padding-bottom:8px;">
                             <?php if (!empty($topProducts)): ?>
@@ -242,6 +247,41 @@ $statusLabels = [
                         </div>
                     </div>
                 </div>
+
+                <!-- Slowest products -->
+                <div class="col-lg-6">
+                    <div class="admin-card mb-0" style="height:100%;">
+                        <div class="admin-card-header">
+                            <h6 class="admin-card-title">
+                                <i class="fas fa-snowflake"></i> Top sản phẩm bán chậm
+                            </h6>
+                            <a href="<?= SITE_URL ?>/admin/products?sort=worstseller&limit=5" class="btn-admin btn-admin-outline btn-admin-sm">Xem tất cả</a>
+                        </div>
+                        <div class="admin-card-body" style="padding-top:8px;padding-bottom:8px;">
+                            <?php if (!empty($worstProducts)): ?>
+                                <?php
+                                $warnClass = ['','','','',''];
+                                foreach ($worstProducts as $i => $p):
+                                ?>
+                                <div class="mini-stat">
+                                    <div class="mini-stat-rank muted"><?= $i + 1 ?></div>
+                                    <div class="mini-stat-info">
+                                        <div class="mini-stat-name"><?= htmlspecialchars($p['ten']) ?></div>
+                                        <div class="mini-stat-sub">Đã bán: <?= number_format($p['so_luong_ban']) ?> · Tồn: <?= number_format($p['ton_kho']) ?></div>
+                                    </div>
+                                    <div class="mini-stat-val"><?= formatPrice($p['gia_cuoi']) ?></div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="text-center py-4 mb-0" style="color:#8a96b8;font-size:14px;">
+                                    <i class="fas fa-inbox d-block mb-2" style="font-size:28px;opacity:.4;"></i>
+                                    Chưa có dữ liệu
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- ===== RECENT ORDERS ===== -->

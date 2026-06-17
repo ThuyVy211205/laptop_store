@@ -21,7 +21,6 @@ class DieuKhienTrangChu {
         $categories  = $this->danhMucModel->getAll();
         $featured    = $this->sanPhamModel->getFeatured(8);
         $flashSale   = $this->sanPhamModel->getFlashSale(8);
-        $newArrivals = $this->sanPhamModel->getNewArrivals(8);
         $bestSellers = $this->sanPhamModel->getBestSellers(8);
 
         $banners = db()->fetchAll(

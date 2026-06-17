@@ -160,16 +160,37 @@ class SanPham {
         return $row['tong'] ?? 0;
     }
 
-    /** Lấy sản phẩm nổi bật (la_noi_bat = 1) */
+    /** Lấy sản phẩm nổi bật (la_noi_bat = 1) — đan xen laptop & phụ kiện */
     public function getFeatured($limit = 8) {
-        return $this->db->fetchAll(
-            "SELECT p.*, c.ten AS ten_danh_muc
+        $all = $this->db->fetchAll(
+            "SELECT p.*, c.ten AS ten_danh_muc, c.duong_dan AS duong_dan_danh_muc
              FROM san_pham p
              LEFT JOIN danh_muc c ON p.id_danh_muc = c.id
              WHERE p.trang_thai = 'active' AND p.la_noi_bat = 1
-             ORDER BY p.ngay_tao DESC
-             LIMIT " . (int)$limit
+             ORDER BY p.ngay_tao DESC, p.id DESC
+             LIMIT " . (int)($limit * 3)
         );
+
+        $laptops = [];
+        $others  = [];
+        foreach ($all as $p) {
+            $slug = $p['duong_dan_danh_muc'] ?? '';
+            if (stripos($slug, 'laptop') !== false || stripos($slug, 'macbook') !== false) {
+                $laptops[] = $p;
+            } else {
+                $others[] = $p;
+            }
+        }
+
+        $result = [];
+        $maxCount = max(count($laptops), count($others));
+        for ($i = 0; $i < $maxCount && count($result) < $limit; $i++) {
+            if (isset($laptops[$i])) $result[] = $laptops[$i];
+            if (count($result) >= $limit) break;
+            if (isset($others[$i])) $result[] = $others[$i];
+        }
+
+        return $result;
     }
 
     /** Lấy sản phẩm đang flash sale còn hiệu lực */
@@ -187,14 +208,14 @@ class SanPham {
         );
     }
 
-    /** Lấy sản phẩm mới (la_moi = 1) */
-    public function getNewArrivals($limit = 8) {
+    /** Lấy sản phẩm mới (la_moi = 1) — ưu tiên sản phẩm mới nhất theo ID */
+    public function getNewArrivals($limit = 5) {
         return $this->db->fetchAll(
             "SELECT p.*, c.ten AS ten_danh_muc
              FROM san_pham p
              LEFT JOIN danh_muc c ON p.id_danh_muc = c.id
              WHERE p.trang_thai = 'active' AND p.la_moi = 1
-             ORDER BY p.ngay_tao DESC
+             ORDER BY p.id DESC
              LIMIT " . (int)$limit
         );
     }
@@ -377,6 +398,14 @@ class SanPham {
         );
     }
 
+    /** Hoàn tồn kho và giảm số lượng đã bán khi hủy đơn hàng */
+    public function increaseStock($productId, $quantity) {
+        return $this->db->execute(
+            "UPDATE san_pham SET ton_kho = ton_kho + ?, so_luong_ban = GREATEST(0, so_luong_ban - ?) WHERE id = ?",
+            [$quantity, $quantity, $productId]
+        );
+    }
+
     /** Lấy danh sách sản phẩm sắp hết hàng */
     public function getLowStock($limit = 10) {
         return $this->db->fetchAll(
@@ -387,8 +416,8 @@ class SanPham {
         );
     }
 
-    /** Admin: lấy tất cả sản phẩm, hỗ trợ tìm kiếm và lọc */
-    public function adminGetAll($search = '', $categoryId = null, $stockFilter = '') {
+    /** Admin: lấy tất cả sản phẩm, hỗ trợ tìm kiếm, lọc và sắp xếp */
+    public function adminGetAll($search = '', $categoryId = null, $stockFilter = '', $sort = '') {
         $sql = "SELECT p.*, c.ten AS ten_danh_muc
                 FROM san_pham p
                 LEFT JOIN danh_muc c ON p.id_danh_muc = c.id
@@ -410,7 +439,16 @@ class SanPham {
             $sql .= " AND p.ton_kho <= 0";
         }
 
-        $sql .= " ORDER BY p.ngay_tao DESC";
+        switch ($sort) {
+            case 'bestseller':
+                $sql .= " ORDER BY p.so_luong_ban DESC";
+                break;
+            case 'worstseller':
+                $sql .= " ORDER BY p.so_luong_ban ASC";
+                break;
+            default:
+                $sql .= " ORDER BY p.ngay_tao DESC";
+        }
         return $this->db->fetchAll($sql, $params);
     }
 }
