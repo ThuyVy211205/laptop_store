@@ -450,6 +450,173 @@ function buildOrderConfirmEmail(array $order, array $items)
     return ['html' => $html, 'images' => $cidImages];
 }
 
+/**
+ * Xây dựng HTML email thông báo hủy đơn hàng (format đỏ).
+ */
+function buildOrderCancelEmail(array $order, array $items)
+{
+    $payLabels = [
+        'cod'           => 'Thanh toán khi nhận hàng (COD)',
+        'bank_transfer' => 'Chuyển khoản ngân hàng',
+        'momo'          => 'Ví MoMo',
+        'vnpay'         => 'VNPay',
+    ];
+    $payLabel  = $payLabels[$order['phuong_thuc_thanh_toan']] ?? $order['phuong_thuc_thanh_toan'];
+    $orderLink = SITE_URL . '/order/detail/' . $order['id'];
+    $reason    = $order['ly_do_huy'] ?? '';
+
+    $dbInst   = db();
+    $rows     = '';
+    $cidImages = [];
+
+    foreach ($items as $idx => $item) {
+        $unitPrice = ($item['gia_khuyen_mai'] ?? 0) ?: ($item['gia'] ?? 0);
+        $lineTotal = $unitPrice * ($item['so_luong'] ?? 1);
+
+        $thumb = $item['hinh_thu_nho'] ?? '';
+        $pid   = $item['id_san_pham'] ?? ($item['id'] ?? null);
+        if ($pid) {
+            $firstImg = $dbInst->fetch(
+                "SELECT duong_dan_anh FROM anh_san_pham WHERE id_san_pham = ? ORDER BY thu_tu ASC LIMIT 1",
+                [$pid]
+            );
+            if ($firstImg) $thumb = $firstImg['duong_dan_anh'];
+        }
+
+        $filePath = '';
+        if ($thumb) {
+            $filePath = strpos($thumb, 'assets/') === 0
+                ? ROOT_PATH . '/' . $thumb
+                : UPLOAD_PATH . '/' . ltrim($thumb, '/');
+        }
+
+        if ($filePath && file_exists($filePath)) {
+            $cid      = 'cancel_img_' . $idx . '_' . ($pid ?: 0) . '@vqstore';
+            $mime     = mime_content_type($filePath) ?: 'image/jpeg';
+            $cidImages[] = ['cid' => $cid, 'path' => $filePath, 'mime' => $mime];
+            $imgTag   = '<img src="cid:' . $cid . '" width="70" height="70"
+                              style="object-fit:cover;border-radius:8px;display:block;border:1px solid #e5e7eb;"
+                              alt="' . htmlspecialchars($item['ten'] ?? $item['ten_san_pham'] ?? '') . '">';
+        } else {
+            $imgTag = '<div style="width:70px;height:70px;background:#f3f4f6;border-radius:8px;
+                           display:flex;align-items:center;justify-content:center;font-size:28px;
+                           border:1px solid #e5e7eb;">🖥️</div>';
+        }
+
+        $itemName = $item['ten'] ?? $item['ten_san_pham'] ?? '';
+        $rows .= '
+        <tr>
+          <td style="padding:14px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;width:82px;">
+            ' . $imgTag . '
+          </td>
+          <td style="padding:14px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+            <div style="font-size:13.5px;font-weight:600;color:#1e2a3b;margin-bottom:6px;line-height:1.4;">
+              ' . htmlspecialchars($itemName) . '
+            </div>
+            <div style="font-size:12.5px;color:#9ca3af;">
+              Số lượng: <strong style="color:#374151;">' . ($item['so_luong'] ?? 1) . '</strong>
+              &nbsp;|&nbsp;
+              Đơn giá: <strong style="color:#374151;">' . number_format($unitPrice, 0, ',', '.') . 'đ</strong>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:#dc2626;margin-top:6px;">
+              Thành tiền: ' . number_format($lineTotal, 0, ',', '.') . 'đ
+            </div>
+          </td>
+        </tr>';
+    }
+
+    $total = $order['tong_tien'];
+    $reasonHtml = $reason
+        ? '<p style="margin:6px 0 0;font-size:13px;color:#dc2626;"><strong>Lý do hủy:</strong> ' . htmlspecialchars($reason) . '</p>'
+        : '';
+
+    $html = '<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Đơn hàng #' . $order['ma_don_hang'] . ' đã bị hủy</title>
+</head>
+<body style="margin:0;padding:0;background:#fef2f2;font-family:Inter,Arial,sans-serif;">
+<div style="max-width:620px;margin:28px auto;background:#fff;border-radius:14px;
+            overflow:hidden;box-shadow:0 4px 20px rgba(220,38,38,.10);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#dc2626,#ef4444);padding:32px;text-align:center;">
+    <div style="font-size:30px;font-weight:900;color:#fff;letter-spacing:2px;">VQSTORE</div>
+    <div style="color:#fecaca;font-size:13px;margin-top:6px;">Laptop &amp; Phụ kiện Công nghệ</div>
+    <div style="margin-top:18px;display:inline-block;background:rgba(255,255,255,.15);
+                border-radius:30px;padding:8px 22px;">
+      <span style="color:#fff;font-size:15px;font-weight:600;">❌ Đơn hàng đã bị hủy</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div style="padding:28px 32px;">
+
+    <p style="font-size:16px;font-weight:700;margin:0 0 6px;color:#1e2a3b;">
+      Xin chào ' . htmlspecialchars($order['ten_giao_hang']) . ',
+    </p>
+    <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.7;">
+      Đơn hàng <strong style="color:#dc2626;">#' . $order['ma_don_hang'] . '</strong>
+      của bạn đã bị hủy theo yêu cầu. Dưới đây là thông tin đơn hàng đã hủy:
+    </p>
+    ' . $reasonHtml . '
+
+    <h3 style="font-size:14px;font-weight:700;color:#dc2626;margin:24px 0 12px;
+               padding-bottom:8px;border-bottom:2px solid #fecaca;">Chi tiết đơn hàng đã hủy</h3>
+
+    <table width="100%" cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;border:1px solid #fee2e2;border-radius:10px;
+                  overflow:hidden;margin-bottom:16px;font-size:13px;">
+      <tbody>' . $rows . '</tbody>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0"
+           style="border-collapse:collapse;margin-bottom:20px;">
+      <tr style="border-top:2px solid #e5e7eb;">
+        <td style="padding:10px 0 4px;font-size:14px;font-weight:700;color:#1e2a3b;">Tổng cộng (đã hủy):</td>
+        <td style="padding:10px 0 4px;font-size:17px;font-weight:800;color:#dc2626;text-align:right;white-space:nowrap;">
+          ' . number_format($total, 0, ',', '.') . 'đ</td>
+      </tr>
+    </table>
+
+    <div style="background:#fef2f2;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+      <h4 style="font-size:13.5px;font-weight:700;margin:0 0 12px;color:#991b1b;">
+        📋 Thông tin đơn hàng
+      </h4>
+      <table cellpadding="0" cellspacing="0" style="font-size:13px;color:#374151;width:100%;">
+        <tr><td style="padding:3px 0;width:130px;color:#9ca3af;">Người nhận:</td>
+            <td style="padding:3px 0;font-weight:600;">' . htmlspecialchars($order['ten_giao_hang']) . '</td></tr>
+        <tr><td style="padding:3px 0;color:#9ca3af;">Thanh toán:</td>
+            <td style="padding:3px 0;">' . $payLabel . '</td></tr>
+      </table>
+    </div>
+
+    <div style="text-align:center;">
+      <a href="' . SITE_URL . '/products"
+         style="display:inline-block;background:linear-gradient(135deg,#dc2626,#ef4444);
+                color:#fff;padding:14px 36px;border-radius:30px;font-weight:700;
+                font-size:15px;text-decoration:none;letter-spacing:.3px;">
+        Tiếp tục mua sắm →
+      </a>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- Footer -->
+  <div style="background:#fef2f2;padding:20px 32px;text-align:center;
+              font-size:12px;color:#9ca3af;border-top:1px solid #fee2e2;">
+    © ' . date('Y') . ' <strong style="color:#6b7280;">VQSTORE</strong> — Laptop &amp; Phụ kiện Công nghệ<br>
+    Email này được gửi tự động, vui lòng không phản hồi trực tiếp.
+  </div>
+
+</div>
+</body></html>';
+
+    return ['html' => $html, 'images' => $cidImages];
+}
+
 /** Tạo khung HTML email có thương hiệu (wrapper chung) */
 function buildMailHtml($subject, $bodyHtml)
 {

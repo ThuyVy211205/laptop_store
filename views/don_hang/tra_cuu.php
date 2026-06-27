@@ -2,12 +2,13 @@
 
 <?php
 $statusMap = [
-    'pending'   => ['label' => 'Chờ xác nhận', 'badge' => 'bg-warning text-dark'],
-    'confirmed' => ['label' => 'Đã xác nhận',  'badge' => 'bg-info text-white'],
-    'shipping'  => ['label' => 'Đang giao',     'badge' => 'bg-primary text-white'],
-    'delivered' => ['label' => 'Đã giao',        'badge' => 'bg-success text-white'],
-    'completed' => ['label' => 'Hoàn thành',     'badge' => 'bg-success text-white'],
-    'cancelled' => ['label' => 'Đã hủy',         'badge' => 'bg-danger text-white'],
+    'pending'         => ['label' => 'Chờ xác nhận',    'badge' => 'bg-warning text-dark'],
+    'confirmed'       => ['label' => 'Đã xác nhận',      'badge' => 'bg-info text-white'],
+    'shipping'        => ['label' => 'Đang giao hàng',    'badge' => 'bg-primary text-white'],
+    'delivery_failed' => ['label' => 'Giao hàng thất bại', 'badge' => 'bg-danger text-white'],
+    'delivered'       => ['label' => 'Đã giao',            'badge' => 'bg-success text-white'],
+    'completed'       => ['label' => 'Hoàn thành',         'badge' => 'bg-success text-white'],
+    'cancelled'       => ['label' => 'Đã hủy',             'badge' => 'bg-danger text-white'],
 ];
 $payMap = [
     'cod'           => 'Tiền mặt khi nhận (COD)',

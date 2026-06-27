@@ -8,12 +8,23 @@ class DonHang {
     private $db;
 
     private static $validTransitions = [
-        'pending'   => ['confirmed', 'cancelled'],
-        'confirmed' => ['shipping', 'cancelled'],
-        'shipping'  => ['delivered', 'cancelled'],
-        'delivered' => ['completed'],
-        'completed' => [],
-        'cancelled' => [],
+        'pending'         => ['confirmed', 'delivery_failed', 'cancelled'],
+        'confirmed'       => ['shipping', 'delivery_failed', 'cancelled'],
+        'shipping'        => ['delivered', 'delivery_failed', 'cancelled'],
+        'delivery_failed' => ['cancelled'],
+        'delivered'       => ['completed'],
+        'completed'       => [],
+        'cancelled'       => [],
+    ];
+
+    public static $statusLabels = [
+        'pending'         => 'Chờ xác nhận',
+        'confirmed'       => 'Đã xác nhận',
+        'shipping'        => 'Đang giao hàng',
+        'delivery_failed' => 'Giao hàng thất bại',
+        'delivered'       => 'Đã giao',
+        'completed'       => 'Hoàn thành',
+        'cancelled'       => 'Đã hủy',
     ];
 
     public function __construct() {
@@ -98,7 +109,9 @@ class DonHang {
     /** Cập nhật trạng thái đơn hàng. Nếu là trạng thái hoàn tất (delivered/completed), tự động cập nhật thanh_toan */
     public function updateStatus($orderId, $status) {
         $order = $this->getById($orderId);
-        if (!$order || !$this->isValidTransition($order['trang_thai'], $status)) {
+        if (!$order) return false;
+        $order['trang_thai'] = $order['trang_thai'] ?: 'pending';
+        if (!$this->isValidTransition($order['trang_thai'], $status)) {
             return false;
         }
 
@@ -122,11 +135,27 @@ class DonHang {
     /** Hủy đơn hàng, lưu lý do hủy */
     public function cancel($orderId, $reason = '') {
         $order = $this->getById($orderId);
-        if (!$order || !$this->isValidTransition($order['trang_thai'], 'cancelled')) {
+        if (!$order) return false;
+        $order['trang_thai'] = $order['trang_thai'] ?: 'pending';
+        if (!$this->isValidTransition($order['trang_thai'], 'cancelled')) {
             return false;
         }
         return $this->db->execute(
             "UPDATE don_hang SET trang_thai = 'cancelled', ly_do_huy = ? WHERE id = ?",
+            [$reason, $orderId]
+        );
+    }
+
+    /** Đánh dấu giao hàng thất bại, lưu lý do */
+    public function markDeliveryFailed($orderId, $reason = '') {
+        $order = $this->getById($orderId);
+        if (!$order) return false;
+        $order['trang_thai'] = $order['trang_thai'] ?: 'pending';
+        if (!$this->isValidTransition($order['trang_thai'], 'delivery_failed')) {
+            return false;
+        }
+        return $this->db->execute(
+            "UPDATE don_hang SET trang_thai = 'delivery_failed', ly_do_huy = ? WHERE id = ?",
             [$reason, $orderId]
         );
     }

@@ -300,28 +300,43 @@ class DieuKhienQuanTri {
         $donHangModel = new DonHang();
 
         if ($param === 'status' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id     = (int)($_POST['id'] ?? 0);
-            $status = $_POST['status'] ?? '';
-            $reason = trim($_POST['cancel_reason'] ?? '');
+            $id         = (int)($_POST['id'] ?? 0);
+            $status     = $_POST['status'] ?? '';
+            $reason     = trim($_POST['cancel_reason'] ?? $_POST['fail_reason'] ?? '');
             if ($id && $status) {
-                $order = $donHangModel->getById($id);
+                $order   = $donHangModel->getById($id);
+                if (!$order) {
+                    setFlash('danger', 'Không tìm thấy đơn hàng.');
+                    redirect('/admin/orders');
+                    return;
+                }
+                $order['trang_thai'] = $order['trang_thai'] ?: 'pending';
+                $details = $donHangModel->getDetails($id);
+                $db      = db();
 
-                if ($status === 'cancelled') {
-                    $details = $donHangModel->getDetails($id);
-                    $db = db();
-                    $db->beginTransaction();
-                    try {
+                $needsRollback = ($status === 'cancelled');
+
+                if ($needsRollback) $db->beginTransaction();
+                try {
+                    if ($status === 'delivery_failed') {
+                        $result = $donHangModel->markDeliveryFailed($id, $reason);
+                    } elseif ($status === 'cancelled') {
                         $result = $donHangModel->cancel($id, $reason);
-                        if (!$result) {
-                            $db->rollback();
-                            $labels = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'shipping' => 'Đang giao', 'delivered' => 'Đã giao', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
-                            $from = $labels[$order['trang_thai']] ?? $order['trang_thai'];
-                            $to   = $labels[$status] ?? $status;
-                            setFlash('danger', "Không thể cập nhật trạng thái. Chuyển từ \"$from\" sang \"$to\" không hợp lệ.");
-                            redirect('/admin/orders');
-                            return;
-                        }
+                    } else {
+                        $result = $donHangModel->updateStatus($id, $status);
+                    }
 
+                    if (!$result) {
+                        if ($needsRollback) $db->rollback();
+                        $from = DonHang::$statusLabels[$order['trang_thai']] ?? $order['trang_thai'];
+                        $to   = DonHang::$statusLabels[$status] ?? $status;
+                        setFlash('danger', "Không thể cập nhật trạng thái. Chuyển từ \"$from\" sang \"$to\" không hợp lệ.");
+                        redirect('/admin/orders');
+                        return;
+                    }
+
+                    // ── Rollback khi hủy đơn ──
+                    if ($needsRollback) {
                         require_once ROOT_PATH . '/models/SanPham.php';
                         require_once ROOT_PATH . '/models/NguoiDung.php';
                         $sanPhamModel   = new SanPham();
@@ -336,34 +351,33 @@ class DieuKhienQuanTri {
                             $nguoiDungModel->updateRank($order['id_nguoi_dung']);
                         }
 
-                        $db->commit();
-                    } catch (Exception $e) {
-                        $db->rollback();
-                        setFlash('danger', 'Hủy đơn hàng thất bại. Vui lòng thử lại.');
-                        redirect('/admin/orders');
-                        return;
+                        if (!empty($order['id_phieu_giam'])) {
+                            $db->execute(
+                                "UPDATE phieu_giam_gia SET so_lan_dung = GREATEST(0, so_lan_dung - 1) WHERE id = ?",
+                                [$order['id_phieu_giam']]
+                            );
+                        }
                     }
-                } else {
-                    $result = $donHangModel->updateStatus($id, $status);
-                }
 
-                if (!$result) {
-                    $labels = ['pending' => 'Chờ xác nhận', 'confirmed' => 'Đã xác nhận', 'shipping' => 'Đang giao', 'delivered' => 'Đã giao', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
-                    $from = $labels[$order['trang_thai']] ?? $order['trang_thai'];
-                    $to   = $labels[$status] ?? $status;
-                    setFlash('danger', "Không thể cập nhật trạng thái. Chuyển từ \"$from\" sang \"$to\" không hợp lệ.");
+                    if ($needsRollback) $db->commit();
+                } catch (Exception $e) {
+                    if ($needsRollback) $db->rollback();
+                    $actionLabel = ($status === 'delivery_failed') ? 'Cập nhật trạng thái' : (($status === 'cancelled') ? 'Hủy đơn' : 'Cập nhật');
+                    setFlash('danger', $actionLabel . ' thất bại. Vui lòng thử lại.');
                     redirect('/admin/orders');
                     return;
                 }
 
-                // Thông báo chuông cho khách hàng
+                // ── Thông báo cho khách hàng ──
                 if ($order && !empty($order['id_nguoi_dung'])) {
+                    $reasonSuffix = $reason ? '. Lý do: ' . $reason : '';
                     $statusMap = [
-                        'confirmed' => ['Đơn hàng đã được xác nhận',       'Đơn hàng #%s đã được xác nhận và đang được chuẩn bị.',          'order'],
-                        'shipping'  => ['Đơn hàng đang trên đường giao',    'Đơn hàng #%s đã được giao cho đơn vị vận chuyển, đang trên đường đến bạn.', 'order'],
-                        'delivered' => ['Đơn hàng đã giao thành công',      'Đơn hàng #%s đã được giao thành công. Cảm ơn bạn đã mua hàng!', 'success'],
-                        'completed' => ['Đơn hàng hoàn thành',              'Đơn hàng #%s đã hoàn tất. Đừng quên để lại đánh giá sản phẩm nhé!', 'success'],
-                        'cancelled' => ['Đơn hàng đã bị hủy',               'Đơn hàng #%s đã bị hủy' . ($reason ? '. Lý do: ' . $reason : '.'), 'order'],
+                        'confirmed'       => ['Đơn hàng đã được xác nhận',       'Đơn hàng #%s đã được xác nhận và đang được chuẩn bị.',            'order'],
+                        'shipping'        => ['Đơn hàng đang trên đường giao',    'Đơn hàng #%s đã được giao cho đơn vị vận chuyển.',               'order'],
+                        'delivery_failed' => ['Giao hàng thất bại',             'Đơn hàng #%s giao hàng không thành công' . $reasonSuffix,        'order'],
+                        'delivered'       => ['Đơn hàng đã giao thành công',      'Đơn hàng #%s đã được giao thành công. Cảm ơn bạn đã mua hàng!',  'success'],
+                        'completed'       => ['Đơn hàng hoàn thành',              'Đơn hàng #%s đã hoàn tất. Đừng quên để lại đánh giá nhé!',       'success'],
+                        'cancelled'       => ['Đơn hàng đã bị hủy',               'Đơn hàng #%s đã bị hủy' . $reasonSuffix,                          'order'],
                     ];
                     if (isset($statusMap[$status])) {
                         [$title, $bodyTpl, $loai] = $statusMap[$status];
@@ -374,6 +388,24 @@ class DieuKhienQuanTri {
                             'loai'          => $loai,
                             'lien_ket'      => '/order/detail/' . $id,
                         ]);
+                    }
+                }
+
+                // ── Gửi email hủy đơn ──
+                if ($status === 'cancelled') {
+                    try {
+                        $orderRow = $donHangModel->getById($id);
+                        $mailResult = buildOrderCancelEmail($orderRow, $details);
+                        $mailErr = '';
+                        $toEmail = $orderRow['thu_dien_tu_giao_hang']
+                            ?? (db()->fetch("SELECT thu_dien_tu FROM nguoi_dung WHERE id=?", [$order['id_nguoi_dung']])['thu_dien_tu'] ?? '');
+                        if ($toEmail) {
+                            sendOrderMail($toEmail, $orderRow['ten_giao_hang'],
+                                'Đơn hàng #' . $orderRow['ma_don_hang'] . ' đã bị hủy',
+                                $mailResult['html'], $mailErr, $mailResult['images']);
+                        }
+                    } catch (Exception $mailEx) {
+                        error_log('Admin cancel mail error: ' . $mailEx->getMessage());
                     }
                 }
 

@@ -39,6 +39,7 @@ $flash       = getFlash();
         window.SITE_URL = '<?= SITE_URL ?>';
         window.IS_LOGGED_IN = <?= isLoggedIn() ? 'true' : 'false' ?>;
     </script>
+    <script src="<?= ASSETS_URL ?>/js/show-more.js"></script>
 </head>
 <body>
 

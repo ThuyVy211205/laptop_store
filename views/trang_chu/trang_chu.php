@@ -19,7 +19,7 @@ $homeCategories = [
     ['ten' => 'Bàn phím',         'duong_dan' => 'ban-phim-co',      'img' => 'ban-phim-keychron.webp'],
 ];
 
-$extraCss = ['home.css'];
+$extraCss = ['home.css', 'show-more.css'];
 include ROOT_PATH . '/views/bo_cuc/dau_trang.php';
 ?>
 
@@ -82,7 +82,7 @@ include ROOT_PATH . '/views/bo_cuc/dau_trang.php';
 </section>
 
 <!-- =========================================================
-     SẢN PHẨM NỔI BẬT — 4 sản phẩm hàng ngang (dynamic)
+     SẢN PHẨM NỔI BẬT — 4 hiện, còn lại ẩn + nút Xem thêm
      ========================================================= -->
 <?php if (!empty($featured)): ?>
     <section class="section section-products">
@@ -91,16 +91,28 @@ include ROOT_PATH . '/views/bo_cuc/dau_trang.php';
                 <h2 class="section-title">Sản phẩm nổi bật</h2>
             </div>
             <div class="pg-grid">
-                <?php foreach (array_slice($featured, 0, 6) as $product): ?>
-                    <?php include __DIR__ . '/../san_pham/_the_san_pham.php'; ?>
+                <?php $visibleFeat = 6; ?>
+                <?php foreach ($featured as $i => $product): ?>
+                    <div class="<?= $i >= $visibleFeat ? 'more-item more-item-feat' : '' ?>" style="<?= $i >= $visibleFeat ? 'display:none' : '' ?>">
+                        <?php include __DIR__ . '/../san_pham/_the_san_pham.php'; ?>
+                    </div>
                 <?php endforeach; ?>
             </div>
+            <?php if (count($featured) > $visibleFeat): ?>
+            <div class="show-more-wrap">
+                <button type="button" class="show-more-btn" data-section="more-item-feat"
+                        onclick="toggleShowMore('more-item-feat', this)">
+                    <span>Xem thêm</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            <?php endif; ?>
         </div>
     </section>
 <?php endif; ?>
 
 <!-- =========================================================
-     SẢN PHẨM BÁN CHẠY — 4 sản phẩm hàng ngang (dynamic)
+     SẢN PHẨM BÁN CHẠY — 4 hiện, còn lại ẩn + nút Xem thêm
      ========================================================= -->
 <?php if (!empty($bestSellers)): ?>
     <section class="section section-products">
@@ -109,10 +121,22 @@ include ROOT_PATH . '/views/bo_cuc/dau_trang.php';
                 <h2 class="section-title">Sản phẩm bán chạy</h2>
             </div>
             <div class="pg-grid">
-                <?php foreach (array_slice($bestSellers, 0, 6) as $product): ?>
-                    <?php include __DIR__ . '/../san_pham/_the_san_pham.php'; ?>
+                <?php $visibleBest = 6; ?>
+                <?php foreach ($bestSellers as $i => $product): ?>
+                    <div class="<?= $i >= $visibleBest ? 'more-item more-item-best' : '' ?>" style="<?= $i >= $visibleBest ? 'display:none' : '' ?>">
+                        <?php include __DIR__ . '/../san_pham/_the_san_pham.php'; ?>
+                    </div>
                 <?php endforeach; ?>
             </div>
+            <?php if (count($bestSellers) > $visibleBest): ?>
+            <div class="show-more-wrap">
+                <button type="button" class="show-more-btn" data-section="more-item-best"
+                        onclick="toggleShowMore('more-item-best', this)">
+                    <span>Xem thêm</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            <?php endif; ?>
         </div>
     </section>
 <?php endif; ?>

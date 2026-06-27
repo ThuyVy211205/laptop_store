@@ -2,12 +2,13 @@
 
 <?php
 $statusMap = [
-    'pending'   => ['label' => 'Chờ xác nhận', 'badge' => 'bg-warning text-dark'],
-    'confirmed' => ['label' => 'Đã xác nhận',   'badge' => 'bg-info text-white'],
-    'shipping'  => ['label' => 'Đang giao',      'badge' => 'bg-primary text-white'],
-    'delivered' => ['label' => 'Đã giao',         'badge' => 'bg-success text-white'],
-    'completed' => ['label' => 'Hoàn thành',      'badge' => 'bg-success text-white'],
-    'cancelled' => ['label' => 'Đã hủy',          'badge' => 'bg-danger text-white'],
+    'pending'         => ['label' => 'Chờ xác nhận',    'badge' => 'bg-warning text-dark'],
+    'confirmed'       => ['label' => 'Đã xác nhận',      'badge' => 'bg-info text-white'],
+    'shipping'        => ['label' => 'Đang giao',         'badge' => 'bg-primary text-white'],
+    'delivery_failed' => ['label' => 'Giao hàng thất bại', 'badge' => 'bg-danger text-white'],
+    'delivered'       => ['label' => 'Đã giao',            'badge' => 'bg-success text-white'],
+    'completed'       => ['label' => 'Hoàn thành',         'badge' => 'bg-success text-white'],
+    'cancelled'       => ['label' => 'Đã hủy',             'badge' => 'bg-danger text-white'],
 ];
 $payMap = [
     'cod'           => ['label' => 'Tiền mặt khi nhận (COD)', 'icon' => 'money-bill-wave'],
@@ -60,6 +61,16 @@ $curIdx     = array_search($order['trang_thai'], $steps);
             <i class="fas fa-times-circle fa-2x flex-shrink-0"></i>
             <div>
                 <strong class="d-block">Đơn hàng đã bị hủy</strong>
+                <?php if (!empty($order['ly_do_huy'])): ?>
+                <small class="text-muted">Lý do: <?= htmlspecialchars($order['ly_do_huy']) ?></small>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php elseif ($order['trang_thai'] === 'delivery_failed'): ?>
+        <div class="alert alert-danger d-flex align-items-center gap-3 mb-0">
+            <i class="fas fa-truck fa-2x flex-shrink-0"></i>
+            <div>
+                <strong class="d-block">Giao hàng không thành công</strong>
                 <?php if (!empty($order['ly_do_huy'])): ?>
                 <small class="text-muted">Lý do: <?= htmlspecialchars($order['ly_do_huy']) ?></small>
                 <?php endif; ?>

@@ -998,6 +998,8 @@ html.dark .price-old { color: var(--color-text-3); }
 .pd-qty__input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 .pd-qty__left { font-size: 12px; color: #9CA3AF; white-space: nowrap; }
+.pd-qty__err { color: #dc2626; font-size: 12px; font-weight: 500; margin-top: 4px; display: block; }
+html.dark .pd-qty__err { color: #f87171; }
 
 /* ── CTA buttons ── */
 .pd-cta {

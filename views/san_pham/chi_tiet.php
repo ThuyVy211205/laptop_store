@@ -330,10 +330,11 @@ $_isAccessory = (bool) preg_match('/chu[oô]t|tai[\s-]?nghe|b[àa]n[\s-]?ph[íi]
                 <span class="pd-qty__label">Số lượng</span>
                 <div class="pd-qty__ctrl">
                     <button class="pd-qty__btn" id="qtyMinus" type="button"><i class="fas fa-minus"></i></button>
-                    <input class="pd-qty__input" type="number" id="qtyInput" value="1" min="1" max="<?= $product['ton_kho'] ?>" readonly>
+                    <input class="pd-qty__input" type="number" id="qtyInput" value="1" min="1" max="<?= $product['ton_kho'] ?>" inputmode="numeric">
                     <button class="pd-qty__btn" id="qtyPlus"  type="button"><i class="fas fa-plus"></i></button>
                 </div>
                 <span class="pd-qty__left">Còn <?= $product['ton_kho'] ?> sản phẩm</span>
+                <small class="pd-qty__err" id="qtyErr" style="display:none;"></small>
             </div>
 
             <!-- ── CTA buttons ── -->
@@ -525,7 +526,7 @@ $_isAccessory = (bool) preg_match('/chu[oô]t|tai[\s-]?nghe|b[àa]n[\s-]?ph[íi]
             <h3 class="pd-related__title">
                 <i class="fas fa-th-large"></i> Sản phẩm liên quan
             </h3>
-            <a href="<?= SITE_URL ?>/products" class="pd-related__more">
+            <a href="<?= SITE_URL ?>/category/<?= htmlspecialchars($product['duong_dan_danh_muc']) ?>" class="pd-related__more">
                 Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
             </a>
         </div>
@@ -614,21 +615,53 @@ document.querySelectorAll('.pd-cv__card').forEach(function(card) {
 
 /* ─── QUANTITY ─── */
 var qtyInput = document.getElementById('qtyInput');
+var qtyErr   = document.getElementById('qtyErr');
+var qtyMax   = parseInt(qtyInput.max) || 1;
+
+function validateQty() {
+    var v = parseInt(qtyInput.value);
+    if (isNaN(v) || v < 1) {
+        qtyErr.textContent = 'Số lượng tối thiểu là 1';
+        qtyErr.style.display = 'block';
+        qtyInput.style.borderColor = '#dc2626';
+        return false;
+    }
+    if (v > qtyMax) {
+        qtyErr.textContent = 'Số lượng vượt quá sản phẩm hiện có trong kho (' + qtyMax + ')';
+        qtyErr.style.display = 'block';
+        qtyInput.style.borderColor = '#dc2626';
+        return false;
+    }
+    qtyErr.style.display = 'none';
+    qtyInput.style.borderColor = '';
+    return true;
+}
+
+qtyInput.addEventListener('input', function() {
+    if (qtyErr.style.display !== 'none') validateQty();
+});
+qtyInput.addEventListener('blur', validateQty);
+qtyInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { validateQty(); qtyInput.blur(); }
+});
+
 document.getElementById('qtyMinus')?.addEventListener('click', function() {
-    if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
+    if (parseInt(qtyInput.value) > 1) { qtyInput.value = parseInt(qtyInput.value) - 1; validateQty(); }
 });
 document.getElementById('qtyPlus')?.addEventListener('click', function() {
-    if (parseInt(qtyInput.value) < parseInt(qtyInput.max)) qtyInput.value = parseInt(qtyInput.value) + 1;
+    if (parseInt(qtyInput.value) < qtyMax) { qtyInput.value = parseInt(qtyInput.value) + 1; validateQty(); }
 });
 
 /* ─── ADD TO CART ─── */
 document.querySelector('.btn-add-cart-detail')?.addEventListener('click', function() {
-    addToCartDetail(this.dataset.id, qtyInput ? parseInt(qtyInput.value) : 1);
+    if (!validateQty()) return;
+    addToCartDetail(this.dataset.id, parseInt(qtyInput.value));
 });
 
 /* ─── BUY NOW ─── */
 document.querySelector('.btn-buy-now')?.addEventListener('click', function() {
-    var qty = qtyInput ? parseInt(qtyInput.value) : 1;
+    if (!validateQty()) return;
+    var qty = parseInt(qtyInput.value);
     document.getElementById('buynow-qty').value = qty;
     document.getElementById('form-buy-now').submit();
 });

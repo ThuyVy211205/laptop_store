@@ -3,20 +3,22 @@ if (empty($_SESSION['admin'])) { header('Location: ' . SITE_URL . '/admin/login'
 $admin      = $_SESSION['admin'];
 $activePage = 'orders';
 $statusLabels = [
-    'pending'   => 'Chờ xác nhận',
-    'confirmed' => 'Đã xác nhận',
-    'shipping'  => 'Đang giao',
-    'delivered' => 'Đã giao',
-    'completed' => 'Hoàn thành',
-    'cancelled' => 'Đã hủy',
+    'pending'         => 'Chờ xác nhận',
+    'confirmed'       => 'Đã xác nhận',
+    'shipping'        => 'Đang giao',
+    'delivery_failed' => 'Giao hàng thất bại',
+    'delivered'       => 'Đã giao',
+    'completed'       => 'Hoàn thành',
+    'cancelled'       => 'Đã hủy',
 ];
 $statusColors = [
-    'pending'   => '#f59e0b',
-    'confirmed' => '#3b82f6',
-    'shipping'  => '#8b5cf6',
-    'delivered' => '#06b6d4',
-    'completed' => '#10b981',
-    'cancelled' => '#ef4444',
+    'pending'         => '#f59e0b',
+    'confirmed'       => '#3b82f6',
+    'shipping'        => '#8b5cf6',
+    'delivery_failed' => '#ef4444',
+    'delivered'       => '#06b6d4',
+    'completed'       => '#10b981',
+    'cancelled'       => '#ef4444',
 ];
 ?>
 <!DOCTYPE html>
@@ -119,8 +121,9 @@ $statusColors = [
                         </td>
                         <td style="font-size:12.5px;color:#8a96b8;"><?= date('d/m/Y H:i', strtotime($o['ngay_tao'])) ?></td>
                         <td>
-                            <span class="badge-status" style="background:<?= $statusColors[$o['trang_thai']] ?>1a;color:<?= $statusColors[$o['trang_thai']] ?>;border-color:<?= $statusColors[$o['trang_thai']] ?>40;">
-                                <?= $statusLabels[$o['trang_thai']] ?? $o['trang_thai'] ?>
+                            <?php $st = $o['trang_thai'] ?: 'pending'; ?>
+                            <span class="badge-status" style="background:<?= $statusColors[$st] ?>1a;color:<?= $statusColors[$st] ?>;border-color:<?= $statusColors[$st] ?>40;">
+                                <?= $statusLabels[$st] ?? $st ?>
                             </span>
                         </td>
                         <td>
@@ -183,8 +186,8 @@ $statusColors = [
                         <?php endforeach; ?>
                     </select>
                     <div id="cancelReasonWrap" class="mt-3" style="display:none;">
-                        <label class="admin-form-label">Lý do hủy</label>
-                        <textarea name="cancel_reason" class="admin-form-control" rows="2" placeholder="Nhập lý do..."></textarea>
+                        <label class="admin-form-label" id="reasonLabel">Lý do</label>
+                        <textarea name="fail_reason" class="admin-form-control" rows="2" placeholder="Nhập lý do..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -214,7 +217,17 @@ function openStatusModal(o) {
     new bootstrap.Modal(document.getElementById('statusModal')).show();
 }
 function toggleCancelReason(val) {
-    document.getElementById('cancelReasonWrap').style.display = val === 'cancelled' ? 'block' : 'none';
+    var wrap = document.getElementById('cancelReasonWrap');
+    var lbl  = document.getElementById('reasonLabel');
+    if (val === 'cancelled') {
+        wrap.style.display = 'block';
+        lbl.textContent = 'Lý do hủy';
+    } else if (val === 'delivery_failed') {
+        wrap.style.display = 'block';
+        lbl.textContent = 'Lý do thất bại';
+    } else {
+        wrap.style.display = 'none';
+    }
 }
 </script>
 </body>

@@ -3,20 +3,22 @@ if (empty($_SESSION['admin'])) { header('Location: ' . SITE_URL . '/admin/login'
 $admin      = $_SESSION['admin'];
 $activePage = 'orders';
 $statusLabels = [
-    'pending'   => 'Chờ xác nhận',
-    'confirmed' => 'Đã xác nhận',
-    'shipping'  => 'Đang giao',
-    'delivered' => 'Đã giao',
-    'completed' => 'Hoàn thành',
-    'cancelled' => 'Đã hủy',
+    'pending'         => 'Chờ xác nhận',
+    'confirmed'       => 'Đã xác nhận',
+    'shipping'        => 'Đang giao',
+    'delivery_failed' => 'Giao hàng thất bại',
+    'delivered'       => 'Đã giao',
+    'completed'       => 'Hoàn thành',
+    'cancelled'       => 'Đã hủy',
 ];
 $statusColors = [
-    'pending'   => '#f59e0b',
-    'confirmed' => '#3b82f6',
-    'shipping'  => '#8b5cf6',
-    'delivered' => '#06b6d4',
-    'completed' => '#10b981',
-    'cancelled' => '#ef4444',
+    'pending'         => '#f59e0b',
+    'confirmed'       => '#3b82f6',
+    'shipping'        => '#8b5cf6',
+    'delivery_failed' => '#ef4444',
+    'delivered'       => '#06b6d4',
+    'completed'       => '#10b981',
+    'cancelled'       => '#ef4444',
 ];
 $payLabels = [
     'cod'  => 'COD',
@@ -86,9 +88,48 @@ $payLabels = [
                         </div>
                         <div class="mb-2">
                             <small class="text-muted d-block">Trạng thái</small>
-                            <span class="badge-status" style="background:<?= $statusColors[$order['trang_thai']] ?>1a;color:<?= $statusColors[$order['trang_thai']] ?>;border-color:<?= $statusColors[$order['trang_thai']] ?>40;">
-                                <?= $statusLabels[$order['trang_thai']] ?? $order['trang_thai'] ?>
-                            </span>
+                            <?php $st = $order['trang_thai'] ?: 'pending'; ?>
+                            <?php $isFinal = in_array($st, ['delivered','completed','cancelled']); ?>
+                            <?php if ($isFinal): ?>
+                                <span class="badge-status" style="background:<?= $statusColors[$st] ?>1a;color:<?= $statusColors[$st] ?>;border-color:<?= $statusColors[$st] ?>40;">
+                                    <?= $statusLabels[$st] ?? $st ?>
+                                </span>
+                            <?php else: ?>
+                            <form method="POST" action="<?= SITE_URL ?>/admin/orders/status" class="d-flex gap-2 align-items-center">
+                                <input type="hidden" name="id" value="<?= $order['id'] ?>">
+                                <select name="status" class="admin-select" style="width:auto;min-width:150px;" onchange="this.form.querySelector('.btn-save').style.display='inline-block'">
+                                    <option value="<?= $st ?>"><?= $statusLabels[$st] ?> (hiện tại)</option>
+                                    <?php
+                                    $next = [
+                                        'pending' => ['confirmed','delivery_failed','cancelled'],
+                                        'confirmed' => ['shipping','delivery_failed','cancelled'],
+                                        'shipping' => ['delivered','delivery_failed','cancelled'],
+                                        'delivery_failed' => ['cancelled'],
+                                    ][$st] ?? [];
+                                    foreach ($next as $ns): ?>
+                                    <option value="<?= $ns ?>"><?= $statusLabels[$ns] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <input type="text" name="fail_reason" id="detailReason" placeholder="Lý do (nếu cần)" class="admin-form-control" style="display:none;width:180px;font-size:12px;">
+                                <button type="submit" class="btn-admin btn-admin-primary btn-admin-sm btn-save" style="display:none;">
+                                    <i class="fas fa-save me-1"></i>Lưu
+                                </button>
+                            </form>
+                            <script>
+                            (function(){
+                                var sel = document.currentScript.previousElementSibling.querySelector('select');
+                                var reason = document.currentScript.previousElementSibling.querySelector('#detailReason');
+                                sel.addEventListener('change', function(){
+                                    var v = this.value;
+                                    if (v === 'cancelled' || v === 'delivery_failed') {
+                                        reason.style.display = 'inline-block';
+                                    } else {
+                                        reason.style.display = 'none';
+                                    }
+                                });
+                            })();
+                            </script>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-2">
                             <small class="text-muted d-block">Thanh toán</small>

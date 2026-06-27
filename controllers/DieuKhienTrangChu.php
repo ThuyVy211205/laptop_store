@@ -19,9 +19,9 @@ class DieuKhienTrangChu {
     /** Hiển thị trang chủ với sản phẩm nổi bật, flash sale và banner */
     public function index() {
         $categories  = $this->danhMucModel->getAll();
-        $featured    = $this->sanPhamModel->getFeatured(8);
+        $featured    = $this->sanPhamModel->getFeatured(9);
         $flashSale   = $this->sanPhamModel->getFlashSale(8);
-        $bestSellers = $this->sanPhamModel->getBestSellers(8);
+        $bestSellers = $this->sanPhamModel->getBestSellers(9);
 
         $banners = db()->fetchAll(
             "SELECT * FROM bang_quang_cao WHERE trang_thai = 'active' AND vi_tri = 'hero' ORDER BY thu_tu ASC"
