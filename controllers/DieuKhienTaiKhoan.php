@@ -29,6 +29,12 @@ class DieuKhienTaiKhoan {
         $totalOrders   = count($allOrders);
         $successOrders = count(array_filter($allOrders, fn($o) => $o['trang_thai'] === 'completed'));
         $recentOrders  = array_slice($allOrders, 0, 5);
+        $recentIds     = array_column($recentOrders, 'id');
+        $itemsByOrder  = $donHang->getItemsByOrderIds($recentIds);
+        foreach ($recentOrders as &$order) {
+            $order['items'] = $itemsByOrder[$order['id']] ?? [];
+        }
+        unset($order);
 
         $collection = db()->fetchAll(
             "SELECT od.id_don_hang, od.id_san_pham, od.ten_san_pham, od.hinh_thu_nho,

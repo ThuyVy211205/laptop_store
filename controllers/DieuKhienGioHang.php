@@ -161,13 +161,13 @@ class DieuKhienGioHang {
                 $imgSrc   = imgUrl($item['hinh_thu_nho']);
                 $name     = htmlspecialchars($item['ten'] ?? '');
                 $qty      = (int)($item['so_luong'] ?? 1);
-                $priceStr = formatPrice($price * $qty);
+                $unitStr  = formatPrice($price);
                 $pid      = (int)($item['id_san_pham'] ?? $item['id'] ?? 0);
                 echo '<div class="cart-mini-item">'
                    . '<img src="' . $imgSrc . '" alt="' . $name . '" onerror="this.style.display=\'none\'">'
                    . '<div class="cart-mini-info">'
                    . '<div class="name">' . $name . '</div>'
-                   . '<div class="price">' . $priceStr . ' &times; ' . $qty . '</div>'
+                   . '<div class="price">' . $unitStr . ' &times; ' . $qty . '</div>'
                    . '</div>'
                    . '<button class="btn-remove-mini" data-id="' . $pid . '" title="Xóa">'
                    . '<i class="fas fa-times"></i>'
